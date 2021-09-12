@@ -1,7 +1,8 @@
+mod abs;
+use num::complex::Complex;
 fn main() {
-    let result: f32 = 0.1 + 0.1;
-    let desired: f32 = 0.2;
-    let absolute_difference = (desired-result).abs();
-    assert!(absolute_difference <= f32::EPSILON);
-    assert!(absolute_difference.is_nan())
+    let a = Complex {re: 2.1, im: -1.2};
+    let b = Complex::new(11.1,22.2);
+    let result = a + b;
+    println!("{} + {}i",result.re,result.im)
 }
