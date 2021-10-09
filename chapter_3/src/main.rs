@@ -1,4 +1,8 @@
-#![allow(unused_variables)]
+use rand::prelude::*;
+
+fn one_in(denominator:u32) -> bool {
+    thread_rng().gen_ratio(1, denominator)
+}
 
 #[derive(Debug)]
 struct File {
@@ -32,12 +36,20 @@ impl File {
     }
 }
 
-fn open(f: &mut File) -> bool {
-    true
+fn open(f: File) -> Result<File,String> {
+    if one_in(100_000){
+        let err_msg = String::from("Permission denied");
+        return Err(err_msg);
+    }
+    Ok(f)
 }
 
-fn close(f: &mut File) -> bool {
-    true
+fn close(f:File) -> Result<File,String> {
+    if one_in(100_000){
+        let err_msg = String::from("Interrupted by signal!");
+        return Err(err_msg);
+    }
+    Ok(f)
 }
 
 
@@ -47,9 +59,9 @@ fn main() {
     let mut f2 = File::new_with_data("f2.txt",&f3_data);
     let mut buffer: Vec<u8> = vec![];
 
-    open(&mut f2);
+    f2 = open(f2).unwrap();
     let f2_length = f2.read(&mut buffer);
-    close(&mut f2);
+    f2 = close(f2).unwrap();
 
     let text = String::from_utf8_lossy(&buffer);
     println!("{:?}",f2);
