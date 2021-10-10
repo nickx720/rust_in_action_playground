@@ -1,9 +1,20 @@
+use core::fmt;
+use std::fmt::Display;
+
 use rand::prelude::*;
 
 #[derive(Debug,PartialEq)]
 enum FileState {
     Open,
     Closed
+}
+impl Display for FileState{
+    fn fmt(&self, f:&mut fmt::Formatter,)-> fmt::Result{
+        match *self {
+            FileState::Open => write!(f,"OPEN"),
+            FileState::Closed => write!(f,"CLOSED"),
+        }
+    }
 }
 
 fn one_in(denominator:u32) -> bool {
@@ -44,6 +55,13 @@ impl File {
         save_to.reserve(read_length);
         save_to.append(&mut tmp);
         Ok(read_length)
+    }
+}
+
+impl Display for File {
+    fn fmt(&self,
+        f: &mut fmt::Formatter)-> fmt::Result{
+        write!(f,"<{} ({})>",self.name,self.state)
     }
 }
 
