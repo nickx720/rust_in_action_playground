@@ -84,3 +84,12 @@ fn main() {
         println!("{:?}: {:?}", sat, msg);
     }
 }
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+    #[test]
+    fn return_id(){
+        assert_eq!(fetch_sat_ids(),vec![1,2,3]);
+    }
+}
