@@ -34,8 +34,21 @@ fn bit_patterns_translate_to_a_fixed_number_of_integers(){
     println!("{}, {}, {}", sixtyfivethousand_533,sixtyfivethousand_534, sixtyfivethousand_535);
 }
 
+fn understanding_endianess(){
+    let big_endian: [u8;4] = [0xAA,0xBB,0xCC,0xDD];
+    let little_endian: [u8;4] = [0xDD,0xCC,0xBB,0xAA];
+    let a:i32 = unsafe {
+        std::mem::transmute(big_endian)
+    };
+    let b: i32 = unsafe {
+        std::mem::transmute(little_endian)
+    };
+    println!("{} vs {}",a,b);
+}
+
 fn main() {
     //    same();
     //    interpret_float_string_as_integer();
-    bit_patterns_translate_to_a_fixed_number_of_integers()
+ //   bit_patterns_translate_to_a_fixed_number_of_integers()
+ understanding_endianess()
 }
