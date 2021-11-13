@@ -44,3 +44,19 @@ pub fn understanding_endianess(){
     };
     println!("{} vs {}",a,b);
 }
+pub fn isolating_sign_bit(){
+    let n: f32 = 42.42;
+    let n_bits: u32 = n.to_bits();
+    let sign_bit = n_bits >> 1;
+    dbg!(n_bits);
+    dbg!(format!("{:#b}",42));
+}
+
+pub fn isolating_the_exponent(){
+    let n: f32 = 42.42;
+    let n_bits: u32 = n.to_bits();
+    let exponent_ = n_bits >> 23;
+    let exponent_ = exponent_ & 0xff;
+    let exponent = (exponent_ as i32) - 12;
+    dbg!(exponent);
+}
