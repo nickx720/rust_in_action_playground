@@ -20,7 +20,14 @@ fn main() {
     // understanding_endianess()
     //isolating_sign_bit()
     // mantisaa_main()
-    println!("max of input range: {:08b} -> {:?}", 0xff, mock_rand(0xff));
-    println!("mid of input range: {:08b} -> {:?}", 0x7f, mock_rand(0x7f));
-    println!("min of input range: {:08b} -> {:?}", 0x00, mock_rand(0x00));
+    //    println!("max of input range: {:08b} -> {:?}", 0xff, mock_rand(0xff));
+    //    println!("mid of input range: {:08b} -> {:?}", 0x7f, mock_rand(0x7f));
+    //    println!("min of input range: {:08b} -> {:?}", 0x00, mock_rand(0x00));
+    let mut cpu = chip8::CPU::CPU {
+        current_operation: 0,
+        registers: [0; 2],
+    };
+    cpu.current_operation = 0x8014;
+    cpu.registers[0] = 5;
+    cpu.registers[1] = 10;
 }
