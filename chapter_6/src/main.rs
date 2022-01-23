@@ -1,24 +1,22 @@
+mod external;
 mod references;
-use references::{references, B, C};
-
-use std::borrow::Cow;
-use std::ffi::CStr;
-use std::os::raw::c_char;
+use external::external;
+use references::references;
 
 fn main() {
     //    references();
-    let a = 42;
-    let b: String;
-    let c: Cow<str>;
+    // external()
+    let a: i64 = 42;
+    let a_ptr = &a as *const i64;
+    let a_addr: usize = unsafe { std::mem::transmute(a_ptr) };
+    println!("a: {} ({:p}...0x{:x})", a, a_ptr, a_addr + 7);
+    // println!("a : {} ({:p})", a, a_ptr);
+
+    // Unsafe pointer from integer
+    let ptr = 42 as *const Vec<String>;
 
     unsafe {
-        let b_ptr = &B as *const u8 as *mut u8;
-        b = String::from_raw_parts(b_ptr, 10, 10);
-
-        let c_ptr = &C as *const u8 as *const c_char;
-
-        c = CStr::from_ptr(c_ptr).to_string_lossy();
+        let new_addr = ptr.offset(4);
+        println!("{:p} -> {:p}", ptr, new_addr);
     }
-
-    println!("a : {}, b: {}, c: {}", a, b, c);
 }
