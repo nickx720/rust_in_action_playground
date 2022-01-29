@@ -1,7 +1,9 @@
 mod external;
 mod references;
+mod stack;
 use external::external;
 use references::references;
+use stack::stack_main;
 
 fn main() {
     //    references();
@@ -19,4 +21,5 @@ fn main() {
         let new_addr = ptr.offset(4);
         println!("{:p} -> {:p}", ptr, new_addr);
     }
+    stack_main();
 }
