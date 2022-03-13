@@ -66,4 +66,5 @@ pub fn rpgplaymain() {
 
     spellcenter.enchant(&mut it);
     spellcenter.enchant(&mut Thing::Sword);
+    spellcenter.enchant(&mut Thing::Sword);
 }
