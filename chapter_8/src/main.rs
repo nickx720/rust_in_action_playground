@@ -1,13 +1,9 @@
-use std::error::Error;
+mod reqwest_play;
+mod rpg_play;
+use reqwest_play::reqwestmain;
+use rpg_play::rpgplaymain;
 
-use reqwest;
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let url = "https://www.rustinaction.com/";
-    let mut response = reqwest::get(url)?;
-
-    let content = response.text()?;
-    print!("{content}");
-
-    Ok(())
+fn main() {
+    //    reqwestmain();
+    rpgplaymain();
 }
