@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 reqwest = "0.9"
-rand = "0.8.4"
+rand = "0.6"
+clap = "2"
+trust-dns = { version = "0.16", default-features = false }
