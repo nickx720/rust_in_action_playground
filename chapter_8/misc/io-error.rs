@@ -1,12 +1,11 @@
-use std::error::Error;
 use std::fmt;
 use std::fs::File;
-use std::net::{AddrParseError, Ipv6Addr};
+use std::net::Ipv6Addr;
 
 #[derive(Debug)]
 enum UpstreamError {
     IO(std::io::Error),
-    Parsing(AddrParseError),
+    Parsing(std::net::AddrParseError),
 }
 
 impl fmt::Display for UpstreamError {
@@ -15,12 +14,24 @@ impl fmt::Display for UpstreamError {
     }
 }
 
-impl Error for UpstreamError {}
+impl std::error::Error for UpstreamError {}
+
+impl From<std::io::Error> for UpstreamError {
+    fn from(error: std::io::Error) -> Self {
+        UpstreamError::IO(error)
+    }
+}
+
+impl From<std::net::AddrParseError> for UpstreamError {
+    fn from(error: std::net::AddrParseError) -> Self {
+        UpstreamError::Parsing(error)
+    }
+}
 
 fn main() -> Result<(), UpstreamError> {
-    let _f = File::open("invisible.txt").map_err(UpstreamError::IO)?;
+    let _f = File::open("invisible.txt")?;
 
-    let _localhost = ":1".parse::<Ipv6Addr>().map_err(UpstreamError::Parsing)?;
+    let _localhost = ":1".parse::<Ipv6Addr>()?;
 
     Ok(())
 }
