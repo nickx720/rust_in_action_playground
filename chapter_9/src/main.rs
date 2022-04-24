@@ -1,5 +1,5 @@
-use chrono::Local;
+mod clock;
+use clock::clock_main;
 fn main() {
-    let now = Local::now();
-    println!("{now}");
+    clock_main()
 }
