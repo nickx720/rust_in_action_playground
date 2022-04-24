@@ -29,7 +29,7 @@ pub fn clock_main() {
                 .long("use-standard")
                 .takes_value(true)
                 .possible_values(&["rfc2822", "rfc3339", "timestamp"])
-                .default_value("rfc3399"),
+                .default_value("rfc3339"),
         )
         .arg(Arg::with_name("datetime").help(
             "When <action> is 'set',apply , <datetime>. \
