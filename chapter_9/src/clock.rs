@@ -1,7 +1,7 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use chrono::DateTime;
-use chrono::Local;
 use chrono::TimeZone;
+use chrono::{Local, Utc};
 use clap::{App, Arg};
 use libc;
 use std::mem::zeroed;
