@@ -1,11 +1,56 @@
 use byteorder::{BigEndian, ReadBytesExt};
-use chrono::DateTime;
-use chrono::TimeZone;
+use chrono::{DateTime, Duration as ChronoDuration, TimeZone, Timelike};
 use chrono::{Local, Utc};
 use clap::{App, Arg};
 use libc;
 use std::mem::zeroed;
+use std::net::UdpSocket;
+use std::time::Duration;
 
+const NTP_MESSAGE_LENGTH: usize = 48;
+const NTP_TO_UNIX_SECONDS: i64 = 2_208_988_800;
+const LOCAL_ADDR: &'static str = "0.0.0.0:12300";
+
+#[derive(Default, Debug, Clone, Copy)]
+struct NTPTimestamp {
+    seconds: u32,
+    fraction: u32,
+}
+
+struct NTPMessage {
+    data: [u8; NTP_MESSAGE_LENGTH],
+}
+
+#[derive(Debug)]
+struct NTPResult {
+    t1: DateTime<Utc>,
+    t2: DateTime<Utc>,
+    t3: DateTime<Utc>,
+    t4: DateTime<Utc>,
+}
+
+impl NTPResult {
+    fn offset(&self) -> i64 {
+        let duration = (self.t2 - self.t1) + (self.t4 - self.t3);
+        duration.num_milliseconds() / 2
+    }
+    fn delay(&self) -> i64 {
+        let duration = (self.t4 - self.t1) - (self.t3 - self.t2);
+        duration.num_milliseconds()
+    }
+}
+
+impl From<NTPTimestamp> for DateTime<Utc> {
+    fn from(ntp: NTPTimestamp) -> Self {
+        let secs = ntp.seconds as i64 - NTP_TO_UNIX_SECONDS;
+        let mut nanos = ntp.fraction as f64;
+        nanos *= 1e9;
+        nanos /= 2_f64.powi(32);
+
+        Utc.timestamp(secs, nanos as u32)
+    }
+}
+// start here
 struct Clock;
 
 impl Clock {
