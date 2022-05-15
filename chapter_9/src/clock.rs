@@ -50,7 +50,56 @@ impl From<NTPTimestamp> for DateTime<Utc> {
         Utc.timestamp(secs, nanos as u32)
     }
 }
-// start here
+
+impl From<DateTime<Utc>> for NTPTimestamp {
+    fn from(utc: DateTime<Utc>) -> Self {
+        let secs = utc.timestamp() + NTP_TO_UNIX_SECONDS;
+        let mut fraction = utc.nanosecond() as f64;
+        fraction *= 2_f64.powi(32);
+        fraction /= 1e9;
+        NTPTimestamp {
+            seconds: secs as u32,
+            fraction: fraction as u32,
+        }
+    }
+}
+
+impl NTPMessage {
+    fn new() -> Self {
+        NTPMessage {
+            data: [0; NTP_MESSAGE_LENGTH],
+        }
+    }
+
+    fn client() -> Self {
+        const VERSION: u8 = 0b00_011_000;
+        const MODE: u8 = 0b00_000_011;
+
+        let mut msg = NTPMessage::new();
+
+        msg.data[0] |= VERSION;
+        msg.data[0] |= MODE;
+        msg
+    }
+
+    fn parse_timestamp(&self, i: usize) -> Result<NTPTimestamp, std::io::Error> {
+        let mut reader = &self.data[i..i + 8];
+        let seconds = reader.read_u32::<BigEndian>()?;
+        let fraction = reader.read_u32::<BigEndian>()?;
+
+        Ok(NTPTimestamp {
+            seconds: seconds,
+            fraction: fraction,
+        })
+    }
+
+    fn rx_time(&self) -> Result<NTPTimestamp, std::io::Error> {
+        self.parse_timestamp(32)
+    }
+
+    // start at tx_time
+}
+
 struct Clock;
 
 impl Clock {
