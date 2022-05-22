@@ -206,11 +206,11 @@ impl Clock {
         }
     }
 }
-
+// continue main
 pub fn clock_main() {
     let app = App::new("clock")
-        .version("0.1.2")
-        .about("Gets and (aspirationally) sets the time.")
+        .version("0.1.3")
+        .about("Gets and sets the time.")
         .after_help(
             "Note: UNIX timestamps are parsed as whole \
         seconds since 1st January 1970 0:00:00 UTC. \
@@ -236,6 +236,7 @@ pub fn clock_main() {
         ));
     let args = app.get_matches();
     let action = args.value_of("action").unwrap();
+
     let std = args.value_of("std").unwrap();
 
     if action == "set" {
@@ -249,6 +250,24 @@ pub fn clock_main() {
 
         let err_msg = format!("Unable to parse {t_} according to {std}");
         let t = parser(t_).expect(&err_msg);
+        Clock::set(t);
+    } else if action == "check-ntp" {
+        let offset = check_time().unwrap() as isize;
+
+        let adjust_ms_ = offset.signum() * offset.abs().min(200) / 5;
+        let adjust_ms = ChronoDuration::milliseconds(adjust_ms_ as i64);
+
+        let now: DateTime<Utc> = Utc::now() + adjust_ms;
+        Clock::set(now);
+    }
+
+    let maybe_error = std::io::Error::last_os_error();
+    let os_error_code = &maybe_error.raw_os_error();
+
+    match os_error_code {
+        Some(0) => (),
+        Some(_) => eprintln!("Unable to set the time: {maybe_error:?}"),
+        None => (),
     }
 
     let now = Clock::get();
