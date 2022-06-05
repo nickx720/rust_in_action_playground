@@ -1,3 +1,8 @@
+use std::env;
+
+use svg::node::element::path::{Command,Data,Position};
+use svg::node::element::{Path,Rectangle};
+use svg::Document;
 
 #[derive(Debug,Clone,Copy)]
 enum Operation{
