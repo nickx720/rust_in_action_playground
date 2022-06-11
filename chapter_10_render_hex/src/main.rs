@@ -118,6 +118,20 @@ fn parse(input: &str) -> Vec<Operation> {
     steps
 }
 
+fn convert(operations: &Vec<Operation>) -> Vec<Command> {
+    let mut turtle = Artist::new();
+
+    let mut path_data = Vec::<Command>::with_capacity(operations.len());
+    let start_at_home = Command::Move(Position::Absolute, (HOME_X, HOME_Y).into());
+    path_data.push(start_at_home);
+    for op in operations{
+        match *op {
+            Forward(distance) => turtle.forward(distance);
+        }
+    }
+    todo!()
+}
+
 fn main() {
     let args = env::args().collect::<Vec<String>>();
     let input = args.get(1).unwrap();
