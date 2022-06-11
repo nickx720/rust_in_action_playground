@@ -1,23 +1,12 @@
 use std::env;
 
-use svg::node::element::path::{Command,Data,Position};
-use svg::node::element::{Path,Rectangle};
+use svg::node::element::path::{Command, Data, Position};
+use svg::node::element::{Path, Rectangle};
 use svg::Document;
 
-use crate::Operation::{
-    Forward,
-    Home,
-    Noop,
-    TurnLeft,
-    TurnRight,
-};
+use crate::Operation::{Forward, Home, Noop, TurnLeft, TurnRight};
 
-use crate::Orientation::{
-    East,
-    North,
-    South,
-    West
-};
+use crate::Orientation::{East, North, South, West};
 
 const WIDTH: isize = 400;
 const HEIGHT: isize = WIDTH;
@@ -27,7 +16,7 @@ const HOME_X: isize = WIDTH / 2;
 
 const STROKE_WIDTH: usize = 5;
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 enum Orientation {
     North,
     East,
@@ -35,8 +24,8 @@ enum Orientation {
     South,
 }
 
-#[derive(Debug,Clone,Copy)]
-enum Operation{
+#[derive(Debug, Clone, Copy)]
+enum Operation {
     Forward(isize),
     TurnLeft,
     TurnRight,
@@ -53,54 +42,80 @@ struct Artist {
 
 impl Artist {
     fn new() -> Artist {
-        Artist{
+        Artist {
             heading: North,
             x: HOME_X,
             y: HOME_Y,
         }
     }
 
-    fn home(&mut self){
+    fn home(&mut self) {
         self.x = HOME_X;
         self.y = HOME_Y;
     }
 
     fn forward(&mut self, distance: isize) {
-        match self.heading{
+        match self.heading {
             North => self.y += distance,
             South => self.y -= distance,
-            West => self.x +=distance,
+            West => self.x += distance,
             East => self.x -= distance,
         }
     }
 
-    fn turn_right(&mut self){
+    fn turn_right(&mut self) {
         self.heading = match self.heading {
             North => East,
             South => West,
             West => North,
-            East =>South,
+            East => South,
+        }
+    }
+
+    fn turn_left(&mut self) {
+        self.heading = match self.heading {
+            North => West,
+            South => East,
+            West => South,
+            East => North,
+        }
+    }
+
+    fn wrap(&mut self) {
+        if self.x < 0 {
+            self.x = HOME_X;
+            self.heading = West;
+        } else if self.x > WIDTH {
+            self.x = HOME_X;
+            self.heading = East;
+        }
+
+        if self.y < 0 {
+            self.y = HOME_Y;
+            self.heading = North;
+        } else if self.y > HEIGHT {
+            self.y = HOME_Y;
+            self.heading = South;
         }
     }
 }
 
-
-fn parse(input:&str) -> Vec<Operation>{
+fn parse(input: &str) -> Vec<Operation> {
     let mut steps = Vec::<Operation>::new();
-    for byte in input.bytes(){
-        let step = match byte{
-            b'0'=> Home,
-            b'1'..b'9' => {
-                let distance = {byte- 0x30} as isize;
-                Forward(distance * (HEIGHT/10))
-            },
+    for byte in input.bytes() {
+        let step = match byte {
+            b'0' => Home,
+            b'1'..=b'9' => {
+                let distance = { byte - 0x30 } as isize;
+                Forward(distance * (HEIGHT / 10))
+            }
             b'a' | b'b' | b'c' => TurnLeft,
-            b'd' | b'e' | b'f' => Turn Right,
+            b'd' | b'e' | b'f' => TurnRight,
             _ => Noop(byte),
-
-        }
-    };
-    steps.push(step);
+        };
+        steps.push(step);
+    }
+    steps
 }
 
 fn main() {
