@@ -124,12 +124,54 @@ fn convert(operations: &Vec<Operation>) -> Vec<Command> {
     let mut path_data = Vec::<Command>::with_capacity(operations.len());
     let start_at_home = Command::Move(Position::Absolute, (HOME_X, HOME_Y).into());
     path_data.push(start_at_home);
-    for op in operations{
+    for op in operations {
         match *op {
-            Forward(distance) => turtle.forward(distance);
-        }
+            Forward(distance) => turtle.forward(distance),
+            TurnLeft => turtle.turn_left(),
+            TurnRight => turtle.turn_right(),
+            Home => turtle.home(),
+            Noop(byte) => {
+                eprintln!("warning: illegal byte encountered {:?}", byte);
+            }
+        };
+
+        let path_segment = Command::Line(Position::Absolute, (turtle.x, turtle.y).into());
+        path_data.push(path_segment);
+        turtle.wrap();
     }
-    todo!()
+    path_data
+}
+
+fn generate_svg(path_data: Vec<Command>) -> Document {
+    let background = Rectangle::new()
+        .set("x", 0i32)
+        .set("y", 0i32)
+        .set("width", WIDTH)
+        .set("height", HEIGHT)
+        .set("fill", "#ffffff");
+
+    let border = background
+        .clone()
+        .set("fill-opacity", "0.0")
+        .set("stroke", "#cccccc")
+        .set("stroke-width", 3 * STROKE_WIDTH);
+
+    let sketch = Path::new()
+        .set("fill", "none")
+        .set("stroke", "#2f2f2f")
+        .set("stroke-width", STROKE_WIDTH)
+        .set("stroke-capacity", "0.9")
+        .set("d", Data::from(path_data));
+
+    let document = Document::new()
+        .set("viewBox", (0, 0, HEIGHT, WIDTH))
+        .set("height", HEIGHT)
+        .set("width", WIDTH)
+        .set("style", "style=\"outline: 5px solid #80000;\"")
+        .add(background)
+        .add(sketch)
+        .add(border);
+    document
 }
 
 fn main() {
