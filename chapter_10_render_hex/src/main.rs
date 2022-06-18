@@ -178,7 +178,7 @@ fn main() {
     let args = env::args().collect::<Vec<String>>();
     let input = args.get(1).unwrap();
     let default = format!("{}.svg", input);
-    let save_to = args.get(2).unwrap_or(default);
+    let save_to = args.get(2).unwrap_or(&default);
 
     let operations = parse(input);
     let path_data = convert(&operations);
