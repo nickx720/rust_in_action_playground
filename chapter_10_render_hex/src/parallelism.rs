@@ -3,10 +3,10 @@ use svg::node::element::path::{Command, Data, Position};
 use svg::node::element::{Path, Rectangle};
 use svg::Document;
 
-use crate::Operation::{Forward, Home, Noop, TurnLeft, TurnRight};
+//use crate::Operation::{Forward, Home, Noop, TurnLeft, TurnRight};
+//use crate::Orientation::{East, North, South, West};
 use rayon::prelude::*;
 
-use crate::Orientation::{East, North, South, West};
 const WIDTH: isize = 400;
 const HEIGHT: isize = WIDTH;
 
@@ -42,7 +42,7 @@ struct Artist {
 impl Artist {
     fn new() -> Artist {
         Artist {
-            heading: North,
+            heading: Orientation::North,
             x: HOME_X,
             y: HOME_Y,
         }
@@ -64,37 +64,37 @@ impl Artist {
 
     fn turn_right(&mut self) {
         self.heading = match self.heading {
-            North => East,
-            South => West,
-            West => North,
-            East => South,
+            North => Orientation::East,
+            South => Orientation::West,
+            West => Orientation::North,
+            East => Orientation::South,
         }
     }
 
     fn turn_left(&mut self) {
         self.heading = match self.heading {
-            North => West,
-            South => East,
-            West => South,
-            East => North,
+            North => Orientation::West,
+            South => Orientation::East,
+            West => Orientation::South,
+            East => Orientation::North,
         }
     }
 
     fn wrap(&mut self) {
         if self.x < 0 {
             self.x = HOME_X;
-            self.heading = West;
+            self.heading = Orientation::West;
         } else if self.x > WIDTH {
             self.x = HOME_X;
-            self.heading = East;
+            self.heading = Orientation::East;
         }
 
         if self.y < 0 {
             self.y = HOME_Y;
-            self.heading = North;
+            self.heading = Orientation::North;
         } else if self.y > HEIGHT {
             self.y = HOME_Y;
-            self.heading = South;
+            self.heading = Orientation::South;
         }
     }
 }
@@ -104,14 +104,14 @@ fn parse(input: &str) -> Vec<Operation> {
         .as_bytes()
         .par_iter()
         .map(|byte| match byte {
-            b'0' => Home,
+            b'0' => Operation::Home,
             b'1'..=b'9' => {
                 let distance = (byte - 0x30) as isize;
-                Forward(distance * (HEIGHT / 10))
+                Operation::Forward(distance * (HEIGHT / 10))
             }
-            b'a' | b'b' | b'c' => TurnLeft,
-            b'd' | b'e' | b'f' => TurnRight,
-            _ => Noop(*byte),
+            b'a' | b'b' | b'c' => Operation::TurnLeft,
+            b'd' | b'e' | b'f' => Operation::TurnRight,
+            _ => Operation::Noop(*byte),
         })
         .collect()
 }
@@ -124,11 +124,11 @@ fn convert(operations: &Vec<Operation>) -> Vec<Command> {
     path_data.push(start_at_home);
     for op in operations {
         match *op {
-            Forward(distance) => turtle.forward(distance),
+            Operation::Forward(distance) => turtle.forward(distance),
             TurnLeft => turtle.turn_left(),
             TurnRight => turtle.turn_right(),
             Home => turtle.home(),
-            Noop(byte) => {
+            Operation::Noop(byte) => {
                 eprintln!("warning: illegal byte encountered {:?}", byte);
             }
         };
