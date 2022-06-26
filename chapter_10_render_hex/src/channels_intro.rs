@@ -1,5 +1,13 @@
 use crossbeam::channel::unbounded;
 use std::thread;
+
+#[derive(Debug)]
+enum ConnectivityCheck {
+    Ping,
+    Pong,
+    Pang,
+}
+
 pub fn channels_intro_main() {
     let (tx, rx) = unbounded();
 
