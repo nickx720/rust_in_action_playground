@@ -43,4 +43,3 @@ pub fn channels_intro_main() {
         recv(rx) -> msg => println!("{:?}",msg),
     }
 }
-metadata
