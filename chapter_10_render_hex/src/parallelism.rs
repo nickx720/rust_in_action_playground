@@ -183,3 +183,4 @@ pub fn parallel_main() {
     let document = generate_svg(path_data);
     svg::save(save_to, &document).unwrap();
 }
+metadata
