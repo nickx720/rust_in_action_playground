@@ -8,7 +8,7 @@ enum ConnectivityCheck {
     Pang,
 }
 
-pub fn sending_msg_spawned_channel() {
+fn sending_msg_spawned_channel() {
     let n_messages = 3;
     let (requests_tx, requests_rx) = unbounded();
     let (responses_tx, responses_rx) = unbounded();
