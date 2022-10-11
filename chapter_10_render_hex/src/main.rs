@@ -5,9 +5,12 @@ extern crate crossbeam;
 
 mod channels_intro;
 mod parallelism;
+mod threadpool;
 use channels_intro::channels_intro_main;
-use parallelism::parallel_main;
+//use parallelism::parallel_main;
+use threadpool::threadpool_main;
 fn main() {
     //    parallel_main();
-    channels_intro_main();
+    // channels_intro_main();
+    threadpool_main();
 }
