@@ -8,7 +8,7 @@ use svg::Document;
 use rayon::prelude::*;
 
 const WIDTH: isize = 400;
-const HEIGHT: isize = WIDTH;
+pub const HEIGHT: isize = WIDTH;
 
 const HOME_Y: isize = HEIGHT / 2;
 const HOME_X: isize = WIDTH / 2;
@@ -16,7 +16,7 @@ const HOME_X: isize = WIDTH / 2;
 const STROKE_WIDTH: usize = 5;
 
 #[derive(Debug, Clone, Copy)]
-enum Orientation {
+pub enum Orientation {
     North,
     East,
     West,
@@ -24,7 +24,7 @@ enum Orientation {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Operation {
+pub enum Operation {
     Forward(isize),
     TurnLeft,
     TurnRight,
