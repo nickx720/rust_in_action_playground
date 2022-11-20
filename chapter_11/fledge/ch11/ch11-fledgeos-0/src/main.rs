@@ -1,9 +1,7 @@
 #![no_std] // <1>
 #![no_main] // <1>
 #![feature(core_intrinsics)] // <2>
-#![feature(asm)] // <2>
 
-use core::arch::asm;
 use core::intrinsics; // <2>
 use core::panic::PanicInfo; // <3>
 
@@ -20,7 +18,7 @@ pub extern "C" fn _start() -> ! {
     unsafe {
         framebuffer
             .offset(1) // <5>
-            .write_volatile(0x30); // <6>
+            .write_volatile(0x10); // <6>
     }
 
     loop {}
