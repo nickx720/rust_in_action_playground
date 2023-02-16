@@ -21,5 +21,7 @@ pub extern "C" fn _start() -> ! {
             .write_volatile(0x10); // <6>
     }
 
-    loop {}
+    loop {
+        hlt();
+    }
 }
