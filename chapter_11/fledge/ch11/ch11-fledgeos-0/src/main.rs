@@ -17,6 +17,28 @@ pub fn panic(_info: &PanicInfo) -> ! {
 #[lang = "eh_personality"]
 #[no_mangle]
 pub extern "C" fn eh_personality() {}
+
+#[allow(unused)]
+#[derive(Clone, Copy)]
+#[repr(u8)]
+enum Color {
+    Black = 0x0,
+    White = 0xF,
+    Blue = 0x1,
+    BrightBlue = 0x9,
+    Green = 0x2,
+    BrightGreen = 0xA,
+    Cyan = 0x3,
+    BrightCyan = 0xB,
+    Red = 0x4,
+    BrightRed = 0xC,
+    Magenta = 0x5,
+    BrightMagenta = 0xD,
+    Brown = 0x6,
+    Yellow = 0xE,
+    Gray = 0x7,
+    DarkGray = 0x8,
+}
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     let framebuffer = 0xb8000 as *mut u8;
