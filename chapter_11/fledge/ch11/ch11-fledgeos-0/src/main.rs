@@ -39,6 +39,35 @@ enum Color {
     Gray = 0x7,
     DarkGray = 0x8,
 }
+
+struct Cursor {
+    position: isize,
+    foreground: Color,
+    background: Color,
+}
+
+impl Cursor {
+    fn color(&self) -> u8 {
+        let fg = self.foreground as u8;
+        let bg = (self.background as u8) << 4;
+        fg | bg
+    }
+
+    fn print(&mut self, text: &[u8]) {
+        let color = self.color();
+
+        let framebuffer = 0xb8000 as *mut u8;
+
+        for &character in text {
+            unsafe {
+                framebuffer.offset(self.position).write_volatile(character);
+                framebuffer.offset(self.position + 1).write_volatile(color);
+            }
+            self.position += 2;
+        }
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     let framebuffer = 0xb8000 as *mut u8;
