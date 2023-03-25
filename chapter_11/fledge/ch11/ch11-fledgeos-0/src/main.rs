@@ -3,15 +3,27 @@
 #![no_main] // <1>
 #![feature(core_intrinsics)] // <2>
 
-use core::intrinsics; // <2>
+use core::fmt::Write;
 use core::panic::PanicInfo;
+use core::{fmt, intrinsics}; // <2>
 
 use x86_64::instructions::hlt; // <3>
 
 #[panic_handler]
 #[no_mangle]
-pub fn panic(_info: &PanicInfo) -> ! {
-    intrinsics::abort(); // <4>
+pub fn panic(info: &PanicInfo) -> ! {
+    let mut cursor = Cursor {
+        position: 0,
+        foreground: Color::White,
+        background: Color::Red,
+    };
+    for _ in 0..(80 * 25) {
+        cursor.print(b" ");
+    }
+    cursor.position = 0;
+    write!(cursor, "{}", info).unwrap();
+    loop {}
+    // intrinsics::abort(); // <4>
 }
 
 #[lang = "eh_personality"]
@@ -46,6 +58,13 @@ struct Cursor {
     background: Color,
 }
 
+impl fmt::Write for Cursor {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.print(s.as_bytes());
+        Ok(())
+    }
+}
+
 impl Cursor {
     fn color(&self) -> u8 {
         let fg = self.foreground as u8;
@@ -70,13 +89,22 @@ impl Cursor {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    let framebuffer = 0xb8000 as *mut u8;
+    let text = b"Rust in Action";
 
-    unsafe {
-        framebuffer
-            .offset(1) // <5>
-            .write_volatile(0x10); // <6>
-    }
+    let mut cursor = Cursor {
+        position: 0,
+        foreground: Color::BrightCyan,
+        background: Color::Black,
+    };
+
+    cursor.print(text);
+    //   let framebuffer = 0xb8000 as *mut u8;
+
+    //   unsafe {
+    //       framebuffer
+    //           .offset(1) // <5>
+    //           .write_volatile(0x10); // <6>
+    //   }
 
     loop {
         hlt();
