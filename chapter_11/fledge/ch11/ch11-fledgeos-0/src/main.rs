@@ -3,15 +3,27 @@
 #![no_main] // <1>
 #![feature(core_intrinsics)] // <2>
 
-use core::intrinsics; // <2>
+use core::fmt::Write;
 use core::panic::PanicInfo;
+use core::{fmt, intrinsics}; // <2>
 
 use x86_64::instructions::hlt; // <3>
 
 #[panic_handler]
 #[no_mangle]
-pub fn panic(_info: &PanicInfo) -> ! {
-    intrinsics::abort(); // <4>
+pub fn panic(info: &PanicInfo) -> ! {
+    let mut cursor = Cursor {
+        position: 0,
+        foreground: Color::White,
+        background: Color::Red,
+    };
+    for _ in 0..(80 * 25) {
+        cursor.print(b" ");
+    }
+    cursor.position = 0;
+    write!(cursor, "{}", info).unwrap();
+    loop {}
+    // intrinsics::abort(); // <4>
 }
 
 #[lang = "eh_personality"]
@@ -44,6 +56,13 @@ struct Cursor {
     position: isize,
     foreground: Color,
     background: Color,
+}
+
+impl fmt::Write for Cursor {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.print(s.as_bytes());
+        Ok(())
+    }
 }
 
 impl Cursor {
