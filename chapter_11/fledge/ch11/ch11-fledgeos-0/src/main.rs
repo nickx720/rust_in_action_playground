@@ -70,13 +70,22 @@ impl Cursor {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    let framebuffer = 0xb8000 as *mut u8;
+    let text = b"Rust in Action";
 
-    unsafe {
-        framebuffer
-            .offset(1) // <5>
-            .write_volatile(0x10); // <6>
-    }
+    let mut cursor = Cursor {
+        position: 0,
+        foreground: Color::BrightCyan,
+        background: Color::Black,
+    };
+
+    cursor.print(text);
+    //   let framebuffer = 0xb8000 as *mut u8;
+
+    //   unsafe {
+    //       framebuffer
+    //           .offset(1) // <5>
+    //           .write_volatile(0x10); // <6>
+    //   }
 
     loop {
         hlt();
