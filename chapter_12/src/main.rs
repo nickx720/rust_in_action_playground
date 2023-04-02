@@ -1,9 +1,3 @@
-//use core::arch::asm;
-//fn main() {
-//    unsafe {
-//        asm!("int 42");
-//    }
-//}
 use std::process;
 use std::thread::sleep;
 use std::time;
