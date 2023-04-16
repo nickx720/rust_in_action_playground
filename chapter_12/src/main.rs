@@ -1,4 +1,3 @@
-
 //use core::arch::asm;
 //fn main() {
 //    unsafe {
@@ -8,6 +7,7 @@
 //use std::process;
 //use std::thread::sleep;
 //use std::time;
+mod noop;
 mod shutdown;
 mod toy_global;
 
@@ -20,5 +20,6 @@ fn main() {
     //        sleep(delay);
     //        println!("{i}");
     //    }
-    toy_global::toy_global_main();
+    //toy_global::toy_global_main();
+    noop::noop_main();
 }
