@@ -7,6 +7,7 @@
 //use std::process;
 //use std::thread::sleep;
 //use std::time;
+mod ignore;
 mod noop;
 mod shutdown;
 mod toy_global;
@@ -21,5 +22,6 @@ fn main() {
     //        println!("{i}");
     //    }
     //toy_global::toy_global_main();
-    noop::noop_main();
+    //    noop::noop_main();
+    ignore::main_ignore();
 }
