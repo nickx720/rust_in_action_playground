@@ -8,10 +8,10 @@
 //use std::thread::sleep;
 //use std::time;
 mod ignore;
+mod longjump;
 mod noop;
 mod shutdown;
 mod toy_global;
-
 fn main() {
     //    let delay = time::Duration::from_secs(1);
     //    let pid = process::id();
@@ -23,5 +23,6 @@ fn main() {
     //    }
     //toy_global::toy_global_main();
     //    noop::noop_main();
-    ignore::main_ignore();
+    //ignore::main_ignore();
+    longjump::main_jmp();
 }
