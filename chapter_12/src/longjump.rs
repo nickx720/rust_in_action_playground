@@ -1,4 +1,3 @@
-#![feature(link_llvm_intrinsics)]
 #![allow(non_camel_case_types)]
 #![cfg(not(windows))]
 
@@ -55,4 +54,45 @@ fn handle_signals(sig: i32) {
 
     return_early();
 }
-pub fn main_jmp() {}
+
+fn print_depth(depth: usize) {
+    for _ in 0..depth {
+        print!("#");
+    }
+    println!();
+}
+
+fn dive(depth: usize, max_depth: usize) {
+    unsafe {
+        if SHUT_DOWN {
+            println!("!");
+            return;
+        }
+    }
+    print_depth(depth);
+
+    if depth >= max_depth {
+        return;
+    } else if depth == MOCK_SIGNAL_AT {
+        unsafe {
+            libc::raise(SIGUSR1);
+        }
+    } else {
+        dive(depth + 1, max_depth);
+    }
+    print_depth(depth);
+}
+pub fn main_jmp() {
+    const JUMP_SET: i32 = 0;
+    register_signal_handler();
+
+    let return_point = ptr_to_jmp_buf();
+    let rc = unsafe { setjmp(return_point) };
+    if rc == JUMP_SET {
+        dive(0, 10);
+    } else {
+        println!("early return!");
+    }
+
+    println!("finishing");
+}

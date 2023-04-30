@@ -1,3 +1,4 @@
+#![feature(link_llvm_intrinsics)]
 //use core::arch::asm;
 //fn main() {
 //    unsafe {
