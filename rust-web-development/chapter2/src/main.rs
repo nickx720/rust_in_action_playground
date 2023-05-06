@@ -1,30 +1,12 @@
-#[derive(Debug)]
-struct Question {
-    id: QuestionId,
-    title: String,
-    content: String,
-    tags: Option<Vec<String>>,
-}
+mod asyncexample;
+mod question;
 
-#[derive(Debug)]
-struct QuestionId(String);
-
-impl Question {
-    fn new(id: QuestionId, title: String, content: String, tags: Option<Vec<String>>) -> Self {
-        Question {
-            id,
-            title,
-            content,
-            tags,
-        }
-    }
-}
-fn main() {
-    let question = Question::new(
-        QuestionId("1".to_string()),
-        "First Question".to_string(),
-        "Content of Question".to_string(),
-        Some(vec!["faq".to_string()]),
-    );
-    println!("{:?}", question);
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    //question::question_main();
+    dbg!("hello 1");
+    let response = asyncexample::async_example();
+    response.await.expect("Future didn't complete");
+    dbg!("hello 3");
+    Ok(())
 }
