@@ -3,7 +3,7 @@ use std::{
     io::{Error, ErrorKind},
     str::FromStr,
 };
-use warp::{reject::Reject, Filter};
+use warp::{http::StatusCode, reject::Reject, reply::Reply, Filter, Rejection};
 
 #[derive(Debug)]
 struct InvalidId;
@@ -56,12 +56,27 @@ async fn get_questions() -> Result<impl warp::Reply, warp::Rejection> {
     }
 }
 
+async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+    if let Some(_InvalidId) = r.find() {
+        Ok(warp::reply::with_status(
+            "No valid ID presented",
+            StatusCode::UNPROCESSABLE_ENTITY,
+        ))
+    } else {
+        Ok(warp::reply::with_status(
+            "Route not found",
+            StatusCode::NOT_FOUND,
+        ))
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let get_items = warp::get()
         .and(warp::path("questions"))
         .and(warp::path::end())
-        .and_then(get_questions);
+        .and_then(get_questions)
+        .recover(return_error);
     let routes = get_items;
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
