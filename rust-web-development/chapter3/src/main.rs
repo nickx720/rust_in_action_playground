@@ -3,7 +3,7 @@ use std::{
     io::{Error, ErrorKind},
     str::FromStr,
 };
-use warp::{http::StatusCode, reject::Reject, reply::Reply, Filter, Rejection};
+use warp::{http::StatusCode, reject::Reject, Filter, Rejection, Reply};
 
 #[derive(Debug)]
 struct InvalidId;
@@ -57,7 +57,7 @@ async fn get_questions() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-    if let Some(_InvalidId) = r.find() {
+    if let Some(_InvalidId) = r.find::<warp::filters::body::BodyDeserializeError>() {
         Ok(warp::reply::with_status(
             "No valid ID presented",
             StatusCode::UNPROCESSABLE_ENTITY,
