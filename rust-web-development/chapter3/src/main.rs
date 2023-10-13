@@ -3,7 +3,10 @@ use std::{
     io::{Error, ErrorKind},
     str::FromStr,
 };
-use warp::{http::Method, http::StatusCode, reject::Reject, Filter, Rejection, Reply};
+use warp::{
+    filters::cors::CorsForbidden, http::Method, http::StatusCode, reject::Reject, Filter,
+    Rejection, Reply,
+};
 
 #[derive(Debug)]
 struct InvalidId;
