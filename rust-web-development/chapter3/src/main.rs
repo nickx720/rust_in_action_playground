@@ -60,6 +60,7 @@ async fn get_questions() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+    println!("{:?}", r);
     if let Some(_InvalidId) = r.find::<warp::filters::body::BodyDeserializeError>() {
         Ok(warp::reply::with_status(
             "No valid ID presented",
@@ -77,7 +78,7 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
 async fn main() {
     let cors = warp::cors()
         .allow_any_origin()
-        .allow_header("content-type")
+        .allow_header("not-in-the-request")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
     let get_items = warp::get()
         .and(warp::path("questions"))
