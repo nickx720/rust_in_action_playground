@@ -19,6 +19,10 @@ impl Store {
             questions: HashMap::new(),
         }
     }
+    fn add_question(mut self, question: Question) -> Self {
+        self.questions.insert(question.id.clone(), question);
+        self
+    }
 }
 
 #[derive(Debug)]
@@ -33,7 +37,7 @@ struct Question {
     tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq, Hash)]
 struct QuestionId(String);
 
 impl FromStr for QuestionId {
