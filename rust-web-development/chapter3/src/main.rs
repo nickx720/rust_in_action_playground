@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::{
     io::{Error, ErrorKind},
@@ -24,14 +24,9 @@ impl Store {
         self
     }
 
-    fn init(self) -> Self {
-        let question = Question::new(
-            QuestionId::from_str("1").expect("Id not set"),
-            "How?".to_string(),
-            "Please help!".to_string(),
-            Some(vec!["general".to_string()]),
-        );
-        self.add_question(question)
+    fn init() -> HashMap<QuestionId, Question> {
+        let file = include_str!("../questions.json");
+        serde_json::from_str(file).expect("can't read questions.json")
     }
 }
 
@@ -39,7 +34,7 @@ impl Store {
 struct InvalidId;
 impl Reject for InvalidId {}
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Question {
     id: QuestionId,
     title: String,
@@ -47,7 +42,7 @@ struct Question {
     tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 struct QuestionId(String);
 
 impl FromStr for QuestionId {
