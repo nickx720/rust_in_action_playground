@@ -46,8 +46,12 @@ struct Question {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 struct QuestionId(String);
 
-async fn get_questions(store: Store) -> Result<impl warp::Reply, warp::Rejection> {
-    let res: Vec<Question> = store.questions.values().clone().collect();
+async fn get_questions(
+    params: HashMap<String, String>,
+    store: Store,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    print!("{:?}", params);
+    let res: Vec<&Question> = store.questions.values().clone().collect();
     Ok(warp::reply::json(&res))
 }
 
@@ -65,6 +69,8 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     }
 }
 
+// @TODO No matches found error on run
+
 #[tokio::main]
 async fn main() {
     let store = Store::new();
@@ -76,6 +82,7 @@ async fn main() {
     let get_items = warp::get()
         .and(warp::path("questions"))
         .and(warp::path::end())
+        .and(warp::query())
         .and(store_filter)
         .and_then(get_questions)
         .recover(return_error);
