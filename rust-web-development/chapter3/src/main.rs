@@ -51,7 +51,7 @@ async fn get_questions(
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     print!("{:?}", params);
-    let res: Vec<&Question> = store.questions.values().clone().collect();
+    let res: Vec<Question> = store.questions.into_values().collect();
     Ok(warp::reply::json(&res))
 }
 
