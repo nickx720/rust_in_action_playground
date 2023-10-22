@@ -1,9 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::{
-    io::{Error, ErrorKind},
-    str::FromStr,
-};
 use warp::{
     filters::cors::CorsForbidden, http::Method, http::StatusCode, reject::Reject, Filter,
     Rejection, Reply,
@@ -50,7 +46,7 @@ async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    print!("{:?}", params);
+    dbg!(params);
     let res: Vec<Question> = store.questions.into_values().collect();
     Ok(warp::reply::json(&res))
 }
@@ -70,6 +66,12 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
 }
 
 // @TODO No matches found error on run
+// https://github.com/seanmonstar/warp/blob/master/examples/query_string.rs
+#[derive(Serialize, Deserialize)]
+struct MyObject {
+    start: u32,
+    end: u32,
+}
 
 #[tokio::main]
 async fn main() {
