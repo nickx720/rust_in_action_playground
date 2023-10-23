@@ -43,7 +43,7 @@ struct Question {
 struct QuestionId(String);
 
 async fn get_questions(
-    params: HashMap<String, String>,
+    params: MyObject,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     dbg!(params);
@@ -67,7 +67,7 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
 
 // @TODO No matches found error on run
 // https://github.com/seanmonstar/warp/blob/master/examples/query_string.rs
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct MyObject {
     start: u32,
     end: u32,
