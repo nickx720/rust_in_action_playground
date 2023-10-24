@@ -43,7 +43,7 @@ struct Question {
 struct QuestionId(String);
 
 async fn get_questions(
-    params: MyObject,
+    params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     dbg!(params);
