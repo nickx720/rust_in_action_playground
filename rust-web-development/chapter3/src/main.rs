@@ -46,7 +46,7 @@ async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    dbg!(params);
+    dbg!(params.get("start"));
     let res: Vec<Question> = store.questions.into_values().collect();
     Ok(warp::reply::json(&res))
 }
