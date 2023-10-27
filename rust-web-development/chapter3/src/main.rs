@@ -48,7 +48,7 @@ async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    dbg!(params.get("start"));
+    dbg!(params);
     dbg!("Hello");
     let res: Vec<Question> = store.questions.into_values().collect();
     Ok(warp::reply::json(&res))
@@ -86,12 +86,11 @@ async fn main() {
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
     let get_items = warp::get()
         .and(warp::path("questions"))
-        .and(warp::query::<HashMap<String, String>>())
-        .map(|p: HashMap<String, String>| match p.get("key") {
-            Some(key) => Response::builder().body(format!("key = {}", key)),
-            None => Response::builder().body(String::from("No \"key\" param in query.")),
-        });
-    let routes = get_items.with(cors);
+        .and(warp::path::end())
+        .and(warp::query())
+        .and(store_filter)
+        .and_then(get_questions);
+    //let routes = get_items.with(cors);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3031)).await;
+    warp::serve(get_items).run(([127, 0, 0, 1], 3030)).await;
 }
