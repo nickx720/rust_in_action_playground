@@ -90,7 +90,7 @@ async fn main() {
         .and(warp::query())
         .and(store_filter)
         .and_then(get_questions);
-    //let routes = get_items.with(cors);
+    let routes = get_items.with(cors);
 
-    warp::serve(get_items).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
