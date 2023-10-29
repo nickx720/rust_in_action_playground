@@ -48,8 +48,11 @@ async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    dbg!(params);
-    dbg!("Hello");
+    let mut start = 0;
+    if let Some(n) = params.get("start") {
+        start = n.parse::<usize>().expect("Could not parse start");
+    }
+    println!("{}", start);
     let res: Vec<Question> = store.questions.into_values().collect();
     Ok(warp::reply::json(&res))
 }
@@ -68,14 +71,6 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     }
 }
 
-// @TODO No matches found error on run
-// https://github.com/seanmonstar/warp/blob/master/examples/query_string.rs
-#[derive(Serialize, Deserialize, Debug)]
-struct MyObject {
-    start: u32,
-    end: u32,
-}
-
 #[tokio::main]
 async fn main() {
     let store = Store::new();
@@ -84,13 +79,14 @@ async fn main() {
         .allow_any_origin()
         .allow_header("not-in-the-request")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
-    let get_items = warp::get()
+    let get_questions = warp::get()
         .and(warp::path("questions"))
         .and(warp::path::end())
         .and(warp::query())
         .and(store_filter)
-        .and_then(get_questions);
-    let routes = get_items.with(cors);
+        .and_then(get_questions)
+        .recover(return_error);
+    let routes = get_questions.with(cors);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
