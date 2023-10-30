@@ -44,6 +44,27 @@ struct Question {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 struct QuestionId(String);
 
+// https://blog.rust-lang.org//2015/05/11/traits.html
+
+#[derive(Debug)]
+enum Error {
+    ParseError(std::num::ParseIntError),
+    MissingParameters,
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            Error::ParseError(ref err) => {
+                write!(f, "Cannot parse parameter: {}", err)
+            }
+            Error::MissingParameters => write!(f, "Mising parameter"),
+        }
+    }
+}
+
+impl Reject for Error {}
+
 async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
