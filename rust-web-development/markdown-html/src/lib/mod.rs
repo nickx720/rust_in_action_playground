@@ -4,6 +4,7 @@ use markdown::to_html;
 // read from a directory
 // convert to markdown
 // use wehooks for triggering generate
+// http://danielwelch.github.io/rust-web-service.html
 // make an api request to github directory
 // read the contents
 // convert to markdown
