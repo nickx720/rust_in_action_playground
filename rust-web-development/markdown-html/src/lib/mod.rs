@@ -1,6 +1,6 @@
 use std::fs;
-mod server;
-use crate::actix_web;
+pub mod server;
+
 use markdown::to_html;
 // read from a directory
 // convert to markdown
