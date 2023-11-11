@@ -1,4 +1,5 @@
 use markdownlib::runfromlib;
 fn main() {
-    runfromlib("./docs").unwrap();
+    //runfromlib("./docs").unwrap();
+    markdownlib::server::server().unwrap();
 }
