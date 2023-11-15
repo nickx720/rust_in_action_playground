@@ -1,4 +1,13 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::Deserialize;
+
+// http://danielwelch.github.io/rust-web-service.html
+
+#[derive(Deserialize)]
+struct PushEvent {
+    #[serde(rename = "ref")]
+    reference: String,
+}
 
 #[get("/")]
 async fn hello() -> impl Responder {
