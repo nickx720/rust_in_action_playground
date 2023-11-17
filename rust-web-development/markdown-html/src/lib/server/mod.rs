@@ -1,10 +1,10 @@
-use std::future::{ready, Ready};
-
 use actix_web::{
-    dev::{Service, ServiceRequest, ServiceResponse, Transform},
+    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     get, post, web, App, Error, HttpResponse, HttpServer, Responder,
 };
+use futures_util::future::LocalBoxFuture;
 use serde::Deserialize;
+use std::future::{ready, Ready};
 
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
@@ -26,11 +26,30 @@ where
     type Response = ServiceResponse<B>;
     type Error = Error;
     type InitError = ();
-    type Transform = VerifySignature<S>;
+    type Transform = VerifySignatureResp<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(VerifySignature { service }))
+        ready(Ok(VerifySignatureResp { service }))
+    }
+}
+
+pub struct VerifySignatureResp<S> {
+    service: S,
+}
+
+impl<S, B> Service<ServiceRequest> for VerifySignatureResp<S>
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S::Future: 'static,
+    B: 'static,
+{
+    type Response = ServiceResponse<B>;
+    type Error = Error;
+    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
+    forward_ready!(service);
+    fn call(&self, req: ServiceRequest) -> Self::Future {
+        todo!()
     }
 }
 
