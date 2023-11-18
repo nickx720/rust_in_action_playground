@@ -8,6 +8,7 @@ use std::future::{ready, Ready};
 
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
+// https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
 
 #[derive(Deserialize)]
 struct PushEvent {
