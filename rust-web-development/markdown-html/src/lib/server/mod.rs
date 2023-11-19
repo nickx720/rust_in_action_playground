@@ -31,6 +31,7 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
+        dbg!("Hello from the other side");
         ready(Ok(VerifySignatureResp { service }))
     }
 }
@@ -50,7 +51,8 @@ where
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
     forward_ready!(service);
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        todo!()
+        dbg!("Response");
+        self.service.call(req)
     }
 }
 
@@ -61,7 +63,7 @@ async fn hello() -> impl Responder {
 
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(hello))
+    HttpServer::new(|| App::new().wrap(VerifySignature).service(hello))
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
