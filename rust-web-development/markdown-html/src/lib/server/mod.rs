@@ -48,7 +48,7 @@ where
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
+    type Future = S::Future;
     forward_ready!(service);
     fn call(&self, req: ServiceRequest) -> Self::Future {
         dbg!("Response");
