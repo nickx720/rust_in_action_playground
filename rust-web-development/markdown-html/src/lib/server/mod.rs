@@ -2,7 +2,6 @@ use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     get, post, web, App, Error, HttpResponse, HttpServer, Responder,
 };
-use futures_util::future::LocalBoxFuture;
 use serde::Deserialize;
 use std::future::{ready, Ready};
 
@@ -31,7 +30,6 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        dbg!("Hello from the other side");
         ready(Ok(VerifySignatureResp { service }))
     }
 }
@@ -51,20 +49,21 @@ where
     type Future = S::Future;
     forward_ready!(service);
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        dbg!("Response");
+        dbg!("{}", req.headers().to_owned());
         self.service.call(req)
     }
 }
 
-#[get("/webhook")]
-async fn hello() -> impl Responder {
+async fn webhook() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().wrap(VerifySignature).service(hello))
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new().service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
