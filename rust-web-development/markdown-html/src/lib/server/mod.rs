@@ -8,6 +8,9 @@ use std::future::{ready, Ready};
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
+// Register a repository
+// Create a webhook
+// Access the contents of the branch,read up the files and generate markdown and store it
 
 #[derive(Deserialize)]
 struct PushEvent {
@@ -53,6 +56,9 @@ where
         self.service.call(req)
     }
 }
+
+// @TODO Create a webhook using reqwest
+// https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 
 async fn webhook() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
