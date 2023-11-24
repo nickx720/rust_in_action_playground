@@ -15,8 +15,15 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(path) = path.ok() {
             let path = path.path().into_os_string();
             let content = fs::read_to_string(path)?;
-            let markdown = to_html(&content);
-            println!("{}", markdown);
+            let last = content.trim().split(".");
+            dbg!(last);
+            if content.split(".").last().unwrap() == "md".to_string() {
+                println!("It is a markdown file");
+                let markdown = to_html(&content);
+                println!("{}", markdown);
+            } else {
+                println!("What sort of file is this?");
+            }
         }
     }
     Ok(())
