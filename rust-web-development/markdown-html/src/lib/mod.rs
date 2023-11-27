@@ -14,15 +14,16 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     for path in paths {
         if let Some(path) = path.ok() {
             // @TODO temporary value dropped why?
-            let extension = path.path().extension().and_then(OsStr::to_str);
-            let path = path.path().into_os_string();
-            if extension.is_none() {
-                let content = fs::read_to_string(path)?;
+            if path.path().is_dir() {
+                continue;
+            }
+            if path.path().extension().unwrap() == "md" {
+                let content = fs::read_to_string(path.path())?;
                 println!("It is a markdown file");
                 let markdown = to_html(&content);
                 println!("{}", markdown);
             } else {
-                println!("What sort of file is this?");
+                println!("{}", path.path().file_name().unwrap().to_str().unwrap());
             }
         }
     }
