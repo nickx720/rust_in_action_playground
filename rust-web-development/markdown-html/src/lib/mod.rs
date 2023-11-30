@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsStr,
     fmt::Display,
     fs::{self, File},
     path::PathBuf,
@@ -22,11 +23,19 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
                 // If there are nested folders ignore and continue
                 continue;
             }
-            if path.path().extension().unwrap() == "md" {
-                read_markdown_file(path.path())?;
-            } else {
-                read_yaml_config(path.path())?;
+            // better way to write the following
+            if let Some(extension) = path.path().extension().expect("Some extension").to_str() {
+                match extension {
+                    "md" => read_markdown_file(path.path())?,
+                    "yaml" => read_yaml_config(path.path())?,
+                    _ => panic!("File not supported"),
+                }
             }
+            //  if path.path().extension().unwrap() == "md" {
+            //      read_markdown_file(path.path())?;
+            //  } else {
+            //      read_yaml_config(path.path())?;
+            //  }
         }
     }
     Ok(())
