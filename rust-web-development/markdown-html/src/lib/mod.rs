@@ -1,5 +1,4 @@
 use std::{
-    ffi::OsStr,
     fmt::Display,
     fs::{self, File},
     path::PathBuf,
@@ -24,18 +23,15 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             // better way to write the following
-            if let Some(extension) = path.path().extension().expect("Some extension").to_str() {
+            if let Some(extension) = path.path().extension().and_then(|value| value.to_str()) {
                 match extension {
                     "md" => read_markdown_file(path.path())?,
                     "yaml" => read_yaml_config(path.path())?,
                     _ => panic!("File not supported"),
                 }
+            } else {
+                panic!("Path not found")
             }
-            //  if path.path().extension().unwrap() == "md" {
-            //      read_markdown_file(path.path())?;
-            //  } else {
-            //      read_yaml_config(path.path())?;
-            //  }
         }
     }
     Ok(())
