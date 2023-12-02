@@ -61,6 +61,7 @@ where
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 
 async fn webhook() -> impl Responder {
+    let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
     HttpResponse::Ok().body("Hello world!")
 }
 
