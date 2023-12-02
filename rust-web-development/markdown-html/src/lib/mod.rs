@@ -22,7 +22,6 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
                 // If there are nested folders ignore and continue
                 continue;
             }
-            // better way to write the following
             if let Some(extension) = path.path().extension().and_then(|value| value.to_str()) {
                 match extension {
                     "md" => read_markdown_file(path.path())?,
@@ -42,16 +41,17 @@ fn read_markdown_file(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     println!("It is a markdown file");
     let markdown = to_html(&content);
     println!("{}", markdown);
+    // Store this on s3
     Ok(())
 }
 
 #[derive(Deserialize)]
 struct Pair {
-    key: String,
+    index: String,
 }
 impl Display for Pair {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "The key is {}", self.key)
+        write!(f, "The index file is {}", self.index)
     }
 }
 
