@@ -2,6 +2,8 @@ use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     get, post, web, App, Error, HttpResponse, HttpServer, Responder,
 };
+use core::panicking::panic;
+use dotenv;
 use serde::Deserialize;
 use std::future::{ready, Ready};
 
@@ -17,7 +19,6 @@ struct PushEvent {
     #[serde(rename = "ref")]
     reference: String,
 }
-
 struct VerifySignature;
 
 impl<S, B> Transform<S, ServiceRequest> for VerifySignature
@@ -67,6 +68,15 @@ async fn webhook() -> impl Responder {
 
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
+    //@TODO get token value from string
+    //    let github_token = dotenv::var("GITHUB_TOKEN").map(|value| {
+    //        if Ok(token) = value {
+    //            token
+    //        } else {
+    //            panic("Token is not set")
+    //        }
+    //    });
+    //    dbg!(github_token);
     HttpServer::new(|| {
         App::new().service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
     })
