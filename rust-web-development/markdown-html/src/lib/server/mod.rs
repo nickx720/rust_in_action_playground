@@ -2,7 +2,6 @@ use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     get, post, web, App, Error, HttpResponse, HttpServer, Responder,
 };
-use core::panicking::panic;
 use dotenv;
 use serde::Deserialize;
 use std::future::{ready, Ready};
@@ -59,9 +58,11 @@ where
 }
 
 // @TODO Create a webhook using reqwest
+// https://users.rust-lang.org/t/using-actix-and-anyhow-together/40774
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
-
 async fn webhook() -> impl Responder {
+    let bearer_token = dotenv::var("GITHUB_TOKEN").unwrap();
+    dbg!(bearer_token);
     let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
     HttpResponse::Ok().body("Hello world!")
 }
