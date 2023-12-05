@@ -57,8 +57,14 @@ where
     }
 }
 
+struct WebHookError {
+    parsingError: anyhow::Error,
+    actix_error: actix_web::Error,
+}
+
 // @TODO Create a webhook using reqwest
 // https://users.rust-lang.org/t/using-actix-and-anyhow-together/40774
+// https://dev.to/chaudharypraveen98/error-handling-in-actix-web-4mm
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 async fn webhook() -> impl Responder {
     let bearer_token = dotenv::var("GITHUB_TOKEN").unwrap();
