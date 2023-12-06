@@ -1,8 +1,9 @@
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    get, post, web, App, Error, HttpResponse, HttpServer, Responder,
+    get, post, web, App, Error, HttpResponse, HttpServer, Responder, ResponseError,
 };
 use dotenv;
+use reqwest::StatusCode;
 use serde::Deserialize;
 use std::future::{ready, Ready};
 
@@ -57,20 +58,36 @@ where
     }
 }
 
-struct WebHookError {
-    parsingError: anyhow::Error,
-    actix_error: actix_web::Error,
+#[derive(thiserror::Error, Debug)]
+enum WebHookError {
+    #[error("Generic Error")]
+    InternalParseError(#[from] anyhow::Error),
+    #[error("Couldn't parse GITHUB_TOKEN")]
+    DotEnvError(dotenv::Error),
+}
+
+impl ResponseError for WebHookError {
+    fn status_code(&self) -> StatusCode {
+        match &self {
+            Self::DotEnvError(_) => StatusCode::NOT_FOUND,
+            Self::InternalParseError(_) => StatusCode::NOT_FOUND,
+        }
+    }
+
+    fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+        HttpResponse::build(self.status_code()).body(self.to_string())
+    }
 }
 
 // @TODO Create a webhook using reqwest
-// https://users.rust-lang.org/t/using-actix-and-anyhow-together/40774
+// https://stackoverflow.com/questions/76497360/returning-anyhowresult-in-service-actix-web
 // https://dev.to/chaudharypraveen98/error-handling-in-actix-web-4mm
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
-async fn webhook() -> impl Responder {
-    let bearer_token = dotenv::var("GITHUB_TOKEN").unwrap();
+async fn webhook() -> Result<impl Responder, WebHookError> {
+    let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     dbg!(bearer_token);
     let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
-    HttpResponse::Ok().body("Hello world!")
+    Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
 #[actix_web::main]
