@@ -1,9 +1,10 @@
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    get, post, web, App, Error, HttpResponse, HttpServer, Responder, ResponseError,
+    get,
+    http::StatusCode,
+    post, web, App, Error, HttpResponse, HttpServer, Responder, ResponseError,
 };
 use dotenv;
-use reqwest::StatusCode;
 use serde::Deserialize;
 use std::future::{ready, Ready};
 
@@ -63,7 +64,7 @@ enum WebHookError {
     #[error("Generic Error")]
     InternalParseError(#[from] anyhow::Error),
     #[error("Couldn't parse GITHUB_TOKEN")]
-    DotEnvError(dotenv::Error),
+    DotEnvError(#[from] dotenv::Error),
 }
 
 impl ResponseError for WebHookError {
@@ -74,7 +75,7 @@ impl ResponseError for WebHookError {
         }
     }
 
-    fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+    fn error_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code()).body(self.to_string())
     }
 }
