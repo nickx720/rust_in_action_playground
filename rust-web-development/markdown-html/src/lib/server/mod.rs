@@ -5,6 +5,7 @@ use actix_web::{
     post, web, App, Error, HttpResponse, HttpServer, Responder, ResponseError,
 };
 use dotenv;
+use reqwest::header;
 use serde::Deserialize;
 use std::future::{ready, Ready};
 
@@ -65,6 +66,8 @@ enum WebHookError {
     InternalParseError(#[from] anyhow::Error),
     #[error("Couldn't parse GITHUB_TOKEN")]
     DotEnvError(#[from] dotenv::Error),
+    #[error("Couln't Fetch Data")]
+    GetError(#[from] reqwest::Error),
 }
 
 impl ResponseError for WebHookError {
@@ -72,6 +75,7 @@ impl ResponseError for WebHookError {
         match &self {
             Self::DotEnvError(_) => StatusCode::NOT_FOUND,
             Self::InternalParseError(_) => StatusCode::NOT_FOUND,
+            Self::GetError(_) => StatusCode::FORBIDDEN,
         }
     }
 
@@ -81,13 +85,21 @@ impl ResponseError for WebHookError {
 }
 
 // @TODO Create a webhook using reqwest
-// https://stackoverflow.com/questions/76497360/returning-anyhowresult-in-service-actix-web
-// https://dev.to/chaudharypraveen98/error-handling-in-actix-web-4mm
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
-    dbg!(bearer_token);
     let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
+    // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
+    let mut headers = header::HeaderMap::new();
+    let client = reqwest::Client::builder()
+        .default_headers(headers)
+        .build()?;
+    let list_of_webhooks = client
+        .get("https://api.github.com/repos/nickx720/rust_in_action_playground/hooks")
+        .await?
+        .text()
+        .await?;
+    dbg!(list_of_webhooks);
     Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
