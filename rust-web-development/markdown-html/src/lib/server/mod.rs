@@ -86,16 +86,31 @@ impl ResponseError for WebHookError {
 
 // @TODO Create a webhook using reqwest
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
+// [src/lib/server/mod.rs:116] list_of_webhooks = "\r\nRequest forbidden by administrative rules. Please make sure your request has a User-Agent header (https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required). Check https://developer.github.com for other possible causes.\r\n"
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
+    let bearer_token = format!("Bearer {}", bearer_token);
     let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
     // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
     let mut headers = header::HeaderMap::new();
+    headers.insert(
+        header::ACCEPT,
+        header::HeaderValue::from_static("application/vnd.github+json"),
+    );
+    headers.insert(
+        header::AUTHORIZATION,
+        header::HeaderValue::from_str(&bearer_token).unwrap(),
+    );
+    headers.insert(
+        "X-GitHub-Api-Version",
+        header::HeaderValue::from_static("2022-11-28"),
+    );
     let client = reqwest::Client::builder()
         .default_headers(headers)
         .build()?;
     let list_of_webhooks = client
         .get("https://api.github.com/repos/nickx720/rust_in_action_playground/hooks")
+        .send()
         .await?
         .text()
         .await?;
