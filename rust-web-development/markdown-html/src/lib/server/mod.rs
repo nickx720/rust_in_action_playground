@@ -7,7 +7,10 @@ use actix_web::{
 use dotenv;
 use reqwest::header;
 use serde::Deserialize;
-use std::future::{ready, Ready};
+use std::{
+    fs,
+    future::{ready, Ready},
+};
 
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
@@ -84,6 +87,11 @@ impl ResponseError for WebHookError {
     }
 }
 
+fn read_json_file(path: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(path)?;
+    Ok(vec![])
+}
+
 // @TODO Create a webhook using reqwest
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 // Get list of webhooks,
@@ -129,15 +137,6 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
 
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
-    //@TODO get token value from string
-    //    let github_token = dotenv::var("GITHUB_TOKEN").map(|value| {
-    //        if Ok(token) = value {
-    //            token
-    //        } else {
-    //            panic("Token is not set")
-    //        }
-    //    });
-    //    dbg!(github_token);
     HttpServer::new(|| {
         App::new().service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
     })
