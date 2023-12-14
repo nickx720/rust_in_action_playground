@@ -6,7 +6,7 @@ use actix_web::{
 };
 use dotenv;
 use reqwest::header;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{
     fs,
     future::{ready, Ready},
@@ -87,9 +87,17 @@ impl ResponseError for WebHookError {
     }
 }
 
-fn read_json_file(path: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+#[derive(Serialize, Deserialize, Debug)]
+struct RepoConfig {
+    repo: String,
+}
+
+type ArrayRepoConfig = Vec<RepoConfig>;
+
+fn read_json_file(path: &str) -> Result<ArrayRepoConfig, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(path)?;
-    Ok(vec![])
+    let repo_config: ArrayRepoConfig = serde_json::from_str(&content)?;
+    Ok(repo_config)
 }
 
 // @TODO Create a webhook using reqwest
@@ -101,37 +109,35 @@ fn read_json_file(path: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
-    let webhook_url = "https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28";
-    // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
-    let mut headers = header::HeaderMap::new();
-    headers.insert(
-        header::ACCEPT,
-        header::HeaderValue::from_static("application/vnd.github+json"),
-    );
-    headers.insert(
-        header::AUTHORIZATION,
-        header::HeaderValue::from_str(&bearer_token).unwrap(),
-    );
-    headers.insert(
-        "X-GitHub-Api-Version",
-        header::HeaderValue::from_static("2022-11-28"),
-    );
-    headers.insert(
-        header::USER_AGENT,
-        header::HeaderValue::from_static(
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
-        ),
-    );
-    let client = reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?;
-    let list_of_webhooks = client
-        .get("https://api.github.com/repos/nickx720/rust_in_action_playground/hooks")
-        .send()
-        .await?
-        .text()
-        .await?;
-    dbg!(list_of_webhooks);
+    // TODO implement result error
+    let webhook_url = read_json_file("./docs/repo.json")?;
+    for url in webhook_url {
+        // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            header::ACCEPT,
+            header::HeaderValue::from_static("application/vnd.github+json"),
+        );
+        headers.insert(
+            header::AUTHORIZATION,
+            header::HeaderValue::from_str(&bearer_token).unwrap(),
+        );
+        headers.insert(
+            "X-GitHub-Api-Version",
+            header::HeaderValue::from_static("2022-11-28"),
+        );
+        headers.insert(
+            header::USER_AGENT,
+            header::HeaderValue::from_static(
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
+            ),
+        );
+        let client = reqwest::Client::builder()
+            .default_headers(headers)
+            .build()?;
+        let list_of_webhooks = client.get(url.repo).send().await?.text().await?;
+        dbg!(list_of_webhooks);
+    }
     Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
