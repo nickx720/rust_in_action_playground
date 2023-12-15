@@ -7,7 +7,9 @@ use actix_web::{
 use dotenv;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::{
+    collections::HashMap,
     fs,
     future::{ready, Ready},
 };
@@ -71,6 +73,8 @@ enum WebHookError {
     DotEnvError(#[from] dotenv::Error),
     #[error("Couln't Fetch Data")]
     GetError(#[from] reqwest::Error),
+    #[error("File Read Error")]
+    FileReadError(std::io::Error),
 }
 
 impl ResponseError for WebHookError {
@@ -79,6 +83,7 @@ impl ResponseError for WebHookError {
             Self::DotEnvError(_) => StatusCode::NOT_FOUND,
             Self::InternalParseError(_) => StatusCode::NOT_FOUND,
             Self::GetError(_) => StatusCode::FORBIDDEN,
+            Self::FileReadError(_) => StatusCode::FORBIDDEN,
         }
     }
 
@@ -94,7 +99,8 @@ struct RepoConfig {
 
 type ArrayRepoConfig = Vec<RepoConfig>;
 
-fn read_json_file(path: &str) -> Result<ArrayRepoConfig, Box<dyn std::error::Error>> {
+//https://betterprogramming.pub/a-simple-guide-to-using-thiserror-crate-in-rust-eee6e442409b
+fn read_json_file(path: &str) -> Result<ArrayRepoConfig, WebHookError> {
     let content = fs::read_to_string(path)?;
     let repo_config: ArrayRepoConfig = serde_json::from_str(&content)?;
     Ok(repo_config)
@@ -132,6 +138,19 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
+        let sample = json!({
+           "name":"web",
+           "active":true,
+           "events":[
+              "push",
+              "pull_request"
+           ],
+           "config":{
+              "url":"https://example.com/webhook",
+              "content_type":"json",
+              "insecure_ssl":"0"
+           }
+        });
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()?;
