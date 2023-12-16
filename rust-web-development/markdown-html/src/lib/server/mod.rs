@@ -73,8 +73,8 @@ enum WebHookError {
     DotEnvError(#[from] dotenv::Error),
     #[error("Couln't Fetch Data")]
     GetError(#[from] reqwest::Error),
-    #[error("File Read Error")]
-    FileReadError(std::io::Error),
+    #[error("JSON Error")]
+    ReadingJSONError,
 }
 
 impl ResponseError for WebHookError {
@@ -83,13 +83,23 @@ impl ResponseError for WebHookError {
             Self::DotEnvError(_) => StatusCode::NOT_FOUND,
             Self::InternalParseError(_) => StatusCode::NOT_FOUND,
             Self::GetError(_) => StatusCode::FORBIDDEN,
-            Self::FileReadError(_) => StatusCode::FORBIDDEN,
+            Self::ReadingJSONError => StatusCode::FORBIDDEN,
         }
     }
 
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code()).body(self.to_string())
     }
+}
+
+impl ReadingJSONError for WebHookError {}
+
+#[derive(thiserror::Error, Debug)]
+enum ReadingJSONError {
+    #[error("File Read Error")]
+    FileReadError(std::io::Error),
+    #[error("Serde JSON Parse error")]
+    ParsingError(serde_json::Error),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -100,9 +110,9 @@ struct RepoConfig {
 type ArrayRepoConfig = Vec<RepoConfig>;
 
 //https://betterprogramming.pub/a-simple-guide-to-using-thiserror-crate-in-rust-eee6e442409b
-fn read_json_file(path: &str) -> Result<ArrayRepoConfig, WebHookError> {
-    let content = fs::read_to_string(path)?;
-    let repo_config: ArrayRepoConfig = serde_json::from_str(&content)?;
+fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
+    let content = fs::read_to_string(path).unwrap();
+    let repo_config: ArrayRepoConfig = serde_json::from_str(&content).unwrap();
     Ok(repo_config)
 }
 
@@ -115,8 +125,8 @@ fn read_json_file(path: &str) -> Result<ArrayRepoConfig, WebHookError> {
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
-    // TODO implement result error
-    let webhook_url = read_json_file("./docs/repo.json")?;
+    // TODO implement result error, remove unwrap
+    let webhook_url = read_json_file("./docs/repo.json").unwrap();
     for url in webhook_url {
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let mut headers = header::HeaderMap::new();
