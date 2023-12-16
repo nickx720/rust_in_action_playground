@@ -92,8 +92,6 @@ impl ResponseError for WebHookError {
     }
 }
 
-impl ReadingJSONError for WebHookError {}
-
 #[derive(thiserror::Error, Debug)]
 enum ReadingJSONError {
     #[error("File Read Error")]
