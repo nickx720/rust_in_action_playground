@@ -74,7 +74,7 @@ enum WebHookError {
     #[error("Couln't Fetch Data")]
     GetError(#[from] reqwest::Error),
     #[error("JSON Error")]
-    ReadingJSONError,
+    JSONError(#[from] ReadingJSONError),
 }
 
 impl ResponseError for WebHookError {
@@ -83,7 +83,7 @@ impl ResponseError for WebHookError {
             Self::DotEnvError(_) => StatusCode::NOT_FOUND,
             Self::InternalParseError(_) => StatusCode::NOT_FOUND,
             Self::GetError(_) => StatusCode::FORBIDDEN,
-            Self::ReadingJSONError => StatusCode::FORBIDDEN,
+            Self::JSONError(_) => StatusCode::FORBIDDEN,
         }
     }
 
@@ -95,9 +95,10 @@ impl ResponseError for WebHookError {
 #[derive(thiserror::Error, Debug)]
 enum ReadingJSONError {
     #[error("File Read Error")]
-    FileReadError(std::io::Error),
+    FileReadError(#[from] std::io::Error),
+
     #[error("Serde JSON Parse error")]
-    ParsingError(serde_json::Error),
+    ParsingError(#[from] serde_json::Error),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -109,8 +110,8 @@ type ArrayRepoConfig = Vec<RepoConfig>;
 
 //https://betterprogramming.pub/a-simple-guide-to-using-thiserror-crate-in-rust-eee6e442409b
 fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
-    let content = fs::read_to_string(path).unwrap();
-    let repo_config: ArrayRepoConfig = serde_json::from_str(&content).unwrap();
+    let content = fs::read_to_string(path)?;
+    let repo_config: ArrayRepoConfig = serde_json::from_str(&content)?;
     Ok(repo_config)
 }
 
@@ -124,7 +125,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
     // TODO implement result error, remove unwrap
-    let webhook_url = read_json_file("./docs/repo.json").unwrap();
+    let webhook_url = read_json_file("./docs/repo.json")?;
     for url in webhook_url {
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let mut headers = header::HeaderMap::new();
