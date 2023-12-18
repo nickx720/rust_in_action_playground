@@ -124,7 +124,6 @@ fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
-    // TODO implement result error, remove unwrap
     let webhook_url = read_json_file("./docs/repo.json")?;
     for url in webhook_url {
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
@@ -163,7 +162,8 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()?;
-        let list_of_webhooks = client.get(url.repo).send().await?.text().await?;
+        let url = format!("{}/hooks", url.repo);
+        let list_of_webhooks = client.post(url).json(&sample).send().await?.text().await?;
         dbg!(list_of_webhooks);
     }
     Ok(HttpResponse::Ok().body("Hello world!"))
