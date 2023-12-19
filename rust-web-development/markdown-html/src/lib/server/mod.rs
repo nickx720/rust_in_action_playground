@@ -115,6 +115,25 @@ fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
     Ok(repo_config)
 }
 
+#[derive(Serialize, Deserialize)]
+struct Config {
+    url: String,
+    content_type: String,
+    insecure_ssl: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Webhook {
+    name: String,
+    active: bool,
+    events: Vec<String>,
+    config: Config,
+}
+// impl builder pattern for webhook config
+impl Webhook {
+    fn new() {}
+}
+
 // @TODO Create a webhook using reqwest
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 // Get list of webhooks,
