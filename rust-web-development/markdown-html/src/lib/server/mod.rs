@@ -108,13 +108,23 @@ struct RepoConfig {
 
 type ArrayRepoConfig = Vec<RepoConfig>;
 
-//https://betterprogramming.pub/a-simple-guide-to-using-thiserror-crate-in-rust-eee6e442409b
 fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
     let content = fs::read_to_string(path)?;
     let repo_config: ArrayRepoConfig = serde_json::from_str(&content)?;
     Ok(repo_config)
 }
 
+// https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
+
+#[derive(Default)]
+struct WebhookBuilder {
+    name: String,
+    active: bool,
+    events: Vec<String>,
+    url: String,
+    content_type: String,
+    insecure_ssl: String,
+}
 #[derive(Serialize, Deserialize)]
 struct Config {
     url: String,
@@ -131,7 +141,15 @@ struct Webhook {
 }
 // impl builder pattern for webhook config
 impl Webhook {
-    fn new() {}
+    fn builder() -> WebHookBuilder {
+        WebhookBuilder::default()
+    }
+}
+
+impl WebhookBuilder {
+    pub fn new(name: String) -> WebhookBuilder {
+        WebhookBuilder { name: name }
+    }
 }
 
 // @TODO Create a webhook using reqwest
