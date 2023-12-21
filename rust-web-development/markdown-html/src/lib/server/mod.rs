@@ -116,15 +116,6 @@ fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
 
 // https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
 
-#[derive(Default)]
-struct WebhookBuilder {
-    name: String,
-    active: bool,
-    events: Vec<String>,
-    url: String,
-    content_type: String,
-    insecure_ssl: String,
-}
 #[derive(Serialize, Deserialize)]
 struct Config {
     url: String,
@@ -142,13 +133,29 @@ struct Webhook {
 // impl builder pattern for webhook config
 impl Webhook {
     fn builder() -> WebHookBuilder {
-        WebhookBuilder::default()
+        WebHookBuilder::default()
     }
 }
 
-impl WebhookBuilder {
-    pub fn new(name: String) -> WebhookBuilder {
-        WebhookBuilder { name: name }
+#[derive(Default)]
+struct WebHookBuilder {
+    name: String,
+    active: bool,
+    events: Vec<String>,
+    url: String,
+    content_type: String,
+    insecure_ssl: String,
+}
+impl WebHookBuilder {
+    pub fn new(name: String) -> WebHookBuilder {
+        WebHookBuilder {
+            name: name,
+            ..Default::default()
+        }
+    }
+    pub fn active(mut self, active: bool) -> WebHookBuilder {
+        self.active = active;
+        self
     }
 }
 
