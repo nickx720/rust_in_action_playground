@@ -157,6 +157,22 @@ impl WebHookBuilder {
         self.active = active;
         self
     }
+    pub fn events(mut self, events: Vec<String>) -> WebHookBuilder {
+        self.events = events;
+        self
+    }
+    pub fn url(mut self, url: String) -> WebHookBuilder {
+        self.url = url;
+        self
+    }
+    pub fn content_type(mut self, content_type: String) -> WebHookBuilder {
+        self.content_type = content_type;
+        self
+    }
+    pub fn insecure_ssl(mut self, insecure_ssl: String) -> WebHookBuilder {
+        self.insecure_ssl = insecure_ssl;
+        self
+    }
 }
 
 // @TODO Create a webhook using reqwest
