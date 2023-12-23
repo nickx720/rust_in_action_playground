@@ -122,6 +122,15 @@ struct Config {
     content_type: String,
     insecure_ssl: String,
 }
+impl Config {
+    fn new(url: String, content_type: String, insecure_ssl: String) -> Self {
+        Config {
+            url,
+            content_type,
+            insecure_ssl,
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 struct Webhook {
@@ -129,6 +138,16 @@ struct Webhook {
     active: bool,
     events: Vec<String>,
     config: Config,
+}
+impl Webhook {
+    fn new(name: String, active: bool, events: Vec<String>, config: Config) -> Self {
+        Webhook {
+            name,
+            active,
+            events,
+            config,
+        }
+    }
 }
 // impl builder pattern for webhook config
 impl Webhook {
@@ -172,6 +191,11 @@ impl WebHookBuilder {
     pub fn insecure_ssl(mut self, insecure_ssl: String) -> WebHookBuilder {
         self.insecure_ssl = insecure_ssl;
         self
+    }
+    pub fn builder(self) -> Webhook {
+        let config = Config::new(self.url, self.content_type, self.insecure_ssl);
+        let webhook = Webhook::new(self.name, self.active, self.events, config);
+        webhook
     }
 }
 
