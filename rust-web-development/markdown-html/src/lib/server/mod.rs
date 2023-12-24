@@ -158,7 +158,7 @@ impl Webhook {
 
 #[derive(Default)]
 struct WebHookBuilder {
-    name: String,
+    name: &String,
     active: bool,
     events: Vec<String>,
     url: String,
@@ -166,7 +166,7 @@ struct WebHookBuilder {
     insecure_ssl: String,
 }
 impl WebHookBuilder {
-    pub fn new(name: String) -> WebHookBuilder {
+    pub fn new(name: &str) -> WebHookBuilder {
         WebHookBuilder {
             name: name,
             ..Default::default()
@@ -230,6 +230,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
+        let sample = WebHookBuilder::new("web");
         let sample = json!({
            "name":"web",
            "active":true,
