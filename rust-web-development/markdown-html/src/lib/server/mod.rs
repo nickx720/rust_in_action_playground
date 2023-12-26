@@ -7,7 +7,7 @@ use actix_web::{
 use dotenv;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use std::{
     collections::HashMap,
     fs,
@@ -154,11 +154,14 @@ impl Webhook {
     fn builder() -> WebHookBuilder {
         WebHookBuilder::default()
     }
+    pub fn toJson(self) -> Value {
+        json!(self)
+    }
 }
 
 #[derive(Default)]
 struct WebHookBuilder {
-    name: &String,
+    name: String,
     active: bool,
     events: Vec<String>,
     url: String,
@@ -166,7 +169,7 @@ struct WebHookBuilder {
     insecure_ssl: String,
 }
 impl WebHookBuilder {
-    pub fn new(name: &str) -> WebHookBuilder {
+    pub fn new(name: String) -> WebHookBuilder {
         WebHookBuilder {
             name: name,
             ..Default::default()
@@ -230,7 +233,15 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
-        let sample = WebHookBuilder::new("web");
+        let sample = WebHookBuilder::new("web".to_string());
+        let webhook_input = sample
+            .active(true)
+            .events(vec!["push".to_string(), "pull_request".to_string()])
+            .url("https://example.com/webhook".to_string())
+            .content_type("json".to_string())
+            .insecure_ssl(0.to_string())
+            .builder()
+            .toJson();
         let sample = json!({
            "name":"web",
            "active":true,
