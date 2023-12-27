@@ -242,24 +242,17 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
             .insecure_ssl(0.to_string())
             .builder()
             .toJson();
-        let sample = json!({
-           "name":"web",
-           "active":true,
-           "events":[
-              "push",
-              "pull_request"
-           ],
-           "config":{
-              "url":"https://example.com/webhook",
-              "content_type":"json",
-              "insecure_ssl":"0"
-           }
-        });
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()?;
         let url = format!("{}/hooks", url.repo);
-        let list_of_webhooks = client.post(url).json(&sample).send().await?.text().await?;
+        let list_of_webhooks = client
+            .post(url)
+            .json(&webhook_input)
+            .send()
+            .await?
+            .text()
+            .await?;
         dbg!(list_of_webhooks);
     }
     Ok(HttpResponse::Ok().body("Hello world!"))
