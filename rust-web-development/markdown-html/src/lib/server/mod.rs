@@ -114,8 +114,6 @@ fn read_json_file(path: &str) -> Result<ArrayRepoConfig, ReadingJSONError> {
     Ok(repo_config)
 }
 
-// https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
-
 #[derive(Serialize, Deserialize)]
 struct Config {
     url: String,
@@ -154,7 +152,7 @@ impl Webhook {
     fn builder() -> WebHookBuilder {
         WebHookBuilder::default()
     }
-    pub fn toJson(self) -> Value {
+    pub fn to_json(self) -> Value {
         json!(self)
     }
 }
@@ -241,7 +239,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
-            .toJson();
+            .to_json();
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()?;
