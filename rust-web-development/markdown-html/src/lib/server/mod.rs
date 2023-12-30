@@ -11,8 +11,8 @@ use webhook::{read_json_file, WebHookBuilder, WebHookError};
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
-// Register a repository
-// Create a webhook
+// Register a repository Done
+// Create a webhook Done
 // Access the contents of the branch,read up the files and generate markdown and store it
 
 #[derive(Deserialize)]
@@ -114,10 +114,16 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
+async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Error>> {
+    Ok(HttpResponse::Ok())
+}
+
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
     HttpServer::new(|| {
-        App::new().service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
+        App::new()
+            .service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
+            .service(web::resource("register").to(read_contents_repo))
     })
     .bind(("127.0.0.1", 8080))?
     .run()
