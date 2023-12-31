@@ -114,7 +114,33 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
+//https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
 async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Error>> {
+    let bearer_token = dotenv::var("GITHUB_TOKEN")?;
+    let bearer_token = format!("Bearer {}", bearer_token);
+    let webhook_url = read_json_file("./docs/repo.json")?;
+    for url in webhook_url {
+        // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            header::ACCEPT,
+            header::HeaderValue::from_static("application/vnd.github+json"),
+        );
+        headers.insert(
+            header::AUTHORIZATION,
+            header::HeaderValue::from_str(&bearer_token).unwrap(),
+        );
+        headers.insert(
+            "X-GitHub-Api-Version",
+            header::HeaderValue::from_static("2022-11-28"),
+        );
+        headers.insert(
+            header::USER_AGENT,
+            header::HeaderValue::from_static(
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
+            ),
+        );
+    }
     Ok(HttpResponse::Ok())
 }
 
