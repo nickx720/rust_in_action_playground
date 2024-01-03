@@ -5,7 +5,7 @@ use std::{
 };
 pub mod server;
 
-use markdown::to_html;
+use pulldown_cmark::{html, Parser};
 use serde::Deserialize;
 // read from a directory
 // convert to markdown
@@ -26,7 +26,10 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
                 match extension {
                     "md" => read_markdown_file(path.path())?,
                     "yaml" => read_yaml_config(path.path())?,
-                    _ => panic!("File not supported"),
+                    _ => {
+                        println!("File type not supported");
+                        continue;
+                    }
                 }
             } else {
                 panic!("Path not found")
@@ -39,8 +42,10 @@ pub fn runfromlib(path: &str) -> Result<(), Box<dyn std::error::Error>> {
 fn read_markdown_file(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let content = fs::read_to_string(path)?;
     println!("It is a markdown file");
-    let markdown = to_html(&content);
-    println!("{}", markdown);
+    let parser = Parser::new(&content);
+    let mut markdown = Vec::new();
+    html::write_html(&mut markdown, parser)?;
+    println!("{}", &String::from_utf8_lossy(&markdown)[..]);
     // Store this on s3
     Ok(())
 }
