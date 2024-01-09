@@ -5,7 +5,7 @@ use actix_web::{
 };
 use dotenv;
 use reqwest::header;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::future::{ready, Ready};
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
@@ -115,6 +115,16 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     Ok(HttpResponse::Ok().body("Hello world!"))
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Contents {
+    name: String,
+    path: String,
+    sha: String,
+    size: i32,
+    url: String,
+    download_url: String,
+}
+
 //https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
 async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Error>> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
@@ -151,8 +161,11 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
             .build()?;
         // TODO Convert to json
         let contents = client.get(url).send().await?.text().await?;
-        let v: Value = serde_json::from_str(&contents)?;
-        println!("From api response {}", v["download_url"]);
+        let v: Vec<Contents> = serde_json::from_str(&contents)?;
+        v.iter().for_each(|item| {
+            dbg!(item);
+            return;
+        });
         content.push(contents)
     }
     Ok(HttpResponse::Ok().json(content))
