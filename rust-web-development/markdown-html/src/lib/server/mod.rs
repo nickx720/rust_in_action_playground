@@ -130,7 +130,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
     let webhook_url = read_json_file("./docs/repo.json")?;
-    let mut content = vec![];
+    let mut contents = vec![];
     for url in webhook_url {
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let mut headers = header::HeaderMap::new();
@@ -160,15 +160,11 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
             .default_headers(headers)
             .build()?;
         // TODO Convert to json
-        let contents = client.get(url).send().await?.text().await?;
-        let v: Vec<Contents> = serde_json::from_str(&contents)?;
-        v.iter().for_each(|item| {
-            dbg!(item);
-            return;
-        });
-        content.push(contents)
+        let content = client.get(url).send().await?.text().await?;
+        let content: Vec<Contents> = serde_json::from_str(&content)?;
+        contents.push(content)
     }
-    Ok(HttpResponse::Ok().json(content))
+    Ok(HttpResponse::Ok().json(contents))
 }
 
 #[actix_web::main]
