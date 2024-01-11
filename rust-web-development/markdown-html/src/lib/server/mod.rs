@@ -162,8 +162,18 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
         // TODO Convert to json
         let content = client.get(url).send().await?.text().await?;
         let content: Vec<Contents> = serde_json::from_str(&content)?;
-        contents.push(content)
+        //        contents.push(content);
+        for conten in &content {
+            let desc = client
+                .get(&conten.download_url)
+                .send()
+                .await?
+                .text()
+                .await?;
+            dbg!(desc);
+        }
     }
+    contents.push("he");
     Ok(HttpResponse::Ok().json(contents))
 }
 
