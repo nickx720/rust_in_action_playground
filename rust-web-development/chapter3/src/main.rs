@@ -20,10 +20,10 @@ impl Store {
             questions: Arc::new(RwLock::new(Self::init())),
         }
     }
-    fn add_question(mut self, question: Question) -> Self {
-        self.questions.insert(question.id.clone(), question);
-        self
-    }
+    //    fn add_question(mut self, question: Question) -> Self {
+    //        self.questions.insert(question.id.clone(), question);
+    //        self
+    //    }
 
     fn init() -> HashMap<QuestionId, Question> {
         let file = include_str!("../questions.json");
