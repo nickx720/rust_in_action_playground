@@ -4,9 +4,9 @@ use actix_web::{
     web, App, Error, HttpResponse, HttpServer, Responder,
 };
 use dotenv;
+use pulldown_cmark::{html, Parser};
 use reqwest::header;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
 use std::future::{ready, Ready};
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
 // http://danielwelch.github.io/rust-web-service.html
@@ -164,7 +164,14 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
         //  TODO      Parallelize this, possible optimization
         for cont in &content {
             let desc = client.get(&cont.download_url).send().await?.text().await?;
-            contents.push(desc);
+            if cont.url.ends_with(".md") {
+                let parser = Parser::new(&desc);
+                let mut markdown = Vec::new();
+                html::write_html(&mut markdown, parser)?;
+                contents.push(&String::from_utf8_lossy(&markdown)[..]);
+                continue;
+            }
+            //            contents.push(desc);
         }
     }
     Ok(HttpResponse::Ok().json(contents))
