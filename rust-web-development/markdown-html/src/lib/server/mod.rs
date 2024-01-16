@@ -164,9 +164,9 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
         //  TODO      Parallelize this, possible optimization
         for cont in &content {
             let desc = client.get(&cont.download_url).send().await?.text().await?;
+            let mut markdown = Vec::new();
             if cont.url.ends_with(".md") {
                 let parser = Parser::new(&desc);
-                let mut markdown = Vec::new();
                 html::write_html(&mut markdown, parser).unwrap();
                 let parsed_content = &String::from_utf8_lossy(&markdown)[..];
                 contents.push(parsed_content);
