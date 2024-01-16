@@ -167,8 +167,9 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
             if cont.url.ends_with(".md") {
                 let parser = Parser::new(&desc);
                 let mut markdown = Vec::new();
-                html::write_html(&mut markdown, parser)?;
-                contents.push(&String::from_utf8_lossy(&markdown)[..]);
+                html::write_html(&mut markdown, parser).unwrap();
+                let parsed_content = &String::from_utf8_lossy(&markdown)[..];
+                contents.push(parsed_content);
                 continue;
             }
             //            contents.push(desc);
