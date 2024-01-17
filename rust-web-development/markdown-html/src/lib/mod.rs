@@ -49,6 +49,16 @@ fn read_markdown_file(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     // Store this on s3
     Ok(())
 }
+pub fn convert_markdown_file(path: String) -> Result<String, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(path)?;
+    println!("It is a markdown file");
+    let parser = Parser::new(&content);
+    let mut markdown = Vec::new();
+    html::write_html(&mut markdown, parser)?;
+    let mark = format!("{}", &String::from_utf8_lossy(&markdown)[..]);
+    // Store this on s3
+    Ok(mark)
+}
 
 #[derive(Deserialize)]
 struct Pair {
