@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::future::{ready, Ready};
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
 
-use crate::convert_markdown_file;
+use crate::{convert_markdown_file, convert_yaml_config};
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
@@ -166,13 +166,18 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
         //  TODO      Parallelize this, possible optimization
         for cont in &content {
             let desc = client.get(&cont.download_url).send().await?.text().await?;
-            dbg!(&cont.url);
-            if cont.url.contains(".md") {
-                // TODO handle all conditions
-                let converted = convert_markdown_file(desc).unwrap();
-                dbg!(&converted);
-                contents.push(converted);
-                continue;
+            match &cont.url {
+                url if url.contains(".md") => {
+                    let converted = convert_markdown_file(desc).unwrap();
+                    contents.push(converted);
+                    continue;
+                }
+                url if url.contains(".yaml") => {
+                    let converted = convert_yaml_config(&desc).unwrap();
+                    contents.push(converted);
+                    continue;
+                }
+                _ => continue,
             }
             //            contents.push(desc);
         }
