@@ -74,3 +74,8 @@ fn read_yaml_config(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", yaml);
     Ok(())
 }
+pub fn convert_yaml_config(file: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let yaml: Pair = serde_yaml::from_str(file)?;
+    let output = format!("{}", yaml);
+    Ok(output)
+}
