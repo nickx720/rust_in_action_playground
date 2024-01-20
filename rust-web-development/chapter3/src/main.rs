@@ -137,7 +137,7 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
         ))
     } else {
         Ok(warp::reply::with_status(
-            "Route not found".to_string(),
+            "Route Not Found".to_string(),
             StatusCode::NOT_FOUND,
         ))
     }
