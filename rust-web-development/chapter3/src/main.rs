@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{collections::HashMap, io::Read};
 use tokio::sync::RwLock;
+use warp::filters::body::BodyDeserializeError;
 use warp::{
     filters::cors::CorsForbidden,
     http::{Method, Response, StatusCode},
@@ -129,6 +130,11 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
             error.to_string(),
             StatusCode::FORBIDDEN,
         ))
+    } else if let Some(error) = r.find::<BodyDeserializeError>() {
+        Ok(warp::reply::with_status(
+            error.to_string(),
+            StatusCode::FORBIDDEN,
+        ))
     } else {
         Ok(warp::reply::with_status(
             "Route not found".to_string(),
@@ -159,7 +165,10 @@ async fn main() {
         .and(warp::body::json())
         .and_then(add_question);
 
-    let routes = get_questions.with(cors);
+    let routes = get_questions
+        .or(add_question)
+        .with(cors)
+        .recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
