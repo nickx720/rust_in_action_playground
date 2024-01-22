@@ -930,6 +930,7 @@ dependencies = [
  "anyhow",
  "dotenv",
  "futures-util",
+ "oas3",
  "oauth2",
  "pulldown-cmark",
  "reqwest",
@@ -1007,6 +1008,26 @@ checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "oas3"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "920e12479993cfc5d07c3a5a7fc7fa2dfd79ad56d43bdb4513505d0fbda12b51"
+dependencies = [
+ "bytes",
+ "derive_more",
+ "futures-util",
+ "http",
+ "log",
+ "once_cell",
+ "regex",
+ "semver",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "url",
 ]
 
 [[package]]

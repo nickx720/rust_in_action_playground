@@ -173,8 +173,9 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                     continue;
                 }
                 url if url.contains(".yaml") => {
-                    let converted = convert_yaml_config(&desc).unwrap();
-                    contents.push(converted);
+                    // TODO openapi spec
+                    let converted = oas3::from_path(desc).unwrap();
+                    contents.push(format!("{:?}", converted));
                     continue;
                 }
                 _ => continue,
