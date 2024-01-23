@@ -7,7 +7,10 @@ use dotenv;
 use pulldown_cmark::{html, Parser};
 use reqwest::header;
 use serde::{Deserialize, Serialize};
-use std::future::{ready, Ready};
+use std::{
+    future::{ready, Ready},
+    path::PathBuf,
+};
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
 
 use crate::{convert_markdown_file, convert_yaml_config};
@@ -174,8 +177,9 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 }
                 url if url.contains(".yaml") => {
                     // TODO openapi spec
-                    let converted = oas3::from_path(desc).unwrap();
-                    contents.push(format!("{:?}", converted));
+                    let spec = oas3::from_reader(desc.as_bytes()).unwrap();
+                    let json_value = oas3::to_json(&spec).unwrap();
+                    contents.push(json_value);
                     continue;
                 }
                 _ => continue,
