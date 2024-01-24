@@ -17,9 +17,6 @@ use crate::{convert_markdown_file, convert_yaml_config};
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
-// Register a repository Done
-// Create a webhook Done
-// Access the contents of the branch,read up the files and generate markdown and store it
 
 #[derive(Deserialize)]
 struct PushEvent {
@@ -65,6 +62,7 @@ where
     }
 }
 
+// TODO On Githook push, generate new api endpoints
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
 // Get list of webhooks,
 // Create webhook
@@ -176,7 +174,6 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                     continue;
                 }
                 url if url.contains(".yaml") => {
-                    // TODO openapi spec
                     let spec = oas3::from_reader(desc.as_bytes()).unwrap();
                     let json_value = oas3::to_json(&spec).unwrap();
                     contents.push(json_value);
@@ -184,7 +181,6 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 }
                 _ => continue,
             }
-            //            contents.push(desc);
         }
     }
     Ok(HttpResponse::Ok().json(contents))
