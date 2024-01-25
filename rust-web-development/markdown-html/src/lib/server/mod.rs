@@ -179,7 +179,10 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                     contents.push(json_value);
                     continue;
                 }
-                _ => continue,
+                _ => {
+                    contents.push(format!("{} file is not supported as of now", &cont.url));
+                    continue;
+                }
             }
         }
     }
