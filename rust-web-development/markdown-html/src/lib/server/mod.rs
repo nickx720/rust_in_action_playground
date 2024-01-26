@@ -4,16 +4,12 @@ use actix_web::{
     web, App, Error, HttpResponse, HttpServer, Responder,
 };
 use dotenv;
-use pulldown_cmark::{html, Parser};
 use reqwest::header;
 use serde::{Deserialize, Serialize};
-use std::{
-    future::{ready, Ready},
-    path::PathBuf,
-};
+use std::future::{ready, Ready};
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
 
-use crate::{convert_markdown_file, convert_yaml_config};
+use crate::convert_markdown_file;
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
