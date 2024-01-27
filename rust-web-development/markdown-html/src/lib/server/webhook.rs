@@ -44,6 +44,7 @@ pub enum ReadingJSONError {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepoConfig {
     pub repo: String,
+    pub base: String,
 }
 
 type ArrayRepoConfig = Vec<RepoConfig>;
