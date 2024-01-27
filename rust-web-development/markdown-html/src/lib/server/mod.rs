@@ -151,6 +151,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
+        dbg!(url.base);
         let url = format!(
             "{}/contents/rust-web-development/markdown-html/docs",
             url.repo
