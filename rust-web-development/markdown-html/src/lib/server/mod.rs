@@ -7,6 +7,7 @@ use dotenv;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
 use std::future::{ready, Ready};
+use url::Url;
 use webhook::{read_json_file, WebHookBuilder, WebHookError};
 
 use crate::convert_markdown_file;
@@ -151,7 +152,8 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
-        dbg!(url.base);
+        let individual_components = Url::parse(&url.base)?;
+        dbg!(&individual_components.path_segments());
         let url = format!(
             "{}/contents/rust-web-development/markdown-html/docs",
             url.repo
