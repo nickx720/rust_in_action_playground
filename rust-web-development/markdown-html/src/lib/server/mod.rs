@@ -153,7 +153,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
             ),
         );
         let individual_components = Url::parse(&url.base)?;
-        dbg!(&individual_components.path_segments());
+        dbg!(&individual_components.path_segments().unwrap());
         let url = format!(
             "{}/contents/rust-web-development/markdown-html/docs",
             url.repo
