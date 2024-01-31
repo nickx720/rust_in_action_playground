@@ -10,15 +10,27 @@ use warp::{
     Filter, Rejection, Reply,
 };
 
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
+struct AnswerId(String);
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Answer {
+    id: AnswerId,
+    content: String,
+    question_id: QuestionId,
+}
+
 #[derive(Clone)]
 struct Store {
     questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
+    answers: Arc<RwLock<HashMap<QuestionId, Answer>>>,
 }
 
 impl Store {
     fn new() -> Self {
         Store {
             questions: Arc::new(RwLock::new(Self::init())),
+            answers: Arc::new(RwLock::new(HashMap::new())),
         }
     }
     //    fn add_question(mut self, question: Question) -> Self {
@@ -138,6 +150,23 @@ async fn delete_question(id: String, store: Store) -> Result<impl warp::Reply, w
         Some(_) => return Ok(warp::reply::with_status("Question deleted", StatusCode::OK)),
         None => return Err(warp::reject::custom(Error::QuestionNotFound)),
     }
+}
+
+async fn add_answer(
+    store: Store,
+    params: HashMap<String, String>,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let answer = Answer {
+        id: AnswerId("1".to_string()),
+        content: params.get("content").unwrap().to_string(),
+        question_id: QuestionId(params.get("questionId").unwrap().to_string()),
+    };
+    store
+        .answers
+        .write()
+        .await
+        .insert(answer.id.clone(), answer);
+    Ok(warp::reply::with_status("Answer added", StatusCode::OK))
 }
 
 async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
