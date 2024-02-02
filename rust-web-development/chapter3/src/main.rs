@@ -1,12 +1,16 @@
+mod error;
 use error::{return_error, Error};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::Arc;
-use std::{collections::HashMap, io::Read};
 use tokio::sync::RwLock;
 use warp::{
-    http::{Method, Response, StatusCode},
-    Filter, Rejection, Reply,
+    http::{Method, StatusCode},
+    Filter,
 };
+
+// @TODO before starting, move store,routes and types into stand alone files
+
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
 struct AnswerId(String);
 
@@ -41,9 +45,9 @@ impl Store {
     }
 }
 
-#[derive(Debug)]
-struct InvalidId;
-impl Reject for InvalidId {}
+//#[derive(Debug)]
+//struct InvalidId;
+//impl Reject for InvalidId {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Question {
@@ -57,58 +61,6 @@ struct Question {
 struct QuestionId(String);
 
 // https://blog.rust-lang.org//2015/05/11/traits.html
-mod error {
-    use warp::{
-        filters::body::BodyDeserializeError,
-        filters::cors::CorsForbidden,
-        http::StatusCode,
-        reject::{Reject, Rejection},
-        reply::Reply,
-    };
-    #[derive(Debug)]
-    pub enum Error {
-        ParseError(std::num::ParseIntError),
-        MissingParameters,
-        QuestionNotFound,
-    }
-
-    impl std::fmt::Display for Error {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            match *self {
-                Error::ParseError(ref err) => {
-                    write!(f, "Cannot parse parameter: {}", err)
-                }
-                Error::MissingParameters => write!(f, "Mising parameter"),
-                Error::QuestionNotFound => write!(f, "Question not found"),
-            }
-        }
-    }
-
-    impl Reject for Error {}
-    pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-        if let Some(error) = r.find::<Error>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::RANGE_NOT_SATISFIABLE,
-            ))
-        } else if let Some(error) = r.find::<CorsForbidden>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::FORBIDDEN,
-            ))
-        } else if let Some(error) = r.find::<BodyDeserializeError>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::UNPROCESSABLE_ENTITY,
-            ))
-        } else {
-            Ok(warp::reply::with_status(
-                "Route Not Found".to_string(),
-                StatusCode::NOT_FOUND,
-            ))
-        }
-    }
-}
 #[derive(Debug)]
 struct Pagination {
     start: usize,
