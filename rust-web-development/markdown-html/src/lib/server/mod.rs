@@ -152,14 +152,19 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
+        // TODO refactor the following block
         let individual_components = Url::parse(&url.base)?;
         let individual_segments = individual_components
             .path_segments()
-            .map(|c| c.collect::<Vec<_>>());
-        dbg!(&individual_segments);
+            .map(|c| c.collect::<Vec<_>>())
+            .unwrap();
+        let base_url = format!(
+            "https://api.github.com/repos/{}/{}",
+            individual_segments[0], individual_segments[1]
+        );
         let url = format!(
             "{}/contents/rust-web-development/markdown-html/docs",
-            url.repo
+            base_url
         );
         let client = reqwest::Client::builder()
             .default_headers(headers)
