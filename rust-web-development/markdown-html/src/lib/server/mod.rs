@@ -127,7 +127,7 @@ struct Contents {
     download_url: String,
 }
 
-fn generate_url(url: RepoConfig) -> String {
+fn generate_url(url: RepoConfig) -> Result<String, Box<dyn std::error::Error>> {
     let individual_components = Url::parse(&url.base)?;
     let individual_segments = individual_components
         .path_segments()
@@ -137,7 +137,11 @@ fn generate_url(url: RepoConfig) -> String {
         "https://api.github.com/repos/{}/{}",
         individual_segments[0], individual_segments[1]
     );
-    base_url
+    Ok(base_url)
+}
+
+fn temp_wrapper(url: String) -> String {
+    format!("{}/contents/rust-web-development/markdown-html/docs", url)
 }
 
 //https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
@@ -167,12 +171,9 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
             ),
         );
-        let base_url = generate_url(url);
+        let base_url = generate_url(url)?;
+        let url = temp_wrapper(base_url);
         // TODO refactor the following block
-        let url = format!(
-            "{}/contents/rust-web-development/markdown-html/docs",
-            base_url
-        );
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()?;
