@@ -145,6 +145,7 @@ fn temp_wrapper(url: String) -> String {
 }
 
 fn generate_headers(bearer_token: &String) -> header::HeaderMap {
+
     let mut headers = header::HeaderMap::new();
         headers.insert(
             header::ACCEPT,
@@ -175,6 +176,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     for url in webhook_url {
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let  headers = generate_headers(&bearer_token);
+
         let base_url = generate_url(url)?;
         let url = temp_wrapper(base_url);
         // TODO refactor the following block
