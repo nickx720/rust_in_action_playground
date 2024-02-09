@@ -144,15 +144,8 @@ fn temp_wrapper(url: String) -> String {
     format!("{}/contents/rust-web-development/markdown-html/docs", url)
 }
 
-//https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
-async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Error>> {
-    let bearer_token = dotenv::var("GITHUB_TOKEN")?;
-    let bearer_token = format!("Bearer {}", bearer_token);
-    let webhook_url = read_json_file("./docs/repo.json")?;
-    let mut contents = vec![];
-    for url in webhook_url {
-        // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
-        let mut headers = header::HeaderMap::new();
+fn generate_headers(bearer_token: String) -> header::HeaderMap {
+    let mut headers = header::HeaderMap::new();
         headers.insert(
             header::ACCEPT,
             header::HeaderValue::from_static("application/vnd.github+json"),
@@ -169,8 +162,19 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
             header::USER_AGENT,
             header::HeaderValue::from_static(
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
-            ),
-        );
+            ),);
+        headers
+}
+
+//https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28
+async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Error>> {
+    let bearer_token = dotenv::var("GITHUB_TOKEN")?;
+    let bearer_token = format!("Bearer {}", bearer_token);
+    let webhook_url = read_json_file("./docs/repo.json")?;
+    let mut contents = vec![];
+    for url in webhook_url {
+        // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
+        let  headers = generate_headers();
         let base_url = generate_url(url)?;
         let url = temp_wrapper(base_url);
         // TODO refactor the following block
