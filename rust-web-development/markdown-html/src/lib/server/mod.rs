@@ -67,6 +67,7 @@ where
 // Create webhook
 // https://andrewlock.net/using-ssh-and-localhost-run-to-test-github-webhooks-locally/
 // https://localhost.run/docs/
+// TODO create an endpoint for localhost:5000 to point to from proxy
 async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = dotenv::var("GITHUB_TOKEN")?;
     let bearer_token = format!("Bearer {}", bearer_token);
@@ -78,7 +79,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://example.com/webhook".to_string())
+            .url("https://7ba87a6b74eb88.lhr.life".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
