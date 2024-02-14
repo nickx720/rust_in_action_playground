@@ -192,13 +192,22 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     }
     Ok(HttpResponse::Ok().json(contents))
 }
+async fn from_webhook() -> Result<impl Responder, Box<dyn std::error::Error>> {
+    dbg!("Invoked via webhook");
+    Ok(HttpResponse::Ok())
+}
 
 #[actix_web::main]
 pub async fn server() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(web::resource("/webhook").wrap(VerifySignature).to(webhook))
+            .service(web::resource("webhook").wrap(VerifySignature).to(webhook))
             .service(web::resource("register").to(read_contents_repo))
+            .service(
+                web::resource("engaged")
+                    .wrap(VerifySignature)
+                    .to(from_webhook),
+            )
     })
     .bind(("127.0.0.1", 8080))?
     .run()
