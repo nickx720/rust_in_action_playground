@@ -1,7 +1,8 @@
 mod webhook;
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    web, App, Error, HttpResponse, HttpServer, Responder,
+    web::{self, Json},
+    App, Error, HttpResponse, HttpServer, Responder,
 };
 use dotenv;
 use reqwest::header;
@@ -17,10 +18,11 @@ use self::webhook::RepoConfig;
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct PushEvent {
     #[serde(rename = "ref")]
     reference: String,
+    action: String,
 }
 struct VerifySignature;
 
@@ -192,8 +194,12 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     }
     Ok(HttpResponse::Ok().json(contents))
 }
-async fn from_webhook() -> Result<impl Responder, Box<dyn std::error::Error>> {
+
+// @TODO fix cargo flash on save https://github.com/neoclide/coc.nvim/issues/2698#issuecomment-742495347
+
+async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
+    format!("{}", push.action);
     Ok(HttpResponse::Ok())
 }
 
