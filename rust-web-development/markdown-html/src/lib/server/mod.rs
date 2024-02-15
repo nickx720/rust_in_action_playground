@@ -79,7 +79,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://7ba87a6b74eb88.lhr.life".to_string())
+            .url("https://8bba524df9c941.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -201,7 +201,7 @@ async fn from_webhook() -> Result<impl Responder, Box<dyn std::error::Error>> {
 pub async fn server() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(web::resource("webhook").wrap(VerifySignature).to(webhook))
+            .service(web::resource("webhook").to(webhook))
             .service(web::resource("register").to(read_contents_repo))
             .service(
                 web::resource("engaged")
