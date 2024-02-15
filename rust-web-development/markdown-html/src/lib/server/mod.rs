@@ -1,7 +1,8 @@
 mod webhook;
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    web, App, Error, HttpResponse, HttpServer, Responder,
+    web::{self, Json},
+    App, Error, HttpResponse, HttpServer, Responder,
 };
 use dotenv;
 use reqwest::header;
@@ -17,10 +18,11 @@ use self::webhook::RepoConfig;
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct PushEvent {
     #[serde(rename = "ref")]
     reference: String,
+    action: String,
 }
 struct VerifySignature;
 
@@ -79,7 +81,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://7ba87a6b74eb88.lhr.life".to_string())
+            .url("https://bf5c6bef0ab0a2.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -192,8 +194,12 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     }
     Ok(HttpResponse::Ok().json(contents))
 }
-async fn from_webhook() -> Result<impl Responder, Box<dyn std::error::Error>> {
+
+// @TODO fix cargo flash on save https://github.com/neoclide/coc.nvim/issues/2698#issuecomment-742495347
+
+async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
+    format!("{}", push.action);
     Ok(HttpResponse::Ok())
 }
 
@@ -201,7 +207,7 @@ async fn from_webhook() -> Result<impl Responder, Box<dyn std::error::Error>> {
 pub async fn server() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(web::resource("webhook").wrap(VerifySignature).to(webhook))
+            .service(web::resource("webhook").to(webhook))
             .service(web::resource("register").to(read_contents_repo))
             .service(
                 web::resource("engaged")
