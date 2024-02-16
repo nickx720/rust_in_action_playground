@@ -1,8 +1,7 @@
 #![warn(clippy::all)]
 
-use error::return_error;
+use handle_errors::return_error;
 use warp::{http::Method, Filter};
-mod error;
 mod routes;
 mod store;
 mod types;
