@@ -8,6 +8,10 @@ mod types;
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+    log::error!("This is an error!");
+    log::info!("This is info");
+    log::warn!("This is warning");
     let store = store::Store::new();
     let store_filter = warp::any().map(move || store.clone());
 
