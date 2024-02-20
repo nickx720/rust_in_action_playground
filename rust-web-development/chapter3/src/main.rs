@@ -17,7 +17,7 @@ async fn main() {
 
     let log = warp::log::custom(|info| {
         //  Use a log macro, or slog, or println!(), or whatever;
-        eprint!(
+        log::info!(
             "{} {} {} {:?} from {} with {:?}",
             info.method(),
             info.path(),
