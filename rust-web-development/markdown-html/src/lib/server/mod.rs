@@ -195,8 +195,6 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     Ok(HttpResponse::Ok().json(contents))
 }
 
-// @TODO fix cargo flash on save https://github.com/neoclide/coc.nvim/issues/2698#issuecomment-742495347
-
 async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
     format!("{}", push.action);
