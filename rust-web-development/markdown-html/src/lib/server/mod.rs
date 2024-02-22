@@ -75,13 +75,14 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = format!("Bearer {}", bearer_token);
     let webhook_url = read_json_file("./docs/repo.json")?;
     for url in webhook_url {
+        dbg!(&url);
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let headers = generate_headers(&bearer_token);
         let sample = WebHookBuilder::new("web".to_string());
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://bf5c6bef0ab0a2.lhr.life/engaged".to_string())
+            .url("https://6fa1f69ab3f774.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
