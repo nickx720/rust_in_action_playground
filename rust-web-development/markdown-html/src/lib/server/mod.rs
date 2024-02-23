@@ -20,8 +20,6 @@ use self::webhook::RepoConfig;
 
 #[derive(Deserialize, Debug)]
 struct PushEvent {
-    #[serde(rename = "ref")]
-    reference: String,
     action: String,
 }
 struct VerifySignature;
@@ -75,14 +73,13 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
     let bearer_token = format!("Bearer {}", bearer_token);
     let webhook_url = read_json_file("./docs/repo.json")?;
     for url in webhook_url {
-        dbg!(&url);
         // https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
         let headers = generate_headers(&bearer_token);
         let sample = WebHookBuilder::new("web".to_string());
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://6fa1f69ab3f774.lhr.life/engaged".to_string())
+            .url("https://6596c920f5d6fa.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -196,10 +193,11 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
     Ok(HttpResponse::Ok().json(contents))
 }
 
+// @TODO figure out why post is not pushing to webhook
 async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
-    format!("{}", push.action);
-    Ok(HttpResponse::Ok())
+    dbg!(push);
+    Ok(HttpResponse::Ok().body("Hello world"))
 }
 
 #[actix_web::main]
@@ -211,7 +209,7 @@ pub async fn server() -> std::io::Result<()> {
             .service(
                 web::resource("engaged")
                     .wrap(VerifySignature)
-                    .to(from_webhook),
+                    .post(from_webhook),
             )
     })
     .bind(("127.0.0.1", 8080))?
