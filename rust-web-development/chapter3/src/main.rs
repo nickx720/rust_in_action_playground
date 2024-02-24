@@ -33,11 +33,13 @@ async fn main() {
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
+    let id_filter = warp::any().map(|| uuid::Uuid::new_v4().to_string());
     let get_questions = warp::get()
         .and(warp::path("questions"))
         .and(warp::path::end())
         .and(warp::query())
         .and(store_filter.clone())
+        .and(id_filter)
         .and_then(routes::question::get_questions);
 
     let update_question = warp::put()
