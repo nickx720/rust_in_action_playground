@@ -20,7 +20,7 @@ use self::webhook::RepoConfig;
 
 #[derive(Deserialize, Debug)]
 struct PushEvent {
-    action: String,
+    hook_id: String,
 }
 struct VerifySignature;
 
@@ -79,7 +79,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://6596c920f5d6fa.lhr.life/engaged".to_string())
+            .url("https://57d87875c50e75.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -196,7 +196,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
 // @TODO figure out why post is not pushing to webhook
 async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
-    dbg!(push);
+    dbg!(&push.hook_id);
     Ok(HttpResponse::Ok().body("Hello world"))
 }
 
@@ -209,7 +209,8 @@ pub async fn server() -> std::io::Result<()> {
             .service(
                 web::resource("engaged")
                     .wrap(VerifySignature)
-                    .post(from_webhook),
+                    .post()
+                    .to(from_webhook),
             )
     })
     .bind(("127.0.0.1", 8080))?
