@@ -17,9 +17,39 @@ use self::webhook::RepoConfig;
 // http://danielwelch.github.io/rust-web-service.html
 // https://actix.rs/docs/middleware
 // https://github.com/actix/examples/blob/master/middleware/request-extensions/src/main.rs
+#[derive(Deserialize, Debug)]
+struct Config {
+    content_type: String,
+    insecure_ssl: String,
+    url: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct LastResponse {
+    code: Option<i32>,
+    status: Option<String>,
+    message: Option<String>,
+}
+#[derive(Deserialize, Debug)]
+struct Hook {
+    active: bool,
+    config: Config,
+    created_at: String,
+    events: Vec<String>,
+    id: i32,
+    last_response: LastResponse,
+    name: String,
+    ping_url: String,
+    test_url: String,
+    #[serde(rename = "type")]
+    type_val: String,
+    url: String,
+}
 
 #[derive(Deserialize, Debug)]
 struct PushEvent {
+    hook: Hook,
+    hook_id: i32,
     zen: String,
 }
 struct VerifySignature;
@@ -79,7 +109,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://dff5bab5ac9394.lhr.life/engaged".to_string())
+            .url("https://0e56a883fa1d63.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -196,7 +226,7 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
 // @TODO figure out why post is not pushing to webhook
 async fn from_webhook(push: Json<PushEvent>) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!("Invoked via webhook");
-    dbg!(&push.zen);
+    dbg!(&push);
     Ok(HttpResponse::Ok().body("Hello world"))
 }
 
