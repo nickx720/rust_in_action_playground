@@ -52,6 +52,9 @@ struct PushEvent {
     hook_id: i32,
     zen: String,
 }
+
+#[derive(Deserialize, Debug)]
+struct PullRequest {}
 struct VerifySignature;
 
 impl<S, B> Transform<S, ServiceRequest> for VerifySignature
