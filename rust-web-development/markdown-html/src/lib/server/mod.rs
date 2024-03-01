@@ -54,7 +54,16 @@ struct PushEvent {
 }
 
 #[derive(Deserialize, Debug)]
-struct PullRequest {}
+struct PullRequest {
+    action: String,
+    enterprise: Enterprise,
+    installation: Installation,
+    number: i32,
+    organization: Organization,
+    pull_request: PullRequestObj,
+    repository: Repository,
+    sender: Sender,
+}
 struct VerifySignature;
 
 impl<S, B> Transform<S, ServiceRequest> for VerifySignature
