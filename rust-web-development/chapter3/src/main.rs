@@ -28,7 +28,9 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::query())
         .and(store_filter.clone())
-        .and_then(routes::question::get_questions);
+        .and_then(routes::question::get_questions).with(warp::trace(|info| {
+            tracing::info_span!("get questions request",method = %info.method(),path = %info.path(),id = %uuid::Uuid::new_v4())
+        }));
 
     let update_question = warp::put()
         .and(warp::path("questions"))
@@ -65,6 +67,7 @@ async fn main() {
         .or(add_answer)
         .or(delete_question)
         .with(cors)
+        .with(warp::trace::request())
         .recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
