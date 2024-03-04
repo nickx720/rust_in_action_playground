@@ -64,6 +64,21 @@ struct PullRequest {
     repository: Repository,
     sender: Sender,
 }
+
+#[derive(Deserialize, Debug)]
+struct Enterprise {}
+#[derive(Deserialize, Debug)]
+struct Installation {}
+#[derive(Deserialize, Debug)]
+struct Organization {}
+#[derive(Deserialize, Debug)]
+struct PullRequestObj {}
+
+#[derive(Deserialize, Debug)]
+struct Repository {}
+
+#[derive(Deserialize, Debug)]
+struct Sender {}
 struct VerifySignature;
 
 impl<S, B> Transform<S, ServiceRequest> for VerifySignature
