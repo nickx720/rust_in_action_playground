@@ -56,6 +56,7 @@ struct PushEvent {
 #[derive(Deserialize, Debug)]
 struct PullRequest {
     action: String,
+    assignee: Assignee,
     enterprise: Enterprise,
     installation: Installation,
     number: i32,
@@ -65,6 +66,30 @@ struct PullRequest {
     sender: Sender,
 }
 
+#[derive(Deserialize, Debug)]
+struct Assignee {
+    avatar_url: String,
+    deleted: bool,
+    email: Option<String>,
+    events_url: String,
+    followers_url: String,
+    following_url: String,
+    gists_url: String,
+    html_url: String,
+    id: i32,
+    login: String,
+    name: String,
+    node_id: String,
+    organizations_url: String,
+    received_events_url: String,
+    repos_url: String,
+    site_admin: bool,
+    starred_url: String,
+    subscriptions_url: String,
+    #[serde(rename = "type")]
+    type_val: String,
+    url: String,
+}
 #[derive(Deserialize, Debug)]
 struct Enterprise {}
 #[derive(Deserialize, Debug)]
