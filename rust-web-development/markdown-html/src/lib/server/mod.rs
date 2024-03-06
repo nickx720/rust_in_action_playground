@@ -57,9 +57,12 @@ struct PushEvent {
 struct PullRequest {
     action: String,
     assignee: Assignee,
+    #[serde(skip_serializing)]
     enterprise: Enterprise,
+    #[serde(skip_serializing)]
     installation: Installation,
     number: i32,
+    #[serde(skip_serializing)]
     organization: Organization,
     pull_request: PullRequestObj,
     repository: Repository,
@@ -96,9 +99,29 @@ struct Enterprise {}
 struct Installation {}
 #[derive(Deserialize, Debug)]
 struct Organization {}
-#[derive(Deserialize, Debug)]
-struct PullRequestObj {}
 
+// @TODO pull_request object
+#[derive(Deserialize, Debug)]
+struct PullRequestObj {
+    _links: Links,
+    commits: Commits,
+    html: Html,
+    issue: Issue,
+    review_comment: ReviewComment,
+    review_comments: ReviewComments,
+    #[serde(rename = "self")]
+    self_val: SelfStruct,
+    statuses: Statuses,
+}
+
+#[derive(Deserialize, Debug)]
+struct Links {
+    comments: Comments,
+}
+#[derive(Deserialize, Debug)]
+struct Comments {
+    href: String,
+}
 #[derive(Deserialize, Debug)]
 struct Repository {}
 
