@@ -100,18 +100,37 @@ struct Installation {}
 #[derive(Deserialize, Debug)]
 struct Organization {}
 
-// @TODO pull_request object
+// @TODO pull_request object for opened
+// https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=opened#pull_request
 #[derive(Deserialize, Debug)]
 struct PullRequestObj {
-    _links: Links,
-    commits: Commits,
-    html: Html,
-    issue: Issue,
-    review_comment: ReviewComment,
-    review_comments: ReviewComments,
-    #[serde(rename = "self")]
-    self_val: SelfStruct,
-    statuses: Statuses,
+    url: String,
+    id: i32,
+    node_id: String,
+    html_url: String,
+    diff_url: String,
+    patch_url: String,
+    issue_url: String,
+    commits_url: String,
+    review_comments_url: String,
+    review_comment_url: String,
+    comments_url: String,
+    statuses_url: String,
+    number: i32,
+    state: String,
+    locked: bool,
+    title: String,
+    user: User,
+    body: String,
+    labels: Vec<Labels>,
+    milestone: Milestone,
+    active_lock_reason: Option<String>,
+    created_at: String,
+    updated_at: String,
+    closed_at: Option<String>,
+    merged_at: Option<String>,
+    merge_commit_sha: Option<String>,
+    assignees: Assignees,
 }
 
 #[derive(Deserialize, Debug)]
