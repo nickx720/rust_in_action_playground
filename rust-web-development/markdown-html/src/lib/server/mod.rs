@@ -162,6 +162,36 @@ struct PullRequestObj {
     use_squash_pr_title_as_default: bool,
 }
 
+// Extend user
+#[derive(Deserialize, Debug)]
+struct User {
+    name: Option<String>,
+    email: Option<String>,
+    login: String,
+    id: i32,
+    node_id: String,
+    avatar_url: String,
+    gravatar_id: Option<String>,
+    url: String,
+    html_url: String,
+    followers_url: String,
+    following_url: String,
+    gists_url: String,
+    starred_url: String,
+    subscriptions_url: String,
+    organizations_url: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct Labels {
+    id: i32,
+    node_id: String,
+    url: String,
+    name: String,
+    description: Option<String>,
+    color: String,
+    default: bool,
+}
 #[derive(Deserialize, Debug)]
 struct Links {
     comments: Comments,
