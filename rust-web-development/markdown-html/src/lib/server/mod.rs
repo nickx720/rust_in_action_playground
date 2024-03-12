@@ -130,7 +130,7 @@ struct PullRequestObj {
     closed_at: Option<String>,
     merged_at: Option<String>,
     merge_commit_sha: Option<String>,
-    assignees: Assignees,
+    assignees: User,
     requested_reviewers: RequestedReviewers,
     requested_teams: RequestedTeams,
     head: Head,
@@ -161,8 +161,9 @@ struct PullRequestObj {
     squash_merge_commit_title: String,
     use_squash_pr_title_as_default: bool,
 }
-
-// Extend user
+// continue here
+#[derive(Deserialize, Debug)]
+struct Milestone {}
 #[derive(Deserialize, Debug)]
 struct User {
     name: Option<String>,
@@ -180,6 +181,13 @@ struct User {
     starred_url: String,
     subscriptions_url: String,
     organizations_url: String,
+    repos_url: String,
+    events_url: String,
+    received_events_url: String,
+    #[serde(rename = "type")]
+    type_val: String,
+    site_admin: bool,
+    starred_at: String,
 }
 
 #[derive(Deserialize, Debug)]
