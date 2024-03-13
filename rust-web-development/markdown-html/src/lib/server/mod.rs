@@ -161,9 +161,51 @@ struct PullRequestObj {
     squash_merge_commit_title: String,
     use_squash_pr_title_as_default: bool,
 }
-// continue here
 #[derive(Deserialize, Debug)]
-struct Milestone {}
+struct Milestone {
+    url: String,
+    html_url: String,
+    labels_url: String,
+    id: i32,
+    node_id: String,
+    number: i32,
+    state: String,
+    title: String,
+    description: Option<String>,
+    creator: Creator,
+    open_issues: i32,
+    closed_issues: i32,
+    created_at: String,
+    closed_at: Option<String>,
+    due_on: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Creator {
+    name: Option<String>,
+    email: Option<String>,
+    login: String,
+    id: i32,
+    node_id: String,
+    avatar_url: String,
+    gravatar_id: Option<String>,
+    url: String,
+    html_url: String,
+    followers_url: String,
+    following_url: String,
+    gists_url: String,
+    starred_url: String,
+    subscriptions_url: String,
+    organizations_url: String,
+    repos_url: String,
+    events_url: String,
+    received_events_url: String,
+    #[serde(rename = "type")]
+    type_val: String,
+    site_admin: bool,
+    starred_at: String,
+}
+
 #[derive(Deserialize, Debug)]
 struct User {
     name: Option<String>,
