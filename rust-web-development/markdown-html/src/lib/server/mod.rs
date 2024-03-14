@@ -131,7 +131,7 @@ struct PullRequestObj {
     merged_at: Option<String>,
     merge_commit_sha: Option<String>,
     assignees: User,
-    requested_reviewers: RequestedReviewers,
+    requested_reviewers: Creator,
     requested_teams: RequestedTeams,
     head: Head,
     base: Base,
@@ -252,6 +252,23 @@ struct Comments {
 }
 #[derive(Deserialize, Debug)]
 struct Repository {}
+
+#[derive(Deserialize, Debug)]
+struct RequestedTeams {
+    id: i32,
+    node_id: String,
+    url: String,
+    members_url: String,
+    name: String,
+    description: Option<String>,
+    permission: String,
+    privacy: String,
+    notification_setting: String,
+    html_url: String,
+    repositories_url: String,
+    slug: String,
+    ldap_dn: String,
+}
 
 #[derive(Deserialize, Debug)]
 struct Sender {}
