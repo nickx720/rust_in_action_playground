@@ -72,7 +72,6 @@ struct PullRequest {
 #[derive(Deserialize, Debug)]
 struct Assignee {
     avatar_url: String,
-    deleted: bool,
     email: Option<String>,
     events_url: String,
     followers_url: String,
@@ -83,11 +82,13 @@ struct Assignee {
     login: String,
     name: String,
     node_id: String,
+    gravatar_id: String,
     organizations_url: String,
     received_events_url: String,
     repos_url: String,
     site_admin: bool,
     starred_url: String,
+    starred_at: String,
     subscriptions_url: String,
     #[serde(rename = "type")]
     type_val: String,
@@ -172,38 +173,12 @@ struct Milestone {
     state: String,
     title: String,
     description: Option<String>,
-    creator: Creator,
+    creator: User,
     open_issues: i32,
     closed_issues: i32,
     created_at: String,
     closed_at: Option<String>,
     due_on: Option<String>,
-}
-
-#[derive(Deserialize, Debug)]
-struct Creator {
-    name: Option<String>,
-    email: Option<String>,
-    login: String,
-    id: i32,
-    node_id: String,
-    avatar_url: String,
-    gravatar_id: Option<String>,
-    url: String,
-    html_url: String,
-    followers_url: String,
-    following_url: String,
-    gists_url: String,
-    starred_url: String,
-    subscriptions_url: String,
-    organizations_url: String,
-    repos_url: String,
-    events_url: String,
-    received_events_url: String,
-    #[serde(rename = "type")]
-    type_val: String,
-    site_admin: bool,
-    starred_at: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -270,6 +245,15 @@ struct RequestedTeams {
     ldap_dn: String,
 }
 
+#[derive(Deserialize, Debug)]
+struct Head {
+    label: String,
+    #[serde(rename = "ref")]
+    ref_val: String,
+    repo: Option<String>,
+    sha: String,
+    user: User,
+}
 #[derive(Deserialize, Debug)]
 struct Sender {}
 struct VerifySignature;
