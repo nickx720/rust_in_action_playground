@@ -1,20 +1,16 @@
-//use crate::greeting::base_greeting_fn;
-
 use crate::calculate::{FirstName, LastName};
-//#[macro_use]
-//mod greeting;
 #[macro_use]
 mod calculate;
 struct Age {
-    value: String,
+    value: i32,
 }
 fn main() {
     generate_get_value!(FirstName, String);
-    generate_get_value!(Age, String);
-    let first = FirstName::new("John");
-    let value_of = first.unwrap().get_value().clone();
-    let age = Age::new("Cortanna");
-    let age_va = age.unwrap().get_value().clone();
+    generate_get_value!(Age, i32);
+    let first = FirstName::new("John".to_string());
+    let value_of = first.get_value().clone();
+    let age = Age::new(23);
+    let age_va = age.get_value().clone();
 
     dbg!(value_of);
     dbg!(age_va);

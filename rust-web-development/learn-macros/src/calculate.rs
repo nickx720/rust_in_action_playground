@@ -24,14 +24,8 @@ pub struct LastName {
 macro_rules! generate_get_value {
     ($struct_type:ident, $return_type: ty) => {
         impl $struct_type {
-            pub fn new(value: &str) -> Result<$struct_type, String> {
-                if value.len() < 2 {
-                    Err("Name should be atleast two characters".to_string())
-                } else {
-                    Ok($struct_type {
-                        value: value.to_string(),
-                    })
-                }
+            pub fn new(value: $return_type) -> Self {
+                $struct_type { value }
             }
             pub fn get_value(&self) -> &$return_type {
                 &self.value
