@@ -132,7 +132,7 @@ struct PullRequestObj {
     merged_at: Option<String>,
     merge_commit_sha: Option<String>,
     assignees: User,
-    requested_reviewers: Creator,
+    requested_reviewers: User,
     requested_teams: RequestedTeams,
     head: Head,
     base: Base,
