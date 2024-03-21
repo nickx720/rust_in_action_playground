@@ -134,8 +134,8 @@ struct PullRequestObj {
     assignees: User,
     requested_reviewers: User,
     requested_teams: RequestedTeams,
-    head: Head,
-    base: Base,
+    head: Head, // @TODO properties of repo
+    base: Head,
     _links: Links,
     author_association: String,
     auto_merge: Option<AutoMerge>,
