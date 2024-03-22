@@ -4,7 +4,7 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Launch Rust Debugger",
+      "name": "Launch Rust Debugger Spartan",
       "cargo": {
         "args": [
           "build",
