@@ -101,7 +101,7 @@ struct Installation {}
 #[derive(Deserialize, Debug)]
 struct Organization {}
 
-// @TODO pull_request object for opened
+// TODO pull_request object for opened
 // https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=opened#pull_request
 #[derive(Deserialize, Debug)]
 struct PullRequestObj {
@@ -143,9 +143,8 @@ struct PullRequestObj {
     merged: bool,
     mergeable: Option<bool>,
     rebaseable: Option<bool>,
-    rebaseable: Option<bool>,
     mergeable_state: String,
-    merged_by: MergedBy,
+    merged_by: User,
     comments: i32,
     review_comments: i32,
     maintainer_can_modify: bool,
@@ -228,6 +227,13 @@ struct Comments {
 #[derive(Deserialize, Debug)]
 struct Repository {}
 
+#[derive(Deserialize, Debug)]
+struct AutoMerge {
+    enabled_by: User,
+    merge_method: String,
+    commit_title: String,
+    commit_message: String,
+}
 #[derive(Deserialize, Debug)]
 struct RequestedTeams {
     id: i32,
