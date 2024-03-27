@@ -59,7 +59,6 @@ where
 
 // TODO On Githook push, generate new api endpoints
 // https://docs.github.com/en/rest/repos/webhooks?apiVersion=2022-11-28
-// Get list of webhooks,
 // Create webhook
 // https://andrewlock.net/using-ssh-and-localhost-run-to-test-github-webhooks-locally/
 // https://localhost.run/docs/
@@ -75,7 +74,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://0e56a883fa1d63.lhr.life/engaged".to_string())
+            .url("https://b4c53701ac60ee.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
