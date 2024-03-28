@@ -33,6 +33,8 @@ struct PushEvent {
     hook: Hook,
     hook_id: i32,
     zen: String,
+    #[serde(skip_serializing)]
+    repository: Repository,
 }
 
 #[derive(Deserialize, Debug)]
