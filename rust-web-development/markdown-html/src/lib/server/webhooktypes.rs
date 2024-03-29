@@ -39,8 +39,8 @@ struct PushEvent {
 
 #[derive(Deserialize, Debug)]
 pub enum GithubResponse {
-    PushEvent,
-    PullRequest,
+    PushEvent(PushEvent),
+    PullRequest(PullRequest),
 }
 
 #[derive(Deserialize, Debug)]
