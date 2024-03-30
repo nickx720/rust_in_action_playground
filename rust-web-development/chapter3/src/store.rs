@@ -1,4 +1,10 @@
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{
+    postgres::{PgPoolOptions, PgRow},
+    PgPool, Row,
+};
+
+use crate::types::question::{Question, QuestionId};
+use handle_errors::Error;
 
 #[derive(Debug, Clone)]
 pub struct Store {
@@ -17,6 +23,30 @@ impl Store {
         };
         Store {
             connection: db_pool,
+        }
+    }
+    pub async fn get_questsions(
+        &self,
+        limit: Option<u32>,
+        offset: u32,
+    ) -> Result<Vec<Question>, sqlx::Error> {
+        match sqlx::query("SELECT * FROM questions LIMIT $1 OFFSET $2")
+            .bind(limit)
+            .bind(offset)
+            .map(|row: PgRow| Question {
+                id: QuestionId(row.get("id")),
+                title: row.get("title"),
+                content: row.get("content"),
+                tags: row.get("tags"),
+            })
+            .fetch_all(&self.connection)
+            .await
+        {
+            Ok(questions) => Ok(questions),
+            Err(e) => {
+                tracing::event!(tracing::Level::ERROR, "{:?}", e);
+                Err(Error::DatabaseQueryError)
+            }
         }
     }
 }
