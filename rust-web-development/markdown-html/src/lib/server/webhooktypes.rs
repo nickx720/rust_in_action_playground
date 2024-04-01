@@ -1,19 +1,19 @@
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
-struct Config {
+pub struct Config {
     content_type: String,
     insecure_ssl: String,
     url: String,
 }
 
 #[derive(Deserialize, Debug)]
-struct LastResponse {
+pub struct LastResponse {
     code: Option<i32>,
     status: Option<String>,
     message: Option<String>,
 }
 #[derive(Deserialize, Debug)]
-struct Hook {
+pub struct Hook {
     active: bool,
     config: Config,
     created_at: String,
@@ -29,7 +29,7 @@ struct Hook {
 }
 
 #[derive(Deserialize, Debug)]
-struct PushEvent {
+pub struct PushEvent {
     hook: Hook,
     hook_id: i32,
     zen: String,
@@ -44,7 +44,7 @@ pub enum GithubResponse {
 }
 
 #[derive(Deserialize, Debug)]
-struct PullRequest {
+pub struct PullRequest {
     action: String,
     assignee: Assignee,
     #[serde(skip_serializing)]
@@ -60,7 +60,7 @@ struct PullRequest {
 }
 
 #[derive(Deserialize, Debug)]
-struct Assignee {
+pub struct Assignee {
     avatar_url: String,
     email: Option<String>,
     events_url: String,
@@ -85,16 +85,16 @@ struct Assignee {
     url: String,
 }
 #[derive(Deserialize, Debug)]
-struct Enterprise {}
+pub struct Enterprise {}
 #[derive(Deserialize, Debug)]
-struct Installation {}
+pub struct Installation {}
 #[derive(Deserialize, Debug)]
-struct Organization {}
+pub struct Organization {}
 
 // TODO pull_request object for opened
 // https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=opened#pull_request
 #[derive(Deserialize, Debug)]
-struct PullRequestObj {
+pub struct PullRequestObj {
     url: String,
     id: i32,
     node_id: String,
@@ -152,7 +152,7 @@ struct PullRequestObj {
     use_squash_pr_title_as_default: bool,
 }
 #[derive(Deserialize, Debug)]
-struct Milestone {
+pub struct Milestone {
     url: String,
     html_url: String,
     labels_url: String,
@@ -171,7 +171,7 @@ struct Milestone {
 }
 
 #[derive(Deserialize, Debug)]
-struct User {
+pub struct User {
     name: Option<String>,
     email: Option<String>,
     login: String,
@@ -197,7 +197,7 @@ struct User {
 }
 
 #[derive(Deserialize, Debug)]
-struct Labels {
+pub struct Labels {
     id: i32,
     node_id: String,
     url: String,
@@ -207,25 +207,25 @@ struct Labels {
     default: bool,
 }
 #[derive(Deserialize, Debug)]
-struct Links {
+pub struct Links {
     comments: Comments,
 }
 #[derive(Deserialize, Debug)]
-struct Comments {
+pub struct Comments {
     href: String,
 }
 #[derive(Deserialize, Debug)]
-struct Repository {}
+pub struct Repository {}
 
 #[derive(Deserialize, Debug)]
-struct AutoMerge {
+pub struct AutoMerge {
     enabled_by: User,
     merge_method: String,
     commit_title: String,
     commit_message: String,
 }
 #[derive(Deserialize, Debug)]
-struct RequestedTeams {
+pub struct RequestedTeams {
     id: i32,
     node_id: String,
     url: String,
@@ -242,7 +242,7 @@ struct RequestedTeams {
 }
 
 #[derive(Deserialize, Debug)]
-struct Head {
+pub struct Head {
     label: String,
     #[serde(rename = "ref")]
     ref_val: String,
@@ -251,4 +251,4 @@ struct Head {
     user: User,
 }
 #[derive(Deserialize, Debug)]
-struct Sender {}
+pub struct Sender {}
