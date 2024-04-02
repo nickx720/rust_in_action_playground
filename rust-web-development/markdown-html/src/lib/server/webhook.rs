@@ -8,22 +8,22 @@ use serde_json::{json, Value};
 #[derive(thiserror::Error, Debug)]
 pub enum WebHookError {
     #[error("Generic Error")]
-    InternalParseError(#[from] anyhow::Error),
+    InternalParse(#[from] anyhow::Error),
     #[error("Couldn't parse GITHUB_TOKEN")]
-    DotEnvError(#[from] dotenv::Error),
+    DotEnv(#[from] dotenv::Error),
     #[error("Couln't Fetch Data")]
-    GetError(#[from] reqwest::Error),
+    FetchFail(#[from] reqwest::Error),
     #[error("JSON Error")]
-    JSONError(#[from] ReadingJSONError),
+    JSONFail(#[from] ReadingJSONError),
 }
 
 impl ResponseError for WebHookError {
     fn status_code(&self) -> StatusCode {
         match &self {
-            Self::DotEnvError(_) => StatusCode::NOT_FOUND,
-            Self::InternalParseError(_) => StatusCode::NOT_FOUND,
-            Self::GetError(_) => StatusCode::FORBIDDEN,
-            Self::JSONError(_) => StatusCode::FORBIDDEN,
+            Self::DotEnv(_) => StatusCode::NOT_FOUND,
+            Self::InternalParse(_) => StatusCode::NOT_FOUND,
+            Self::FetchFail(_) => StatusCode::FORBIDDEN,
+            Self::JSONFail(_) => StatusCode::FORBIDDEN,
         }
     }
 
@@ -110,7 +110,7 @@ pub struct WebHookBuilder {
 impl WebHookBuilder {
     pub fn new(name: String) -> WebHookBuilder {
         WebHookBuilder {
-            name: name,
+            name,
             ..Default::default()
         }
     }
