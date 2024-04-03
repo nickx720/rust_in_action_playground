@@ -192,8 +192,14 @@ async fn read_contents_repo() -> Result<impl Responder, Box<dyn std::error::Erro
 async fn from_webhook(
     push: Json<GithubResponse>,
 ) -> Result<impl Responder, Box<dyn std::error::Error>> {
-    dbg!("Invoked via webhook");
-    dbg!("{}", push);
+    match push.0 {
+        GithubResponse::PushEvent(val) => {
+            dbg!(val);
+        }
+        GithubResponse::PullRequest(val) => {
+            dbg!(val);
+        }
+    }
     Ok(HttpResponse::Ok().body("Hello world"))
 }
 
