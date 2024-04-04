@@ -35,6 +35,7 @@ pub struct PushEvent {
     zen: String,
     #[serde(skip_serializing)]
     repository: Repository,
+    sender: Assignee,
 }
 
 #[derive(Deserialize, Debug)]
