@@ -1,31 +1,31 @@
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    content_type: String,
-    insecure_ssl: String,
-    url: String,
+    pub content_type: String,
+    pub insecure_ssl: String,
+    pub url: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct LastResponse {
-    code: Option<i32>,
-    status: Option<String>,
-    message: Option<String>,
+    pub code: Option<i32>,
+    pub status: Option<String>,
+    pub message: Option<String>,
 }
 #[derive(Deserialize, Debug)]
 pub struct Hook {
-    active: bool,
-    config: Config,
-    created_at: String,
-    events: Vec<String>,
-    id: i32,
-    last_response: LastResponse,
-    name: String,
-    ping_url: String,
-    test_url: String,
+    pub active: bool,
+    pub config: Config,
+    pub created_at: String,
+    pub events: Vec<String>,
+    pub id: i32,
+    pub last_response: LastResponse,
+    pub name: String,
+    pub ping_url: String,
+    pub test_url: String,
     #[serde(rename = "type")]
-    type_val: String,
-    url: String,
+    pub type_val: String,
+    pub url: String,
 }
 
 #[derive(Deserialize, Debug)]
