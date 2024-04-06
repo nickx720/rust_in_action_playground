@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-use tracing::{event, instrument,Level};
-use warp::http::StatusCode;
-use types::pagination::Pagination;
 use crate::store::Store;
 use crate::types::pagination::Pagination;
 use crate::types::question::{Question, QuestionId};
 use handle_errors::Error;
+use std::collections::HashMap;
+use tracing::{event, instrument, Level};
+use types::pagination::Pagination;
+use warp::http::StatusCode;
 
 #[instrument]
 pub async fn get_questions(
@@ -13,9 +13,23 @@ pub async fn get_questions(
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     event!(target: "practical_rust_book",Level::INFO,"querying questions");
-    if !params.is_empty(){
-// Continue
+    let mut pagination = Pagination::default();
+    if !params.is_empty() {
+        event!(Level::INFO, pagination = true);
+        pagination = extract_pagination(params)?;
+        info!(pagination = false);
+        let res: Vec<Question> = match store
+            .get_questions(pagination.limit, pagination.offset)
+        .await  {
+            Ok(res) => res,
+            Err(e) => {
+                return Err(warp::reject::custom(Error::DatabaseQueryError(e)
+                )),
+            },
+        };
+        Ok(warp::reply::json(&res))
     }
+
 }
 
 pub async fn update_question(
