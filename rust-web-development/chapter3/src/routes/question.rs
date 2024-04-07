@@ -1,10 +1,10 @@
 use crate::store::Store;
 use crate::types::pagination::Pagination;
-use crate::types::question::{Question, QuestionId};
+use crate::types::question::{NewQuestion, Question, QuestionId};
 use handle_errors::Error;
+use warp::reject::custom;
 use std::collections::HashMap;
 use tracing::{event, instrument, Level};
-use types::pagination::Pagination;
 use warp::http::StatusCode;
 
 #[instrument]
@@ -59,13 +59,10 @@ pub async fn delete_question(
 
 pub async fn add_question(
     store: Store,
-    question: Question,
+    new_question: NewQuestion,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    store
-        .questions
-        .write()
-        .await
-        .insert(question.clone().id, question);
-
+    if let Err(e) = store.add_question(new_question).await {
+        return Err(custom(Error::DatabaseQueryError(e)));
+    }
     Ok(warp::reply::with_status("Question added", StatusCode::OK))
 }
