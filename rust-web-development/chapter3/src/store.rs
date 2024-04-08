@@ -27,9 +27,9 @@ impl Store {
     }
     pub async fn get_questsions(
         &self,
-        limit: Option<u32>,
-        offset: u32,
-    ) -> Result<Vec<Question>, sqlx::Error> {
+        limit: Option<i32>,
+        offset: i32,
+    ) -> Result<Vec<Question>, Error> {
         match sqlx::query("SELECT * FROM questions LIMIT $1 OFFSET $2")
             .bind(limit)
             .bind(offset)
@@ -45,7 +45,7 @@ impl Store {
             Ok(questions) => Ok(questions),
             Err(e) => {
                 tracing::event!(tracing::Level::ERROR, "{:?}", e);
-                Err(Error::DatabaseQueryError)
+                Err(Error::DatabaseQueryError(e))
             }
         }
     }
