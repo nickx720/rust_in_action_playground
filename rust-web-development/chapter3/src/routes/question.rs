@@ -33,16 +33,16 @@ pub async fn get_questions(
 }
 
 pub async fn update_question(
-    id: String,
+    id: i32,
     store: Store,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match store.questions.write().await.get_mut(&QuestionId(id)) {
-        Some(q) => *q = question,
-        None => return Err(warp::reject::custom(Error::QuestionNotFound)),
-    }
+    let res = match store.update_question(question,id).await {
+        Ok(res) => res,
+Err(e) => return Err(warp::reject::custom(Error::DatabaseQueryError(e)))
+    };
 
-    Ok(warp::reply::with_status("Question updated", StatusCode::OK))
+    Ok(warp::reply::json(&res))
 }
 
 pub async fn delete_question(
