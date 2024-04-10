@@ -4,7 +4,6 @@ use sqlx::{
 };
 
 use crate::types::question::{NewQuestion, Question, QuestionId};
-use handle_errors::Error;
 
 #[derive(Debug, Clone)]
 pub struct Store {
@@ -25,11 +24,11 @@ impl Store {
             connection: db_pool,
         }
     }
-    pub async fn get_questsions(
+    pub async fn get_questions(
         &self,
         limit: Option<i32>,
         offset: i32,
-    ) -> Result<Vec<Question>, Error> {
+    ) -> Result<Vec<Question>, sqlx::Error> {
         match sqlx::query("SELECT * FROM questions LIMIT $1 OFFSET $2")
             .bind(limit)
             .bind(offset)
@@ -45,7 +44,7 @@ impl Store {
             Ok(questions) => Ok(questions),
             Err(e) => {
                 tracing::event!(tracing::Level::ERROR, "{:?}", e);
-                Err(Error::DatabaseQueryError(e))
+                Err(e)
             }
         }
     }
