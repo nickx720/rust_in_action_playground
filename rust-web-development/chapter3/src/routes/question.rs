@@ -1,11 +1,11 @@
 use crate::store::Store;
-use crate::types::pagination::Pagination;
+use crate::types::pagination::{extract_pagination, Pagination};
 use crate::types::question::{NewQuestion, Question, QuestionId};
 use handle_errors::Error;
-use warp::reject::custom;
 use std::collections::HashMap;
-use tracing::{event, instrument, Level};
+use tracing::{event, info, instrument, Level};
 use warp::http::StatusCode;
+use warp::reject::custom;
 
 #[instrument]
 pub async fn get_questions(
@@ -20,16 +20,15 @@ pub async fn get_questions(
         info!(pagination = false);
         let res: Vec<Question> = match store
             .get_questions(pagination.limit, pagination.offset)
-        .await  {
+            .await
+        {
             Ok(res) => res,
-            Err(e) => {
-                return Err(warp::reject::custom(Error::DatabaseQueryError(e)
-                )),
-            },
+            Err(e) => return Err(warp::reject::custom(Error::DatabaseQueryError(e))),
         };
-        Ok(warp::reply::json(&res))
+        return Ok(warp::reply::json(&res));
+    } else {
+        return Ok(warp::reply::json(&Vec::<u32>::new()));
     }
-
 }
 
 pub async fn update_question(
@@ -37,9 +36,9 @@ pub async fn update_question(
     store: Store,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let res = match store.update_question(question,id).await {
+    let res = match store.update_question(question, id).await {
         Ok(res) => res,
-Err(e) => return Err(warp::reject::custom(Error::DatabaseQueryError(e)))
+        Err(e) => return Err(warp::reject::custom(Error::DatabaseQueryError(e))),
     };
 
     Ok(warp::reply::json(&res))
