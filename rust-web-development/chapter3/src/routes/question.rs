@@ -44,16 +44,15 @@ pub async fn update_question(
     Ok(warp::reply::json(&res))
 }
 
-pub async fn delete_question(
-    id: String,
-    store: Store,
-) -> Result<impl warp::Reply, warp::Rejection> {
-    match store.questions.write().await.remove(&QuestionId(id)) {
-        Some(_) => (),
-        None => return Err(warp::reject::custom(Error::QuestionNotFound)),
+pub async fn delete_question(id: i32, store: Store) -> Result<impl warp::Reply, warp::Rejection> {
+    if let Err(e) = store.delete_question(id).await {
+        return Err(warp::reject::custom(Error::DatabaseQueryError(e)));
     }
 
-    Ok(warp::reply::with_status("Question deleted", StatusCode::OK))
+    Ok(warp::reply::with_status(
+        format!("Question {} deleted", id),
+        StatusCode::OK,
+    ))
 }
 
 pub async fn add_question(
