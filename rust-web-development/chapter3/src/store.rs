@@ -1,9 +1,13 @@
+use handle_errors::Error;
 use sqlx::{
     postgres::{PgPoolOptions, PgRow},
     PgPool, Row,
 };
 
-use crate::types::question::{NewQuestion, Question, QuestionId};
+use crate::types::{
+    answer::{Answer, NewAnswer},
+    question::{NewQuestion, Question, QuestionId},
+};
 
 #[derive(Debug, Clone)]
 pub struct Store {
@@ -86,5 +90,8 @@ impl Store {
             Ok(_) => Ok(true),
             Err(e) => Err(e),
         }
+    }
+    pub async fn add_answer(&self, new_answer: NewAnswer) -> Result<Answer, Error> {
+        todo!()
     }
 }
