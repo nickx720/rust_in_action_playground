@@ -56,6 +56,7 @@ pub struct PullRequest {
     #[serde(skip_serializing)]
     organization: Organization,
     pull_request: PullRequestObj,
+    #[serde(skip_serializing)]
     repository: Repository,
     sender: Sender,
 }
