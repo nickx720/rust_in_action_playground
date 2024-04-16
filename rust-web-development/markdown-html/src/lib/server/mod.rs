@@ -74,7 +74,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://b4c53701ac60ee.lhr.life/engaged".to_string())
+            .url("https://1aa76fba01540e.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -130,7 +130,7 @@ fn generate_headers(bearer_token: &String) -> header::HeaderMap {
     );
     headers.insert(
         header::AUTHORIZATION,
-        header::HeaderValue::from_str(&bearer_token).unwrap(),
+        header::HeaderValue::from_str(bearer_token).unwrap(),
     );
     headers.insert(
         "X-GitHub-Api-Version",
