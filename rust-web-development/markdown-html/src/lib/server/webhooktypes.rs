@@ -38,7 +38,10 @@ pub struct PushEvent {
     sender: Assignee,
 }
 
+// https://serde.rs/enum-representations.html#untagged
+
 #[derive(Deserialize, Debug)]
+#[serde(untagged)]
 pub enum GithubResponse {
     PushEvent(PushEvent),
     PullRequest(PullRequest),
