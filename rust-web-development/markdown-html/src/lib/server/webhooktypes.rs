@@ -1,18 +1,18 @@
 use serde::Deserialize;
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Config {
     pub content_type: String,
     pub insecure_ssl: String,
     pub url: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct LastResponse {
     pub code: Option<i32>,
     pub status: Option<String>,
     pub message: Option<String>,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Hook {
     pub active: bool,
     pub config: Config,
@@ -28,12 +28,12 @@ pub struct Hook {
     pub url: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct PushEvent {
     hook: Hook,
     hook_id: i32,
     zen: String,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     repository: Repository,
     sender: Assignee,
 }
@@ -47,24 +47,24 @@ pub enum GithubResponse {
     PullRequest(PullRequest),
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct PullRequest {
     action: String,
     assignee: Assignee,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     enterprise: Enterprise,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     installation: Installation,
     number: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     organization: Organization,
     pull_request: PullRequestObj,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     repository: Repository,
     sender: Sender,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Assignee {
     avatar_url: String,
     email: Option<String>,
@@ -89,16 +89,16 @@ pub struct Assignee {
     type_val: String,
     url: String,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Enterprise {}
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Installation {}
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Organization {}
 
 // TODO pull_request object for opened
 // https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=opened#pull_request
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct PullRequestObj {
     url: String,
     id: i32,
@@ -156,7 +156,7 @@ pub struct PullRequestObj {
     squash_merge_commit_title: String,
     use_squash_pr_title_as_default: bool,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Milestone {
     url: String,
     html_url: String,
@@ -175,7 +175,7 @@ pub struct Milestone {
     due_on: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct User {
     name: Option<String>,
     email: Option<String>,
@@ -201,7 +201,7 @@ pub struct User {
     starred_at: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Labels {
     id: i32,
     node_id: String,
@@ -211,25 +211,25 @@ pub struct Labels {
     color: String,
     default: bool,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Links {
     comments: Comments,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Comments {
     href: String,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Repository {}
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct AutoMerge {
     enabled_by: User,
     merge_method: String,
     commit_title: String,
     commit_message: String,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct RequestedTeams {
     id: i32,
     node_id: String,
@@ -246,7 +246,7 @@ pub struct RequestedTeams {
     ldap_dn: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Head {
     label: String,
     #[serde(rename = "ref")]
@@ -255,5 +255,5 @@ pub struct Head {
     sha: String,
     user: User,
 }
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct Sender {}
