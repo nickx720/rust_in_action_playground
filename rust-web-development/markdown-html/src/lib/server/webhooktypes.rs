@@ -203,13 +203,13 @@ pub struct User {
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Labels {
-    id: i32,
-    node_id: String,
-    url: String,
-    name: String,
-    description: Option<String>,
-    color: String,
-    default: bool,
+    pub id: i32,
+    pub node_id: String,
+    pub url: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub color: String,
+    pub default: bool,
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Links {
