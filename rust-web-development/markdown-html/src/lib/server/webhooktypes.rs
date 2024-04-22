@@ -213,7 +213,7 @@ pub struct Labels {
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Links {
-    comments: Comments,
+    pub comments: Comments,
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Comments {
