@@ -217,7 +217,7 @@ pub struct Links {
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Comments {
-    href: String,
+    pub href: String,
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Repository {}
