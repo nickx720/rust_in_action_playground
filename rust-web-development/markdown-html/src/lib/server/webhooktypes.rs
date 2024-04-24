@@ -224,10 +224,10 @@ pub struct Repository {}
 
 #[derive(Deserialize, Default, Debug)]
 pub struct AutoMerge {
-    enabled_by: User,
-    merge_method: String,
-    commit_title: String,
-    commit_message: String,
+    pub enabled_by: User,
+    pub merge_method: String,
+    pub commit_title: String,
+    pub commit_message: String,
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct RequestedTeams {
