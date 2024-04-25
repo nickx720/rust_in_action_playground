@@ -231,19 +231,19 @@ pub struct AutoMerge {
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct RequestedTeams {
-    id: i32,
-    node_id: String,
-    url: String,
-    members_url: String,
-    name: String,
-    description: Option<String>,
-    permission: String,
-    privacy: String,
-    notification_setting: String,
-    html_url: String,
-    repositories_url: String,
-    slug: String,
-    ldap_dn: String,
+    pub id: i32,
+    pub node_id: String,
+    pub url: String,
+    pub members_url: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub permission: String,
+    pub privacy: String,
+    pub notification_setting: String,
+    pub html_url: String,
+    pub repositories_url: String,
+    pub slug: String,
+    pub ldap_dn: String,
 }
 
 #[derive(Deserialize, Default, Debug)]
