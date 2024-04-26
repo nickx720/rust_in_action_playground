@@ -248,12 +248,12 @@ pub struct RequestedTeams {
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Head {
-    label: String,
+    pub label: String,
     #[serde(rename = "ref")]
-    ref_val: String,
-    repo: Option<String>,
-    sha: String,
-    user: User,
+    pub ref_val: String,
+    pub repo: Option<String>,
+    pub sha: String,
+    pub user: User,
 }
 #[derive(Deserialize, Default, Debug)]
 pub struct Sender {}
