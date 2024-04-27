@@ -1,3 +1,4 @@
+## Remember to uninstall sqlx-cli using cargo , only installed it for this book
 Setup for db
 
 create table if not exists answers(id serial primary key, content text not null, created_on timestamp not null default now(), corresponding_question integer references questions);
