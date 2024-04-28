@@ -11,9 +11,13 @@ mod types;
 #[tokio::main]
 async fn main() {
     let log_filter = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "practical_rust_book=info,warp=error".to_owned());
+        .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=info,warp=error".to_owned());
     let store =
         store::Store::new("postgres://postgres:mysecretpassword@localhost:5432/postgres").await;
+    sqlx::migrate!()
+        .run(&store.clone().connection)
+        .await
+        .expect("Cannot run migration");
     let store_filter = warp::any().map(move || store.clone());
 
     let cors = warp::cors()
