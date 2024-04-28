@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS questions (
   title VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
   tags TEXT [],
-  created_on TIMESTAP NOT NULL DEFAULT NOW()
+  created_on TIMESTAMP NOT NULL DEFAULT NOW()
 );
