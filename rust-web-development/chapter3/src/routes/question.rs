@@ -2,9 +2,9 @@ use crate::store::Store;
 use crate::types::pagination::{extract_pagination, Pagination};
 use crate::types::question::{NewQuestion, Question, QuestionId};
 use std::collections::HashMap;
+use reqwest::Client;
 use tracing::{event, info, instrument, Level};
 use warp::http::StatusCode;
-use warp::reject::custom;
 
 #[instrument]
 pub async fn get_questions(
@@ -58,6 +58,9 @@ pub async fn add_question(
     store: Store,
     new_question: NewQuestion,
 ) -> Result<impl warp::Reply, warp::Rejection> {
+    let client = reqwest()::Client::new();
+    let res = client.post("https://api.apiplayer.com/bad_words?censor_character=*").header("apikey","xxxxx").body("a list with shit words").send().await?.text().await?;
+    println!("{}",res);
     if let Err(e) = store.add_question(new_question).await {
         return Err(warp::reject::custom(e));
     }
