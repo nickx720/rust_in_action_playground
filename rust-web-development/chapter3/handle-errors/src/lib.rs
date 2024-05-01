@@ -5,6 +5,8 @@ use warp::{
     Rejection, Reply,
 };
 
+use reqwest::Error as ReqwestError;
+
 use tracing::{event, instrument, Level};
 
 #[derive(Debug)]
@@ -12,15 +14,19 @@ pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     DatabaseQueryError,
+    ExternalAPIError(ReqwestError),
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match *self {
+        match &*self {
             Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
             Error::MissingParameters => write!(f, "Missing parameter"),
             Error::DatabaseQueryError => {
                 write!(f, "Cannot updaqte,invalid data.")
+            }
+            Error::ExternalAPIError(err) => {
+                write!(f, "Cannot execute, {}", err)
             }
         }
     }
@@ -37,6 +43,8 @@ pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
             crate::Error::DatabaseQueryError.to_string(),
             StatusCode::UNPROCESSABLE_ENTITY,
         ))
+    } else if let Some(crate::Error::ExternalAPIError(e)) = r.find() {
+        todo!()
     } else if let Some(error) = r.find::<Error>() {
         Ok(warp::reply::with_status(
             error.to_string(),
