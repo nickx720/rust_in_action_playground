@@ -1,7 +1,6 @@
 use crate::store::Store;
 use crate::types::pagination::{extract_pagination, Pagination};
-use crate::types::question::{NewQuestion, Question, QuestionId};
-use reqwest::Client;
+use crate::types::question::{NewQuestion, Question};
 use std::collections::HashMap;
 use tracing::{event, info, instrument, Level};
 use warp::http::StatusCode;
@@ -64,12 +63,14 @@ pub async fn add_question(
         .header("apikey", "xxxxx")
         .body("a list with shit words")
         .send()
-        .await?
+        .await
+        .map_err(handle_errors::Error::ExternalAPIError)?
         .text()
-        .await?;
+        .await
+        .map_err(handle_errors::Error::ExternalAPIError)?;
     println!("{}", res);
-    if let Err(e) = store.add_question(new_question).await {
-        return Err(warp::reject::custom(e));
+    match store.add_question(new_question).await {
+        Ok(_) => Ok(warp::reply::with_status("Question added", StatusCode::OK)),
+        Err(e) => Err(warp::reject::custom(e)),
     }
-    Ok(warp::reply::with_status("Question added", StatusCode::OK))
 }
