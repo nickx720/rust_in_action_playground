@@ -64,13 +64,21 @@ pub async fn add_question(
         .body("a list with shit words")
         .send()
         .await
-        .map_err(handle_errors::Error::ExternalAPIError)?
-        .text()
-        .await
         .map_err(handle_errors::Error::ExternalAPIError)?;
-    println!("{}", res);
-    match store.add_question(new_question).await {
-        Ok(_) => Ok(warp::reply::with_status("Question added", StatusCode::OK)),
-        Err(e) => Err(warp::reject::custom(e)),
+    match res.error_for_status() {
+        Ok(res) => {
+            let res = res
+                .text()
+                .await
+                .map_err(handle_errors::Error::ExternalAPIError)?;
+            println!("{}", res);
+            match store.add_question(new_question).await {
+                Ok(_) => Ok(warp::reply::with_status("Question added", StatusCode::OK)),
+                Err(e) => Err(warp::reject::custom(e)),
+            }
+        }
+        Err(e) => Err(warp::reject::custom(
+            handle_errors::Error::ExternalAPIError(e),
+        )),
     }
 }
