@@ -194,10 +194,10 @@ async fn from_webhook(
 ) -> Result<impl Responder, Box<dyn std::error::Error>> {
     dbg!(&push);
     match push.0 {
-        GithubResponse::PushEvent(val) => {
+        GithubResponse::Ping(val) => {
             dbg!(val);
         }
-        GithubResponse::PullRequest(val) => {
+        GithubResponse::Push(val) => {
             dbg!(val);
         }
     }
