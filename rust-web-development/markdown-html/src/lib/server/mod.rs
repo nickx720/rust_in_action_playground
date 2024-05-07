@@ -74,7 +74,7 @@ async fn webhook() -> Result<impl Responder, WebHookError> {
         let webhook_input = sample
             .active(true)
             .events(vec!["push".to_string(), "pull_request".to_string()])
-            .url("https://0fac28382ef253.lhr.life/engaged".to_string())
+            .url("https://4d2573bc4eec36.lhr.life/engaged".to_string())
             .content_type("json".to_string())
             .insecure_ssl(0.to_string())
             .builder()
@@ -197,9 +197,11 @@ async fn from_webhook(
         GithubResponse::Ping(val) => {
             dbg!(val);
         }
+
         GithubResponse::Push(val) => {
             dbg!(val);
         }
+
     }
     Ok(HttpResponse::Ok().body("Hello world"))
 }
