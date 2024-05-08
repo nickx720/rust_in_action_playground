@@ -201,7 +201,9 @@ async fn from_webhook(
         GithubResponse::Push(val) => {
             dbg!(val);
         }
-
+        GithubResponse::PullRequestOpened(val) => {
+            dbg!(val);
+        }
     }
     Ok(HttpResponse::Ok().body("Hello world"))
 }
