@@ -294,7 +294,7 @@ pub struct Push {
     pub ref_field: String,
     pub before: String,
     pub after: String,
-    pub repository: Repository,
+    pub repository: RepositoryPush,
     pub pusher: Pusher,
     pub sender: Sender,
     pub created: bool,
@@ -310,7 +310,7 @@ pub struct Push {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Repository {
+pub struct RepositoryPush {
     pub id: i64,
     #[serde(rename = "node_id")]
     pub node_id: String,
