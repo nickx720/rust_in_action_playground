@@ -701,46 +701,8 @@ pub struct Head {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User2,
+    pub user: User,
     pub repo: Repo,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User2 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -918,46 +880,8 @@ pub struct Base {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User3,
+    pub user: User,
     pub repo: Repo2,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User3 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -970,7 +894,7 @@ pub struct Repo2 {
     #[serde(rename = "full_name")]
     pub full_name: String,
     pub private: bool,
-    pub owner: Owner2,
+    pub owner: Owner,
     #[serde(rename = "html_url")]
     pub html_url: String,
     pub description: Value,
@@ -1126,44 +1050,6 @@ pub struct Repo2 {
     pub merge_commit_message: String,
     #[serde(rename = "merge_commit_title")]
     pub merge_commit_title: String,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Owner2 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -1367,46 +1253,8 @@ pub struct Head {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User2,
+    pub user: User,
     pub repo: Repo,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User2 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -1622,62 +1470,8 @@ pub struct Base {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User3,
+    pub user: User,
     pub repo: Repo2,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User3 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Links {
-    #[serde(rename = "self")]
-    pub self_field: Self_field,
-    pub html: Html,
-    pub issue: Issue,
-    pub comments: Comments,
-    #[serde(rename = "review_comments")]
-    pub review_comments: ReviewComments,
-    #[serde(rename = "review_comment")]
-    pub review_comment: ReviewComment,
-    pub commits: Commits,
-    pub statuses: Statuses,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -2088,46 +1882,8 @@ pub struct Head {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User2,
+    pub user: User,
     pub repo: Repo,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User2 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -2343,62 +2099,8 @@ pub struct Base {
     #[serde(rename = "ref")]
     pub ref_field: String,
     pub sha: String,
-    pub user: User3,
+    pub user: User,
     pub repo: Repo2,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct User3 {
-    pub login: String,
-    pub id: i64,
-    #[serde(rename = "node_id")]
-    pub node_id: String,
-    #[serde(rename = "avatar_url")]
-    pub avatar_url: String,
-    #[serde(rename = "gravatar_id")]
-    pub gravatar_id: String,
-    pub url: String,
-    #[serde(rename = "html_url")]
-    pub html_url: String,
-    #[serde(rename = "followers_url")]
-    pub followers_url: String,
-    #[serde(rename = "following_url")]
-    pub following_url: String,
-    #[serde(rename = "gists_url")]
-    pub gists_url: String,
-    #[serde(rename = "starred_url")]
-    pub starred_url: String,
-    #[serde(rename = "subscriptions_url")]
-    pub subscriptions_url: String,
-    #[serde(rename = "organizations_url")]
-    pub organizations_url: String,
-    #[serde(rename = "repos_url")]
-    pub repos_url: String,
-    #[serde(rename = "events_url")]
-    pub events_url: String,
-    #[serde(rename = "received_events_url")]
-    pub received_events_url: String,
-    #[serde(rename = "type")]
-    pub type_field: String,
-    #[serde(rename = "site_admin")]
-    pub site_admin: bool,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Links {
-    #[serde(rename = "self")]
-    pub self_field: Self_field,
-    pub html: Html,
-    pub issue: Issue,
-    pub comments: Comments,
-    #[serde(rename = "review_comments")]
-    pub review_comments: ReviewComments,
-    #[serde(rename = "review_comment")]
-    pub review_comment: ReviewComment,
-    pub commits: Commits,
-    pub statuses: Statuses,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
