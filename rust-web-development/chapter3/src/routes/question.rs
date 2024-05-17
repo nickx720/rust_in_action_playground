@@ -83,7 +83,7 @@ pub async fn add_question(
     let client = reqwest::Client::new();
     let res = client
         .post("https://api.apiplayer.com/bad_words?censor_character=*")
-        .header("apikey", "xxxxx")
+        .header("apikey", "xxxx")
         .body("a list with shit words")
         .send()
         .await
