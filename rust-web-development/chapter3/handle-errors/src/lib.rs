@@ -15,6 +15,20 @@ pub enum Error {
     MissingParameters,
     DatabaseQueryError,
     ExternalAPIError(ReqwestError),
+    ClientError(APILayerError),
+    ServerError(APILayerError),
+}
+
+#[derive(Debug, Clone)]
+pub struct APILayerError {
+    pub status: u16,
+    pub message: String,
+}
+
+impl std::fmt::Display for APILayerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Status: {}, Message {}", self.status, self.message)
+    }
 }
 
 impl std::fmt::Display for Error {
@@ -28,11 +42,18 @@ impl std::fmt::Display for Error {
             Error::ExternalAPIError(err) => {
                 write!(f, "Cannot execute, {}", err)
             }
+            Error::ClientError(err) => {
+                write!(f, "External Client Error : {}", err)
+            }
+            Error::ServerError(err) => {
+                write!(f, "External Server Error : {}", err)
+            }
         }
     }
 }
 
 impl Reject for Error {}
+impl Reject for APILayerError {}
 
 #[instrument]
 pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
