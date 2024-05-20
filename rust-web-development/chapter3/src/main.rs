@@ -4,6 +4,7 @@ use handle_errors::return_error;
 use warp::{http::Method, Filter};
 
 use tracing_subscriber::fmt::format::FmtSpan;
+mod profanity;
 mod routes;
 mod store;
 mod types;
