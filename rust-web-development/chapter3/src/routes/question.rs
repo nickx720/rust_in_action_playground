@@ -1,3 +1,4 @@
+use crate::profanity::check_profanity;
 use crate::store::Store;
 use crate::types::pagination::{extract_pagination, Pagination};
 use crate::types::question::{NewQuestion, Question};
@@ -57,9 +58,16 @@ pub async fn add_question(
     store: Store,
     new_question: NewQuestion,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let content = res.censored_content;
+    let title = match check_profanity(new_question.title).await {
+        Ok(res) => res,
+        Err(e) => return Err(warp::reject::custom(e)),
+    };
+    let content = match check_profanity(new_question.content).await {
+        Ok(res) => res,
+        Err(e) => return Err(warp::reject::custom(e)),
+    };
     let question = NewQuestion {
-        title: new_question.title,
+        title,
         content,
         tags: new_question.tags,
     };
