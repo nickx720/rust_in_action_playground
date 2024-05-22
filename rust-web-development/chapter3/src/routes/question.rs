@@ -35,6 +35,20 @@ pub async fn update_question(
     store: Store,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
+    let title = match check_profanity(question.title).await {
+        Ok(res) => res,
+        Err(e) => return Err(warp::reject::custom(e)),
+    };
+    let content = match check_profanity(question.content).await {
+        Ok(res) => res,
+        Err(e) => return Err(warp::reject::custom(e)),
+    };
+    let question = Question {
+        id: question.id,
+        title,
+        content,
+        tags: question.tags,
+    };
     let res = match store.update_question(question, id).await {
         Ok(res) => res,
         Err(e) => return Err(warp::reject::custom(e)),
