@@ -36,7 +36,7 @@ pub async fn check_profanity(content: String) -> Result<String, handle_errors::E
         .body("a list with shit words")
         .send()
         .await
-        .map_err(handle_errors::Error::ExternalAPIError)?;
+        .map_err(handle_errors::Error::MiddlewareReqwestAPIError)?;
     if !res.status().is_success() {
         if res.status().is_client_error() {
             let err = transform_error(res).await;
@@ -48,7 +48,7 @@ pub async fn check_profanity(content: String) -> Result<String, handle_errors::E
     }
     match res.json::<BadWordsResponse>().await {
         Ok(res) => Ok(res.censored_content),
-        Err(e) => Err(handle_errors::Error::ExternalAPIError(e)),
+        Err(e) => Err(handle_errors::Error::ReqwestAPIError(e)),
     }
 }
 async fn transform_error(res: reqwest::Response) -> handle_errors::APILayerError {
