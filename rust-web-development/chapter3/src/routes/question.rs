@@ -35,26 +35,25 @@ pub async fn update_question(
     store: Store,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let title = match check_profanity(question.title).await {
-        Ok(res) => res,
-        Err(e) => return Err(warp::reject::custom(e)),
-    };
-    let content = match check_profanity(question.content).await {
-        Ok(res) => res,
-        Err(e) => return Err(warp::reject::custom(e)),
-    };
+    let title = check_profanity(question.title);
+    let content = check_profanity(question.content);
+    let (title, content) = tokio::join!(title, content);
+    if title.is_err() {
+        return Err(warp::reject::custom(title.unwrap_err()));
+    }
+    if content.is_err() {
+        return Err(warp::reject::custom(title.unwrap_err()));
+    }
     let question = Question {
         id: question.id,
-        title,
-        content,
+        title: title.unwrap(),
+        content: content.unwrap(),
         tags: question.tags,
     };
-    let res = match store.update_question(question, id).await {
-        Ok(res) => res,
-        Err(e) => return Err(warp::reject::custom(e)),
-    };
-
-    Ok(warp::reply::json(&res))
+    match store.update_question(question, id).await {
+        Ok(res) => Ok(warp::reply::json(&res)),
+        Err(e) => Err(warp::reject::custom(e)),
+    }
 }
 
 pub async fn delete_question(id: i32, store: Store) -> Result<impl warp::Reply, warp::Rejection> {
