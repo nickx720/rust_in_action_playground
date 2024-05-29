@@ -5,6 +5,7 @@ use sqlx::{
 };
 
 use crate::types::{
+    account::Account,
     answer::{Answer, AnswerId, NewAnswer},
     question::{NewQuestion, Question, QuestionId},
 };
@@ -116,6 +117,31 @@ impl Store {
             Ok(answer) => Ok(answer),
             Err(e) => {
                 tracing::event!(tracing::Level::ERROR, "{:?}", e);
+                Err(Error::DatabaseQueryError)
+            }
+        }
+    }
+    pub async fn add_account(self, account: Account) -> Result<bool, Error> {
+        match sqlx::query("INSERT INTO accounts (email, password) VALUES($1, $2)")
+            .bind(account.email)
+            .bind(account.password)
+            .execute(&self.connection)
+            .await
+        {
+            Ok(_) => Ok(true),
+            Err(error) => {
+                tracing::event!(
+                    tracing::Level::ERROR,
+                    code = error
+                        .as_database_error()
+                        .unwrap()
+                        .code()
+                        .unwrap()
+                        .parse::<i32>()
+                        .unwrap(),
+                    db_message = error.as_database_error().unwrap().message(),
+                    constraint = error.as_database_error().unwrap().constraint().unwrap()
+                );
                 Err(Error::DatabaseQueryError)
             }
         }
