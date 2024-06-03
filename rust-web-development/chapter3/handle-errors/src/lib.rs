@@ -38,7 +38,7 @@ impl std::fmt::Display for Error {
             Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
             Error::MissingParameters => write!(f, "Missing parameter"),
             Error::DatabaseQueryError(_) => {
-                write!(f, "Cannot updaqte,invalid data.")
+                write!(f, "Cannot update,invalid data.")
             }
             Error::ReqwestAPIError(err) => {
                 write!(f, "External API error, {}", err)
@@ -56,7 +56,7 @@ impl std::fmt::Display for Error {
     }
 }
 
-const DUPLICATE_KEY: u32 = 23305;
+const DUPLICATE_KEY: u32 = 23505;
 impl Reject for Error {}
 impl Reject for APILayerError {}
 
