@@ -4,6 +4,10 @@ use argon2::{self, Config};
 use rand::Rng;
 use warp::http::StatusCode;
 
+pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
+    todo!()
+}
+
 pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply, warp::Rejection> {
     let hashed_password = hash_password(account.password.as_bytes());
     let account = Account {
