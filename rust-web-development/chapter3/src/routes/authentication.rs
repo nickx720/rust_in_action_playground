@@ -1,5 +1,5 @@
-use crate::store::Store;
 use crate::types::account::Account;
+use crate::{store::Store, types::account::AccountId};
 use argon2::{self, Config};
 use rand::Rng;
 use warp::http::StatusCode;
@@ -25,6 +25,10 @@ pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, war
 }
 
 fn verify_password(hash: &str, password: &[u8]) -> Result<bool, argon2::Error> {
+    argon2::verify_encoded(hash, password)
+}
+
+fn issue_token(account_id: AccountId) -> String {
     todo!()
 }
 
