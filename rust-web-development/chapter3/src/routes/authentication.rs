@@ -29,7 +29,9 @@ fn verify_password(hash: &str, password: &[u8]) -> Result<bool, argon2::Error> {
 }
 
 fn issue_token(account_id: AccountId) -> String {
-    todo!()
+    let state = serde_json::to_string(&account_id).expect("Failed to serialize state");
+    local_paesto(&state, None, " RANDOM WORDS WINTER MACINTOSH PC".as_bytes())
+        .expect("Failed to create token")
 }
 
 pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply, warp::Rejection> {
