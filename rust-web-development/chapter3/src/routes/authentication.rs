@@ -1,4 +1,4 @@
-use crate::types::account::Account;
+use crate::types::account::{Account, Session};
 use crate::{store::Store, types::account::AccountId};
 use argon2::{self, Config};
 use chrono::prelude::*;
@@ -40,6 +40,17 @@ fn issue_token(account_id: AccountId) -> String {
         .set_claim("account_id", serde_json::json!(account_id))
         .build()
         .expect("Failed to construct paseto token w/ builder!")
+}
+
+pub fn verify_token(token: String) -> Result<Session, handle_errors::Error> {
+    let token = paseto::tokens::validate_local_token(
+        &token,
+        None,
+        &"RANDOM WORDS WINTER MACINTOSH PC".as_bytes(),
+        &paseto::tokens::TimeBackend::Chrono,
+    )
+    .map_err(|_| handle_errors::Error::CannotDecryptToken)?;
+    serde_json::from_value::<Session>(token).map_err(|_| handle_errors::Error::CannotDecryptToken)
 }
 
 pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply, warp::Rejection> {
