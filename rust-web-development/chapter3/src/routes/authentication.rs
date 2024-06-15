@@ -1,9 +1,12 @@
+use std::future;
+
 use crate::types::account::{Account, Session};
 use crate::{store::Store, types::account::AccountId};
 use argon2::{self, Config};
 use chrono::prelude::*;
 use rand::Rng;
 use warp::http::StatusCode;
+use warp::{Error, Filter};
 
 pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
     match store.get_account(login.email).await {
@@ -70,4 +73,14 @@ pub fn hash_password(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
     argon2::hash_encoded(password, &salt, &config).expect("Hash failed")
+}
+
+pub fn auth() -> impl Filter<Extract = (Session,), Error = warp::Rejection> + Clone {
+    warp::header::<String>("Authorization").and_then(|token: String| {
+        let token = match verify_token(token) {
+            Ok(t) => t,
+            Err(_) => return future::ready(Err(warp::reject::reject())),
+        };
+        future::ready(Ok(token))
+    })
 }
