@@ -1,5 +1,6 @@
 use crate::profanity::check_profanity;
 use crate::store::Store;
+use crate::types::account::Session;
 use crate::types::pagination::{extract_pagination, Pagination};
 use crate::types::question::{NewQuestion, Question};
 use std::collections::HashMap;
@@ -32,6 +33,7 @@ pub async fn get_questions(
 
 pub async fn update_question(
     id: i32,
+    session: Session,
     store: Store,
     question: Question,
 ) -> Result<impl warp::Reply, warp::Rejection> {
