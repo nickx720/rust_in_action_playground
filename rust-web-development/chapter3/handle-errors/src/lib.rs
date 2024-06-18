@@ -15,6 +15,8 @@ pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     WrongPassword,
+    CannotDecryptToken,
+    Unauthorized,
     ArgonLibraryError(ArgonError),
     DatabaseQueryError(sqlx::Error),
     ReqwestAPIError(ReqwestError),
@@ -42,6 +44,12 @@ impl std::fmt::Display for Error {
             Error::MissingParameters => write!(f, "Missing parameter"),
             Error::WrongPassword => {
                 write!(f, "Wrong password")
+            }
+            Error::CannotDecryptToken => {
+                write!(f, "Cannot decrypt error")
+            }
+            Error::Unauthorized => {
+                write!(f, "No permission to change the underlying response")
             }
             Error::ArgonLibraryError(_) => {
                 write!(f, "Cannot verify password")

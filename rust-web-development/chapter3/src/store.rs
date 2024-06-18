@@ -75,8 +75,9 @@ impl Store {
         &self,
         question: Question,
         question_id: i32,
+        account_id: AccountId,
     ) -> Result<Question, Error> {
-        match sqlx::query("UPDATE questions SET title = $1, content = $2, tags = $3 WHERE id = $4 RETURNING id, title, content, tags").bind(question.title).bind(question.content).bind(question.tags).bind(question_id).map(|row: PgRow| Question {
+        match sqlx::query("UPDATE questions SET title = $1, content = $2, tags = $3 WHERE id = $4 AND account_id = $5 RETURNING id, title, content, tags").bind(question.title).bind(question.content).bind(question.tags).bind(question_id).bind(account_id.0).map(|row: PgRow| Question {
             id: QuestionId(row.get("id")),
             title: row.get("title"),
             content: row.get("content"),
