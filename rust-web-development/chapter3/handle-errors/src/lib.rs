@@ -119,6 +119,18 @@ pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
             "Internal Server Error".to_string(),
             StatusCode::INTERNAL_SERVER_ERROR,
         ))
+    } else if let Some(crate::Error::CannotDecryptToken) = r.find() {
+        event!(Level::ERROR, "Cannot decrypt token",);
+        Ok(warp::reply::with_status(
+            "Internal Server Error".to_string(),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ))
+    } else if let Some(crate::Error::Unauthorized) = r.find() {
+        event!(Level::ERROR, "Not matching account id");
+        Ok(warp::reply::with_status(
+            "No Permission to change underlying resource".to_string(),
+            StatusCode::UNAUTHORIZED,
+        ))
     } else if let Some(crate::Error::ClientError(e)) = r.find() {
         event!(Level::ERROR, "{}", e);
         Ok(warp::reply::with_status(
