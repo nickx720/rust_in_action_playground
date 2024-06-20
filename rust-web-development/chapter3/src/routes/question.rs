@@ -49,7 +49,7 @@ pub async fn update_question(
                 content: content.unwrap(),
                 tags: question.tags,
             };
-            match store.update_question(question, id).await {
+            match store.update_question(question, id, account_id).await {
                 Ok(res) => Ok(warp::reply::json(&res)),
                 Err(e) => Err(warp::reject::custom(e)),
             }
@@ -63,15 +63,24 @@ pub async fn update_question(
     }
 }
 
-pub async fn delete_question(id: i32, store: Store) -> Result<impl warp::Reply, warp::Rejection> {
-    if let Err(e) = store.delete_question(id).await {
-        return Err(warp::reject::custom(e));
-    }
+pub async fn delete_question(
+    id: i32,
+    session: Session,
+    store: Store,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let account_id = session.account_id;
+    if store.is_question_owner(id, &account_id).await? {
+        if let Err(e) = store.delete_question(id).await {
+            return Err(warp::reject::custom(e));
+        }
 
-    Ok(warp::reply::with_status(
-        format!("Question {} deleted", id),
-        StatusCode::OK,
-    ))
+        Ok(warp::reply::with_status(
+            format!("Question {} deleted", id),
+            StatusCode::OK,
+        ))
+    } else {
+        Err(warp::reject::custom(handle_errors::Error::Unauthorized))
+    }
 }
 
 pub async fn add_question(
