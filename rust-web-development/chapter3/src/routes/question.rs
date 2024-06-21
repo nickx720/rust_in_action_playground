@@ -84,9 +84,11 @@ pub async fn delete_question(
 }
 
 pub async fn add_question(
+    session: Session,
     store: Store,
     new_question: NewQuestion,
 ) -> Result<impl warp::Reply, warp::Rejection> {
+    dbg!(session.account_id);
     let title = match check_profanity(new_question.title).await {
         Ok(res) => res,
         Err(e) => return Err(warp::reject::custom(e)),
