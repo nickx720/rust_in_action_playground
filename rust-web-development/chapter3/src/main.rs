@@ -1,5 +1,6 @@
 #![warn(clippy::all)]
 
+use config::Config;
 use handle_errors::return_error;
 use warp::{http::Method, Filter};
 
@@ -9,8 +10,21 @@ mod routes;
 mod store;
 mod types;
 
+#[derive(Parser, Debug, Default, serde::Deserialize, PartialEq)]
+struct Args {
+    log_level: String,
+    database_host: String,
+    database_port: u16,
+    database_name: String,
+    port: u16,
+}
+
 #[tokio::main]
 async fn main() {
+    let config = Config::builder()
+        .add_source(config::File::with_name("setup"))
+        .build()
+        .unwrap();
     let log_filter = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=info,warp=error".to_owned());
     let store =
