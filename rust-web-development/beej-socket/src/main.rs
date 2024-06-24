@@ -1,13 +1,15 @@
+use beej_examples::{self, showip::show_ip};
 use clap::Parser;
-
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
-    show_ip: String,
+    show_ip: bool,
 }
 
 fn main() {
-    let args = Args::parse();
-    println!("Hello {}", args.show_ip);
+    match Args::parse() {
+        Args { show_ip } => show_ip(),
+        _ => panic!("Unsupported"),
+    }
 }

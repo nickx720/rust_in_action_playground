@@ -10,7 +10,7 @@ mod routes;
 mod store;
 mod types;
 
-#[derive(Parser, Debug, Default, serde::Deserialize, PartialEq)]
+#[derive(Debug, Default, serde::Deserialize, PartialEq)]
 struct Args {
     log_level: String,
     database_host: String,
@@ -25,8 +25,13 @@ async fn main() {
         .add_source(config::File::with_name("setup"))
         .build()
         .unwrap();
-    let log_filter = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=info,warp=error".to_owned());
+    let config = config.try_deserialize::<Args>().unwrap();
+    let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        format!(
+            "handle_errors={},practical_rust_book={},warp={}",
+            config.log_level, config.log_level, config.log_level
+        )
+    });
     let store =
         store::Store::new("postgres://postgres:mysecretpassword@localhost:5432/postgres").await;
     sqlx::migrate!()
