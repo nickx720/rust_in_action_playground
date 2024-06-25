@@ -32,8 +32,12 @@ async fn main() {
             config.log_level, config.log_level, config.log_level
         )
     });
-    let store =
-        store::Store::new("postgres://postgres:mysecretpassword@localhost:5432/postgres").await;
+    //    let store =     store::Store::new("postgres://postgres:mysecretpassword@localhost:5432/postgres").await;
+    let store = store::Store::new(&format!(
+        "postgres://{}:{}/{}",
+        config.database_host, config.database_port, config.database_name
+    ))
+    .await;
     sqlx::migrate!()
         .run(&store.clone().connection)
         .await
