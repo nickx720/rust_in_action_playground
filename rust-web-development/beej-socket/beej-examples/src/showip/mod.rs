@@ -1,3 +1,3 @@
-pub fn show_ip() -> i32 {
-    2
+pub fn show_ip(host: String, service: String) -> i32 {
+    todo!()
 }
