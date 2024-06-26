@@ -63,6 +63,7 @@ version = "0.1.0"
 dependencies = [
  "nix",
  "socket2",
+ "types",
 ]
 
 [[package]]
@@ -73,6 +74,7 @@ dependencies = [
  "clap",
  "nix",
  "socket2",
+ "typed-builder",
 ]
 
 [[package]]
@@ -80,6 +82,10 @@ name = "bitflags"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
+
+[[package]]
+name = "builders"
+version = "0.1.0"
 
 [[package]]
 name = "cfg-if"
@@ -222,6 +228,33 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "typed-builder"
+version = "0.18.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77739c880e00693faef3d65ea3aad725f196da38b22fdc7ea6ded6e1ce4d3add"
+dependencies = [
+ "typed-builder-macro",
+]
+
+[[package]]
+name = "typed-builder-macro"
+version = "0.18.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f718dfaf347dcb5b983bfc87608144b0bad87970aebcbea5ce44d2a30c08e63"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "types"
+version = "0.1.0"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
