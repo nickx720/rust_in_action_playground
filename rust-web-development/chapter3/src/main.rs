@@ -11,6 +11,7 @@ mod store;
 mod types;
 
 #[derive(Debug, Default, serde::Deserialize, PartialEq)]
+#[clap(author,version,about,long_about = None)]
 struct Args {
     log_level: String,
     database_host: String,
@@ -18,7 +19,6 @@ struct Args {
     database_name: String,
     port: u16,
 }
-
 #[tokio::main]
 async fn main() {
     let config = Config::builder()

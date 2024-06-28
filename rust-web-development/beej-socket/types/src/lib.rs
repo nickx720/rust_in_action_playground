@@ -50,3 +50,20 @@ impl From<libc::c_int> for SocketType {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Flag {
+    /// No Flags
+    None,
+    Passive,
+}
+
+impl From<libc::c_int> for Flag {
+    fn from(value: libc::c_int) -> Self {
+        match value {
+            0 => Flag::None,
+            libc::AI_PASSIVE => Flag::Passive,
+            _ => panic!("Unsupported flag"),
+        }
+    }
+}
