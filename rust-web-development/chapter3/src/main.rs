@@ -1,5 +1,6 @@
 #![warn(clippy::all)]
 
+use clap::Parser;
 use config::Config;
 use handle_errors::return_error;
 use warp::{http::Method, Filter};
@@ -10,9 +11,10 @@ mod routes;
 mod store;
 mod types;
 
-#[derive(Debug, Default, serde::Deserialize, PartialEq)]
+#[derive(Debug, Default, serde::Deserialize, PartialEq, Parser)]
 #[clap(author,version,about,long_about = None)]
 struct Args {
+    #[clap(short, long, default_value = "warn")]
     log_level: String,
     database_host: String,
     database_port: u16,
