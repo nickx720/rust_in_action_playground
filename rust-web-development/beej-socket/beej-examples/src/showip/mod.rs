@@ -14,8 +14,9 @@ pub fn show_ip(host: String, family: Family, service: String) -> i32 {
     let service: *const libc::c_char = service.as_ptr() as *const libc::c_char;
     let addrinfo = AddrInfo::builder().family(family).build();
     let hints: AddrInfo = addrinfo.into();
+    let my_hints_ptr: *const libc::addrinfo = &hints;
     let mut res = ptr::null_mut();
     // TODO fix the type mismatch
-    unsafe { libc::getaddrinfo(c_host, service, &hints, &mut res) };
+    unsafe { libc::getaddrinfo(c_host, service, my_hints_ptr, &mut res) };
     todo!()
 }
