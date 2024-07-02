@@ -17,12 +17,12 @@ impl Display for Family {
     }
 }
 
-impl From<libc::c_int> for Family {
-    fn from(value: libc::c_int) -> Self {
+impl From<Family> for libc::c_int {
+    fn from(value: Family) -> libc::c_int {
         match value {
-            libc::AF_INET => Family::Ipv4,
-            libc::AF_INET6 => Family::Ipv6,
-            _ => Family::Unspecified,
+            value::Ipv4 => libc::AF_INET,
+            Ipv6 => libc::AF_INET6,
+            Unspecified => libc::AF_UNSPEC,
         }
     }
 }
