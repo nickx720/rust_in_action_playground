@@ -18,11 +18,11 @@ impl Display for Family {
 }
 
 impl From<Family> for libc::c_int {
-    fn from(value: Family) -> libc::c_int {
+    fn from(value: Family) -> Self {
         match value {
-            value::Ipv4 => libc::AF_INET,
-            Ipv6 => libc::AF_INET6,
-            Unspecified => libc::AF_UNSPEC,
+            Family::Ipv4 => libc::AF_INET,
+            Family::Ipv6 => libc::AF_INET6,
+            Family::Unspecified => libc::AF_UNSPEC,
         }
     }
 }
@@ -41,12 +41,11 @@ pub enum SocketType {
     Datagram,
 }
 
-impl From<libc::c_int> for SocketType {
-    fn from(value: libc::c_int) -> Self {
+impl From<SocketType> for libc::c_int {
+    fn from(value: SocketType) -> Self {
         match value {
-            libc::SOCK_STREAM => SocketType::Stream,
-            libc::SOCK_DGRAM => SocketType::Datagram,
-            _ => panic!("Unknown socket type"),
+            SocketType::Stream => libc::SOCK_STREAM,
+            SocketType::Datagram => libc::SOCK_DGRAM,
         }
     }
 }
@@ -58,12 +57,11 @@ pub enum Flag {
     Passive,
 }
 
-impl From<libc::c_int> for Flag {
-    fn from(value: libc::c_int) -> Self {
+impl From<Flag> for libc::c_int {
+    fn from(value: Flag) -> Self {
         match value {
-            0 => Flag::None,
-            libc::AI_PASSIVE => Flag::Passive,
-            _ => panic!("Unsupported flag"),
+            Flag::None => 0,
+            Flag::Passive => libc::AI_PASSIVE,
         }
     }
 }
