@@ -1,5 +1,6 @@
 use builders::AddrInfo;
 use nix::libc;
+use socket2::SockAddr;
 use std::{ffi::CString, ptr};
 
 use types::Family;
@@ -16,5 +17,19 @@ pub fn show_ip(host: String, family: Family, service: String) -> i32 {
     let hints: libc::addrinfo = addrinfo.into();
     let mut res = ptr::null_mut();
     unsafe { libc::getaddrinfo(c_host, service, &hints, &mut res) };
+    while !res.is_null() {
+        let ((), sockaddr) = unsafe {
+            SockAddr::try_init(|storage, len| {
+                *len = (*res).ai_addr as _;
+                std::ptr::copy_nonoverlapping(
+                    (*res).ai_addr as *const u8,
+                    storage as *mut u8,
+                    (*res).ai_addrlen as usize,
+                );
+                Ok(())
+            })
+        }
+        .expect("to create a socket");
+    }
     todo!()
 }
