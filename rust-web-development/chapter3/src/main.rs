@@ -16,13 +16,17 @@ mod types;
 struct Args {
     #[clap(short, long, default_value = "warn")]
     log_level: String,
+    #[clap(long, default_value = "localhost")]
     database_host: String,
+    #[clap(long, default_value = "5432")]
     database_port: u16,
+    #[clap(long, default_value = "some-postgres")]
     database_name: String,
     port: u16,
 }
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
     let config = Config::builder()
         .add_source(config::File::with_name("setup"))
         .build()
