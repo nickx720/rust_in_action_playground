@@ -1,7 +1,6 @@
 #![warn(clippy::all)]
 
 use clap::Parser;
-use config::Config;
 use handle_errors::return_error;
 use warp::{http::Method, Filter};
 
@@ -22,26 +21,22 @@ struct Args {
     database_port: u16,
     #[clap(long, default_value = "some-postgres")]
     database_name: String,
+    #[clap(long, default_value = "8080")]
     port: u16,
 }
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    let config = Config::builder()
-        .add_source(config::File::with_name("setup"))
-        .build()
-        .unwrap();
-    let config = config.try_deserialize::<Args>().unwrap();
     let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
         format!(
             "handle_errors={},practical_rust_book={},warp={}",
-            config.log_level, config.log_level, config.log_level
+            args.log_level, args.log_level, args.log_level
         )
     });
     //    let store =     store::Store::new("postgres://postgres:mysecretpassword@localhost:5432/postgres").await;
     let store = store::Store::new(&format!(
         "postgres://{}:{}/{}",
-        config.database_host, config.database_port, config.database_name
+        args.database_host, args.database_port, args.database_name
     ))
     .await;
     sqlx::migrate!()
@@ -125,5 +120,5 @@ async fn main() {
         .with(warp::trace::request())
         .recover(return_error);
 
-    warp::serve(routes).run(([127, 0, 0, 1], config.port)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], args.port)).await;
 }
