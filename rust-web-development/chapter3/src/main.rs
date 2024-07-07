@@ -19,7 +19,7 @@ struct Args {
     database_host: String,
     #[clap(long, default_value = "5432")]
     database_port: u16,
-    #[clap(long, default_value = "some-postgres")]
+    #[clap(long, default_value = "postgres")]
     database_name: String,
     #[clap(long, default_value = "8080")]
     port: u16,
