@@ -1,6 +1,7 @@
 #![warn(clippy::all)]
 
 use clap::Parser;
+use dotenv;
 use handle_errors::return_error;
 use warp::{http::Method, Filter};
 
@@ -25,7 +26,11 @@ struct Args {
     port: u16,
 }
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), handle_errors::Error> {
+    dotenv::dotenv().ok();
+    if let Err(_) = env::var("API_LAYER_KEY") {
+        panic!("Badwords API key not set");
+    }
     let args = Args::parse();
     let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
         format!(
@@ -121,4 +126,5 @@ async fn main() {
         .recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], args.port)).await;
+    Ok(())
 }
