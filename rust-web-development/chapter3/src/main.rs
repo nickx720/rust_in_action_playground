@@ -32,6 +32,11 @@ async fn main() -> Result<(), handle_errors::Error> {
         panic!("Badwords API key not set");
     }
     let args = Args::parse();
+    let port = std::env::var("PORT")
+        .ok()
+        .map(|val| val.parse::<u16>())
+        .unwrap_or(Ok(args.port))
+        .map_err(|e| handle_errors::Error::ParseError(e))?;
     let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| {
         format!(
             "handle_errors={},practical_rust_book={},warp={}",
