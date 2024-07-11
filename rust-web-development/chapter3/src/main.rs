@@ -48,7 +48,8 @@ async fn main() -> Result<(), handle_errors::Error> {
         "postgres://{}:{}/{}",
         args.database_host, args.database_port, args.database_name
     ))
-    .await;
+    .await
+    .map_err(|e| handle_errors::Error::DatabaseQueryError(e))?;
     sqlx::migrate!()
         .run(&store.clone().connection)
         .await
