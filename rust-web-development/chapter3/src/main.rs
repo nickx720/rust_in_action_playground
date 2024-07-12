@@ -28,7 +28,7 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), handle_errors::Error> {
     dotenv::dotenv().ok();
-    if let Err(_) = env::var("API_LAYER_KEY") {
+    if let Err(_) = std::env::var("API_LAYER_KEY") {
         panic!("Badwords API key not set");
     }
     let args = Args::parse();
