@@ -1,5 +1,5 @@
 use builders::AddrInfo;
-use nix::libc;
+use nix::libc::{self, pread, sockaddr};
 use socket2::SockAddr;
 use std::{ffi::CString, ptr};
 
@@ -30,6 +30,8 @@ pub fn show_ip(host: String, family: Family, service: String) -> i32 {
             })
         }
         .expect("to create a socket");
+        res = (unsafe { *res }).ai_next as *mut libc::addrinfo;
+        println!("\t{}", sockaddr.as_socket().expect("Failed to extract IP"))
     }
     todo!()
 }
