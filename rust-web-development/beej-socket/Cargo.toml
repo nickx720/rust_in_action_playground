@@ -12,3 +12,4 @@ nix = {version ="0.29.0", features = ["net","poll","signal"] }
 socket2 = "0.5.7"
 beej-examples = {path = "beej-examples"}
 typed-builder = "0.18.2"
+types = {path = "./types"}

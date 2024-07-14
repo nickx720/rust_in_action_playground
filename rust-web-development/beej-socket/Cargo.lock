@@ -76,6 +76,7 @@ dependencies = [
  "nix",
  "socket2",
  "typed-builder",
+ "types",
 ]
 
 [[package]]

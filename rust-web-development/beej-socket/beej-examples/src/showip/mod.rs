@@ -1,11 +1,11 @@
 use builders::AddrInfo;
-use nix::libc::{self, pread, sockaddr};
+use nix::libc::{self};
 use socket2::SockAddr;
-use std::{ffi::CString, ptr};
+use std::{error::Error, ffi::CString, ptr};
 
 use types::Family;
 
-pub fn show_ip(host: String, family: Family, service: String) -> i32 {
+pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<dyn Error>> {
     println!("IP addresses for {}\n", host);
     let host = CString::new(host).expect("Invalid host");
     let c_host: *const libc::c_char = host.as_ptr() as *const libc::c_char;
@@ -31,7 +31,18 @@ pub fn show_ip(host: String, family: Family, service: String) -> i32 {
         }
         .expect("to create a socket");
         res = (unsafe { *res }).ai_next as *mut libc::addrinfo;
-        println!("\t{}", sockaddr.as_socket().expect("Failed to extract IP"))
+        println!("\t{}", sockaddr.as_socket().expect("Failed to extract IP"));
+        match sockaddr.family() as i32 {
+            libc::AF_INET => {
+                println!("\t Family: IPV4");
+            }
+            libc::AF_INET6 => {
+                println!("\t Family: IPV6");
+            }
+            _ => {
+                println!("\t Unknown family");
+            }
+        }
     }
-    todo!()
+    Ok(())
 }
