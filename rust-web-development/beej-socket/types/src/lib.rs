@@ -1,6 +1,6 @@
+use clap::ValueEnum;
 use std::fmt::Display;
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, ValueEnum)]
 pub enum Family {
     Ipv4,
     Ipv6,

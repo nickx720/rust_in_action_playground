@@ -12,14 +12,16 @@ struct Args {
 pub enum Commands {
     ShowIp {
         host: String,
+        #[arg(short, long, value_enum, default_value_t = Family::Unspecified)]
         family: Family,
+        #[arg(short, long, default_value = "http")]
         service: String,
     },
 }
 
 fn main() {
     let args = Args::parse();
-    let output = match args.command {
+    match args.command {
         Commands::ShowIp {
             host,
             family,
