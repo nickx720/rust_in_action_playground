@@ -62,6 +62,7 @@ name = "beej-examples"
 version = "0.1.0"
 dependencies = [
  "builders",
+ "libc",
  "nix",
  "socket2",
  "types",

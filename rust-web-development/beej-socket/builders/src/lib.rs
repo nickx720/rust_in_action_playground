@@ -3,7 +3,7 @@ use std::mem;
 use typed_builder::TypedBuilder;
 use types::{Family, Flag, SocketType};
 
-#[derive(PartialEq, TypedBuilder)]
+#[derive(PartialEq, TypedBuilder, Debug)]
 pub struct AddrInfo {
     #[builder(default=Family::Unspecified)]
     family: Family,

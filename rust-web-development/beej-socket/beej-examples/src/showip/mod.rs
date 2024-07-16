@@ -1,5 +1,4 @@
 use builders::AddrInfo;
-use nix::libc::{self};
 use socket2::SockAddr;
 use std::{error::Error, ffi::CString, ptr};
 
@@ -7,7 +6,6 @@ use types::Family;
 
 pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<dyn Error>> {
     dbg!(&host, &family, &service);
-    println!("IP addresses for {}\n", host);
     let host = CString::new(host).expect("Invalid host");
     let c_host: *const libc::c_char = host.as_ptr() as *const libc::c_char;
 
