@@ -16,9 +16,11 @@ pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<
     let hints: libc::addrinfo = addrinfo.into();
     let mut res = ptr::null_mut();
     unsafe { libc::getaddrinfo(c_host, service, &hints, &mut res) };
+    // It only breaks for www.example.net, but runs for ipv6, but does not print
     while !res.is_null() {
         let ((), sockaddr) = unsafe {
             SockAddr::try_init(|storage, len| {
+                dbg!(storage, len);
                 *len = (*res).ai_addr as _;
                 std::ptr::copy_nonoverlapping(
                     (*res).ai_addr as *const u8,
