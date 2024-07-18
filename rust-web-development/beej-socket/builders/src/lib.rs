@@ -24,6 +24,16 @@ impl From<AddrInfo> for libc::addrinfo {
         }
     }
 }
+
+impl From<libc::addrinfo> for AddrInfo {
+    fn from(value: libc::addrinfo) -> Self {
+        AddrInfo {
+            family: value.ai_family.into(),
+            socktype: value.ai_socktype.into(),
+            flags: value.ai_flags.into(),
+        }
+    }
+}
 //impl Into<libc::addrinfo> for AddrInfo {
 //    fn into(self) -> libc::addrinfo {
 //        unsafe {
