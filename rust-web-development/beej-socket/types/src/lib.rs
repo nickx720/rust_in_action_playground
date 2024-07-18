@@ -12,7 +12,7 @@ impl Display for Family {
         match self {
             Family::Ipv4 => write!(f, "ipv4"),
             Family::Ipv6 => write!(f, "ipv6"),
-            Family::Unspecified => write!(f, "Unspecified"),
+            Family::Unspecified => write!(f, "unspecified"),
         }
     }
 }
@@ -23,6 +23,15 @@ impl From<Family> for libc::c_int {
             Family::Ipv4 => libc::AF_INET,
             Family::Ipv6 => libc::AF_INET6,
             Family::Unspecified => libc::AF_UNSPEC,
+        }
+    }
+}
+impl From<libc::c_int> for Family {
+    fn from(value: libc::c_int) -> Self {
+        match value {
+            libc::AF_INET => Family::Ipv4,
+            libc::AF_INET6 => Family::Ipv6,
+            _ => Family::Unspecified,
         }
     }
 }
@@ -50,6 +59,15 @@ impl From<SocketType> for libc::c_int {
     }
 }
 
+impl From<libc::c_int> for SocketType {
+    fn from(value: libc::c_int) -> Self {
+        match value {
+            libc::SOCK_STREAM => SocketType::Stream,
+            libc::SOCK_DGRAM => SocketType::Datagram,
+            _ => panic!("unknown socket type"),
+        }
+    }
+}
 #[derive(Debug, Clone, PartialEq)]
 pub enum Flag {
     /// No Flags
@@ -62,6 +80,15 @@ impl From<Flag> for libc::c_int {
         match value {
             Flag::None => 0,
             Flag::Passive => libc::AI_PASSIVE,
+        }
+    }
+}
+impl From<libc::c_int> for Flag {
+    fn from(value: libc::c_int) -> Self {
+        match value {
+            0 => Flag::None,
+            libc::AI_PASSIVE => Flag::Passive,
+            _ => panic!("unknown flag type"),
         }
     }
 }
