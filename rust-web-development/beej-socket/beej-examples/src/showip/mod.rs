@@ -30,7 +30,7 @@ pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<
                 Ok(())
             })
         }
-        .expect("to create a socket");
+        .expect("Unable to create a socket");
         res = (unsafe { *res }).ai_next as *mut libc::addrinfo;
         println!("\t{}", sockaddr.as_socket().expect("Failed to extract IP"));
         match sockaddr.family() as i32 {
