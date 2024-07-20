@@ -5,7 +5,6 @@ use std::{error::Error, ffi::CString, ptr};
 use types::Family;
 
 pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<dyn Error>> {
-    dbg!(&host, &family, &service);
     let host = CString::new(host).expect("Invalid host");
     let c_host: *const libc::c_char = host.as_ptr() as *const libc::c_char;
 
@@ -17,11 +16,11 @@ pub fn show_ip(host: String, family: Family, service: String) -> Result<(), Box<
     let mut res = ptr::null_mut();
     unsafe { libc::getaddrinfo(c_host, service, &hints, &mut res) };
     // It only breaks for www.example.net, but runs for ipv6, but does not print
+    // ipv6.google.coms
     while !res.is_null() {
         let ((), sockaddr) = unsafe {
             SockAddr::try_init(|storage, len| {
-                dbg!(storage, len);
-                *len = (*res).ai_addr as _;
+                *len = (*res).ai_addrlen as _;
                 std::ptr::copy_nonoverlapping(
                     (*res).ai_addr as *const u8,
                     storage as *mut u8,
