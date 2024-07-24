@@ -24,7 +24,7 @@ void *get_in_addr(struct sockaddr *sa){
   if (sa->sa_family == AF_INET){
     return &(((struct sockaddr_in*)sa)->sin_addr);
   }
-  return &(((struct sockaddr_in6*)sa)->sin_addr);
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 int main(void){
   int sockfd, new_fd;
@@ -41,12 +41,12 @@ int main(void){
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0){
+  if ((rv = getaddrinfo(NULL, PORT, &hints, &serverinfo)) != 0){
     fprintf(stderr,"getaddrinfo: %s\n",gai_strerror(rv));
     return 1;
   }
 
-  for(p=servinfo; p!= NULL; p=p->ai_next){
+  for(p=serverinfo; p!= NULL; p=p->ai_next){
     if((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1){
       perror("server: socket");
       continue;
@@ -63,7 +63,7 @@ int main(void){
     break;
   }
 
-  freeaddrinfo(servinfo);
+  freeaddrinfo(serverinfo);
 
   if(p == NULL){
     fprintf(stderr, "server: failed to bind\n");
@@ -89,7 +89,7 @@ int main(void){
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
     if(new_fd == -1){
       perror("accept");
-      continue
+      continue;
     }
 
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),s, sizeof s);
