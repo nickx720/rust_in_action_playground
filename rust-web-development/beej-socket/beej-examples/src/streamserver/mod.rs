@@ -5,7 +5,7 @@ use std::{
 
 use builders::AddrInfo;
 use socket2::SockAddr;
-use types::Family;
+use types::{Family, SockFd};
 
 /// Simple Stream Server
 pub fn streamserver() {
@@ -34,6 +34,46 @@ pub fn streamserver() {
             CStr::from_ptr(libc::gai_strerror(rv)).to_str().unwrap()
         });
         return;
+    }
+    let mut sockfd = SockFd::Empty;
+    while !servinfo.is_null() {
+        unsafe {
+            let _sockfd = libc::socket(
+                (*servinfo).ai_family,
+                (*servinfo).ai_socktype,
+                (*servinfo).ai_protocol,
+            );
+            if _sockfd == -1 {
+                eprint!("server: socket err");
+                servinfo = (*servinfo).ai_next as *mut libc::addrinfo;
+                continue;
+            }
+            let optval_yes: libc::c_int = 1;
+            let errr = libc::setsockopt(
+                _sockfd,
+                libc::SOL_SOCKET,
+                libc::SO_REUSEADDR,
+                &optval_yes as *const _ as *const libc::c_void,
+                mem::size_of_val(&optval_yes) as libc::socklen_t,
+            );
+            if errr == -1 {
+                eprintln!("server: setsockopt err");
+                libc::exit(1);
+            }
+            let errr = libc::bind(
+                _sockfd,
+                (*servinfo).ai_addr,
+                (*servinfo).ai_addrlen as libc::socklen_t,
+            );
+            if errr == -1 {
+                libc::close(_sockfd);
+                eprintln!("server: bind err");
+                servinfo = (*servinfo).ai_next as *mut libc::addrinfo;
+                continue;
+            }
+            sockfd = SockFd::Initialized(_sockfd);
+        }
+        break;
     }
     todo!()
 }

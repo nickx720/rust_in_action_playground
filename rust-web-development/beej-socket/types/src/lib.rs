@@ -92,3 +92,18 @@ impl From<libc::c_int> for Flag {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SockFd {
+    Empty,
+    Initialized(i32),
+}
+
+impl From<SockFd> for i32 {
+    fn from(value: SockFd) -> Self {
+        match value {
+            SockFd::Empty => -1,
+            SockFd::Initialized(fd) => fd,
+        }
+    }
+}
