@@ -75,5 +75,38 @@ pub fn streamserver() {
         }
         break;
     }
-    todo!()
+    if servinfo.is_null() {
+        eprintln!("server: failed to bind socket");
+        unsafe { libc::exit(1) };
+    }
+
+    if sockfd == SockFd::Empty {
+        eprintln!("server: failed to create socket");
+        unsafe { libc::exit(1) };
+    }
+    let sockfd = sockfd.into();
+    let errr = unsafe {
+        let backlog = 10;
+        libc::listen(sockfd, backlog)
+    };
+    if errr == -1 {
+        eprintln!("server: listen err");
+        unsafe { libc::exit(1) };
+    }
+    println!("server: waiting for connections...");
+    loop {
+        let mut their_addr = mem::MaybeUninit::<libc::sockaddr_storage>::uninit();
+        let mut sin_size = mem::size_of::<libc::sockaddr_storage>() as libc::socklen_t;
+        let new_fd = unsafe {
+            libc::accept(
+                sockfd,
+                their_addr.as_mut_ptr() as *mut libc::sockaddr,
+                &mut sin_size,
+            )
+        };
+        if new_fd == -1 {
+            eprintln!("server: accept err");
+            continue;
+        }
+    }
 }
