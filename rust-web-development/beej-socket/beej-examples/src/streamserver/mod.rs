@@ -108,5 +108,23 @@ pub fn streamserver() {
             eprintln!("server: accept err");
             continue;
         }
+        let s = unsafe { SockAddr::new(their_addr.assume_init(), sin_size) };
+        println!("server: got connection from {:?}", s);
+        let msg = CString::new("Hello, world!").expect("Invalid message");
+        let len = msg.as_bytes().len();
+        let errr = unsafe {
+            libc::send(
+                new_fd,
+                msg.as_ptr() as *const libc::c_void,
+                len,
+                libc::MSG_NOSIGNAL,
+            )
+        };
+
+        if errr == -1 {
+            eprintln!("server: send err");
+        }
+
+        unsafe { libc::close(new_fd) };
     }
 }
