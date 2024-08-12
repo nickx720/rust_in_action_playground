@@ -1,4 +1,9 @@
-use std::{ffi::CString, mem, net::IpAddr, ptr};
+use std::{
+    ffi::{CStr, CString},
+    mem,
+    net::IpAddr,
+    ptr,
+};
 
 use builders::AddrInfo;
 
@@ -65,10 +70,32 @@ pub fn streamclient(host: String) {
                 eprintln!("client: connect err");
                 continue;
             }
-            sockfd.write(_sockfd)
+            sockfd.write(_sockfd);
         }
         break;
     }
-    // if servinfo.is_null()
-    todo!()
+    if servinfo.is_null() {
+        eprintln!("client: failed to connect");
+        unsafe { libc::exit(2) };
+    }
+    showaddrinfo(unsafe { servinfo.as_ref().unwrap() });
+    const MAXDATASIZE: usize = 100;
+    let mut buf = [0u8; MAXDATASIZE];
+    let numbytes = unsafe {
+        libc::recv(
+            sockfd.assume_init(),
+            buf.as_mut_ptr() as *mut libc::c_void,
+            MAXDATASIZE - 1,
+            0,
+        )
+    };
+    if numbytes == -1 {
+        eprintln!("client: recv err");
+        unsafe { libc::exit(1) };
+    }
+    println!("client: received '{}'", unsafe {
+        CStr::from_ptr(buf.as_ptr() as *const libc::c_char)
+            .to_str()
+            .unwrap()
+    });
 }
