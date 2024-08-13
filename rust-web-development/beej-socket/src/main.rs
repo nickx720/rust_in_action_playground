@@ -1,4 +1,6 @@
-use beej_examples::{self, showip::show_ip, streamserver::streamserver};
+use beej_examples::{
+    self, showip::show_ip, streamclient::streamclient, streamserver::streamserver,
+};
 use clap::{Parser, Subcommand};
 use types::Family;
 #[derive(Parser, Debug)]
@@ -18,6 +20,9 @@ pub enum Commands {
         service: String,
     },
     StreamServer,
+    StreamClient {
+        host: String,
+    },
 }
 
 fn main() {
@@ -29,5 +34,6 @@ fn main() {
             service,
         } => show_ip(host, family, service).expect("Something went wrong displaying ip"),
         Commands::StreamServer => streamserver(),
+        Commands::StreamClient { host } => streamclient(host),
     };
 }
