@@ -20,6 +20,7 @@ void *get_in_addr(struct sockaddr *sa){
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+
 int main(void){
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
@@ -35,4 +36,5 @@ int main(void){
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_flags = AI_PASSIVE;
 }
+
 
