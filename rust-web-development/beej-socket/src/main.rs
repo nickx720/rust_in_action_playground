@@ -1,5 +1,8 @@
+use std::net::IpAddr;
+
 use beej_examples::{
-    self, showip::show_ip, streamclient::streamclient, streamserver::streamserver,
+    self, listener::socketlistener, showip::show_ip, streamclient::streamclient,
+    streamserver::streamserver, talker::sockettalker,
 };
 use clap::{Parser, Subcommand};
 use types::Family;
@@ -23,6 +26,16 @@ pub enum Commands {
     StreamClient {
         host: String,
     },
+    Listener {
+        port: u16,
+        #[arg(short, long, value_enum, default_value_t = Family::Unspecified)]
+        family: Family,
+    },
+    Talker {
+        host: IpAddr,
+        port: u16,
+        message: String,
+    },
 }
 
 fn main() {
@@ -35,5 +48,11 @@ fn main() {
         } => show_ip(host, family, service).expect("Something went wrong displaying ip"),
         Commands::StreamServer => streamserver(),
         Commands::StreamClient { host } => streamclient(host),
+        Commands::Listener { port, family } => socketlistener(port, family),
+        Commands::Talker {
+            host,
+            port,
+            message,
+        } => sockettalker(host, port, message),
     };
 }
