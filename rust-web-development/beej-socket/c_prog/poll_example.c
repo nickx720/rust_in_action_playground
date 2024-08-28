@@ -9,6 +9,7 @@ int main(void){
 
   // pfds[1].fd = sme_socket
   // pfds[1].events = POLLIN
+
   printf("Hit return or wait 2.5 seconds for timeout\n");
   int num_events = poll(pfds,1,2500);
 
