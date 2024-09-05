@@ -3,23 +3,19 @@ use std::{
     os::fd::AsFd,
 };
 
-use nix::poll::{PollFd, PollFlags, PollTimeout};
+use nix::{
+    poll::{PollFd, PollFlags, PollTimeout},
+    unistd::pipe,
+};
 
 pub fn pollexample(host: IpAddr) {
     match host {
         IpAddr::V4(addr) => {
             let socket = SocketAddrV4::new(addr, 0);
-            let socket: nix::sys::socket::SockaddrIn = socket.into();
-            let sockfd = nix::sys::socket::socket(
-                nix::sys::socket::AddressFamily::Inet,
-                nix::sys::socket::SockType::Datagram,
-                nix::sys::socket::SockFlag::empty(),
-                None,
-            )
-            .expect("Failed to create sockfd");
+            let (read_fd, write_fd) = pipe().expect("Something went wrong");
             println!("Hit return or wait 2.5 seconds");
             // TODO return on enter, listen for keyboard
-            let pfd = PollFd::new(sockfd.as_fd(), PollFlags::POLLIN);
+            let pfd = PollFd::new(read_fd.as_fd(), PollFlags::POLLIN);
             let mut list_pfd: [PollFd; 1] = [pfd];
             let timeout = 2500u16;
             let timeout: PollTimeout = timeout.into();
@@ -28,13 +24,12 @@ pub fn pollexample(host: IpAddr) {
                 println!("Poll timeout");
             } else {
                 let poll_event = pfd.revents().expect("Poll Flag not created");
-                match poll_event {
-                    PollFlags::POLLIN => {
-                        println!("File descriptor is ready to be read ");
-                    }
-                    _ => println!("Nothing is happening"),
+                if poll_event.contains(PollFlags::POLLIN) {
+                    println!("Yahoo");
                 }
             }
+            //            nix::unistd::close(read_fd).unwrap();
+            //            nix::unistd::close(write_fd).unwrap();
         }
         _ => panic!("not implemented"),
     }
