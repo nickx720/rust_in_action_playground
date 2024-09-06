@@ -36,9 +36,7 @@ pub enum Commands {
         port: u16,
         message: String,
     },
-    PollExample {
-        host: IpAddr,
-    },
+    PollExample,
 }
 
 fn main() {
@@ -57,6 +55,6 @@ fn main() {
             port,
             message,
         } => sockettalker(host, port, message),
-        Commands::PollExample { host } => pollexample(host),
+        Commands::PollExample => pollexample(),
     };
 }
