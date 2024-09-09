@@ -1,7 +1,7 @@
-#include<stdio.h>
-#include<poll.h>
+#include <poll.h>
+#include <stdio.h>
 
-int main(void){
+int main(void) {
   struct pollfd pfds[1];
 
   pfds[0].fd = 0;
@@ -11,17 +11,17 @@ int main(void){
   // pfds[1].events = POLLIN
 
   printf("Hit return or wait 2.5 seconds for timeout\n");
-  int num_events = poll(pfds,1,2500);
+  int num_events = poll(pfds, 1, 2500);
 
-  if(num_events == 0){
+  if (num_events == 0) {
     printf("Poll timed out\n");
-  } else{
+  } else {
     int pollin_happened = pfds[0].revents & POLLIN;
 
-    if(pollin_happened){
-      printf("File descriptor %d is ready to read\n",pfds[0].fd);
-    } else{
-      printf("Unexpected event occureed: %d\n",pfds[0].revents);
+    if (pollin_happened) {
+      printf("File descriptor %d is ready to read\n", pfds[0].fd);
+    } else {
+      printf("Unexpected event occureed: %d\n", pfds[0].revents);
     }
   }
   return 0;
