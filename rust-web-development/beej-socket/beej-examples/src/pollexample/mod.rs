@@ -1,13 +1,9 @@
-use std::{
-    fs::File,
-    os::fd::{AsFd, FromRawFd},
-};
+use std::{io, os::fd::AsFd};
 
 use nix::poll::{PollFd, PollFlags, PollTimeout};
 
 pub fn pollexample() {
-    // TODO return on enter, listen for keyboard
-    let file: File = unsafe { File::from_raw_fd(0) };
+    let file = io::stdin();
     let pfd = PollFd::new(file.as_fd(), PollFlags::POLLIN);
     let mut list_pfd: [PollFd; 1] = [pfd];
     let timeout = 2500u16;
