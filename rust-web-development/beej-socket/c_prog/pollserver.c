@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include <cstdio>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -81,5 +80,54 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count) {
   // Copy the one from the end over this one
   pfds[i] = pfds[*fd_count - 1];
   (*fd_count)--;
+}
+
+int main(void) {
+  int listener;
+  int newfd;
+  struct sockaddr_storage remoteaddr;
+  socklen_t addrlen;
+
+  char buf[256];
+  char remoteIP[INET6_ADDRSTRLEN];
+
+  int fd_count = 0;
+  int fd_size = 5;
+  struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
+  listener = get_listener_socket();
+
+  if (listener == -1) {
+    fprintf(stderr, "error getting listening socket\n");
+    exit(1);
+  }
+  for (;;) {
+    int poll_count = poll(pfds, fd_count, -1);
+
+    if (poll_count == -1) {
+      perror("poll");
+      exit(1);
+    }
+    for (int i = 0; i < fd_count; i++) {
+      if (pfds[i].revents & POLLIN) {
+        if (pfds[i].fd == listener) {
+          addrlen = sizeof remoteaddr;
+          newfd = accept(listener, (struct sockaddr *)&remoteaddr, &addrlen);
+
+          if (newfd == -1) {
+            perror("accept");
+          } else {
+            add_to_pfds(&pfds, newfd, &fd_count, &fd_size);
+            printf("pollserver: new connection from %s on socket %d\n",
+                   inet_ntop(remoteaddr.ss_family,
+                             get_in_addr((struct sockaddr *)&remoteaddr),
+                             remoteIP, INET6_ADDRSTRLEN),
+                   newfd);
+          }
+        } else {
+          // If not the listener, we're just regular clients continue
+        }
+      }
+    }
+  }
 }
 
