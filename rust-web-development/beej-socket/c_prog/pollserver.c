@@ -100,6 +100,11 @@ int main(void) {
     fprintf(stderr, "error getting listening socket\n");
     exit(1);
   }
+
+  pfds[0].fd = listener;
+  pfds[0].events = POLLIN;
+
+  fd_count = 1;
   for (;;) {
     int poll_count = poll(pfds, fd_count, -1);
 
@@ -125,9 +130,33 @@ int main(void) {
           }
         } else {
           // If not the listener, we're just regular clients continue
+          int nbytes = recv(pfds[i].fd, buf, sizeof buf, 0);
+          int sender_fd = pfds[i].fd;
+
+          if (nbytes <= 0) {
+            if (nbytes == 0) {
+              printf("pollserver: socket %d hung up \n", sender_fd);
+            } else {
+              perror("recv");
+            }
+            close(pfds[i].fd);
+
+            del_from_pfds(pfds, i, &fd_count);
+          } else {
+            for (int j = 0; j < fd_count; j++) {
+              int dest_fd = pfds[i].fd;
+
+              if (dest_fd != listener && dest_fd != sender_fd) {
+                if (send(dest_fd, buf, nbytes, 0) == -1) {
+                  perror("send");
+                }
+              }
+            }
+          }
         }
       }
     }
   }
+  return 0;
 }
 
