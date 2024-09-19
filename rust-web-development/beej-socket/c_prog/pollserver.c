@@ -122,7 +122,8 @@ int main(void) {
             perror("accept");
           } else {
             add_to_pfds(&pfds, newfd, &fd_count, &fd_size);
-            printf("pollserver: new connection from %s on socket %d\n",
+            printf("pollserver: new connection from %s "
+                   "on socket %d\n",
                    inet_ntop(remoteaddr.ss_family,
                              get_in_addr((struct sockaddr *)&remoteaddr),
                              remoteIP, INET6_ADDRSTRLEN),
@@ -144,7 +145,7 @@ int main(void) {
             del_from_pfds(pfds, i, &fd_count);
           } else {
             for (int j = 0; j < fd_count; j++) {
-              int dest_fd = pfds[i].fd;
+              int dest_fd = pfds[j].fd;
 
               if (dest_fd != listener && dest_fd != sender_fd) {
                 if (send(dest_fd, buf, nbytes, 0) == -1) {
