@@ -16,4 +16,12 @@ pub struct Order {
     quantity: u32,
     unit_price: u32,
 }
-impl Order {}
+impl Order {
+    pub fn new(product_name: String, quantity: u32, unit_price: u32) -> Order {
+        Order {
+            product_name,
+            quantity,
+            unit_price,
+        }
+    }
+}
