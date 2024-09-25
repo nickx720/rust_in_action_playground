@@ -27,10 +27,13 @@ impl Order {
     pub fn product_name(self) -> String {
         self.product_name
     }
-    pub fn quantity(self) -> u32 {
-        self.quantity
+    pub fn quantity(&self) -> &u32 {
+        &self.quantity
     }
-    pub fn unit_price(self) -> u32 {
-        self.unit_price
+    pub fn unit_price(&self) -> &u32 {
+        &self.unit_price
+    }
+    pub fn total(self) -> u32 {
+        self.quantity * self.unit_price
     }
 }
