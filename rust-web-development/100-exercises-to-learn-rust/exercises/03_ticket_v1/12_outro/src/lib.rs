@@ -17,15 +17,25 @@ pub struct Order {
     unit_price: u32,
 }
 impl Order {
+    fn check_product_name(product_name: &str) {
+        match product_name {
+            _ if product_name.is_empty() => panic!("Product name cannot be empty"),
+            _ if product_name.len() > 300 => {
+                panic!("Product name cannot be longer than 300 words")
+            }
+            _ => (),
+        }
+    }
     pub fn new(product_name: String, quantity: u32, unit_price: u32) -> Order {
+        Order::check_product_name(&product_name);
         Order {
             product_name,
             quantity,
             unit_price,
         }
     }
-    pub fn product_name(self) -> String {
-        self.product_name
+    pub fn product_name(&self) -> &str {
+        &self.product_name
     }
     pub fn quantity(&self) -> &u32 {
         &self.quantity
@@ -33,10 +43,11 @@ impl Order {
     pub fn unit_price(&self) -> &u32 {
         &self.unit_price
     }
-    pub fn total(self) -> u32 {
+    pub fn total(&self) -> u32 {
         self.quantity * self.unit_price
     }
     pub fn set_product_name(&mut self, product_name: String) {
+        Order::check_product_name(&product_name);
         self.product_name = product_name;
     }
     pub fn set_quantity(&mut self, quantity: u32) {
