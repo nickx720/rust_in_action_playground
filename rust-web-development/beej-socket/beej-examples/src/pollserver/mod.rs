@@ -22,5 +22,22 @@ pub fn pollserver(port: u16) {
     nix::sys::socket::listen(&listener, backlog).expect("Failed to listen on socket");
 
     let listener_pfd = nix::poll::PollFd::new(listener.as_fd(), nix::poll::PollFlags::POLLIN);
-    todo!()
+    let mut pfds = Vec::with_capacity(5);
+    pfds.push(listener_pfd);
+    println!("Listening on {}", unspec);
+
+    loop {
+        println!("polling for events, we have '{}' poll fds", pfds.len());
+
+        let num_events =
+            nix::poll::poll(&mut pfds, nix::poll::PollTimeout::NONE).expect("poll failed");
+
+        if num_events > 0 {
+            println!("Events ready: {}", num_events);
+        }
+        for i in 0..pfds.len() {
+            let pfd = pfds[i];
+            dbg!(pfd);
+        }
+    }
 }
