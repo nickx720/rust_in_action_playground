@@ -1,6 +1,6 @@
 use std::{
     net::{Ipv6Addr, SocketAddrV6},
-    os::fd::{AsFd, AsRawFd},
+    os::fd::{AsFd, AsRawFd, BorrowedFd},
 };
 
 pub fn pollserver(port: u16) {
@@ -37,7 +37,19 @@ pub fn pollserver(port: u16) {
         }
         for i in 0..pfds.len() {
             let pfd = pfds[i];
-            dbg!(pfd);
+            if let Some(e) = pfd.revents() {
+                if e.contains(nix::poll::PollFlags::POLLIN) {
+                    if pfd.as_fd().as_raw_fd() == listener.as_raw_fd() {
+                        println!("[New Connection] Attaching to poll list");
+                        let new_fd = nix::sys::socket::accept(pfd.as_fd().as_raw_fd())
+                            .expect("Failed to accept new connection");
+                        let new_bfd = unsafe { BorrowedFd::borrow_raw(new_fd) };
+                        let new_pfd = nix::poll::PollFd::new(new_bfd, nix::poll::PollFlags::POLLIN);
+                        pfds.push(new_pfd);
+                        // convert fd to address
+                    }
+                }
+            }
         }
     }
 }
