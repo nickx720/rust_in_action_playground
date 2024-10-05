@@ -7,6 +7,28 @@
 mod tests {
     use super::*;
 
+    trait IsEven {
+        fn is_even(self) -> bool;
+    }
+
+    impl IsEven for u32 {
+        fn is_even(self) -> bool {
+            if self % 2 == 0 {
+                return true;
+            }
+            false
+        }
+    }
+
+    impl IsEven for i32 {
+        fn is_even(self) -> bool {
+            if self % 2 == 0 {
+                return true;
+            }
+            false
+        }
+    }
+
     #[test]
     fn test_u32_is_even() {
         assert!(42u32.is_even());
