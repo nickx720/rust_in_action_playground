@@ -67,16 +67,13 @@ pub fn pollserver(port: u16) {
                         } else {
                             println!("[Client] Reading bytes...");
                             // Send data to all clients but the sender and listener
-                            for j in 1..pfds.len() {
+                            for (j, pfd) in pfds.iter().skip(1).enumerate() {
                                 if i != j {
-                                    let target_pfd = &pfds[j];
                                     let ss: nix::sys::socket::SockaddrStorage =
-                                        nix::sys::socket::getpeername(
-                                            target_pfd.as_fd().as_raw_fd(),
-                                        )
-                                        .expect("getpeername failed");
+                                        nix::sys::socket::getpeername(pfd.as_fd().as_raw_fd())
+                                            .expect("getpeername failed");
                                     nix::sys::socket::sendto(
-                                        target_pfd.as_fd().as_raw_fd(),
+                                        pfd.as_fd().as_raw_fd(),
                                         &buf[..nbytes],
                                         &ss,
                                         nix::sys::socket::MsgFlags::empty(),
