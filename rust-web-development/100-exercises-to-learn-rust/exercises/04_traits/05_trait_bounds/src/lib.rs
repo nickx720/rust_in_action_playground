@@ -6,7 +6,10 @@
 // collections (e.g. BTreeMap).
 
 /// Return the minimum of two values.
-pub fn min<T>(left: T, right: T) -> T {
+pub fn min<T>(left: T, right: T) -> T
+where
+    T: Eq + Ord + PartialEq + PartialOrd,
+{
     if left <= right {
         left
     } else {
