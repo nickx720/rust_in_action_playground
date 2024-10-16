@@ -41,9 +41,7 @@ pub enum Commands {
     PollServer {
         port: u16,
     },
-    SelectExample {
-        port: u16,
-    },
+    SelectExample,
 }
 
 fn main() {
@@ -64,6 +62,6 @@ fn main() {
         } => sockettalker(host, port, message),
         Commands::PollExample => pollexample(),
         Commands::PollServer { port } => pollserver(port),
-        Commands::SelectExample { port } => selectexample::selectexample(port),
+        Commands::SelectExample => selectexample::selectexample(),
     };
 }
