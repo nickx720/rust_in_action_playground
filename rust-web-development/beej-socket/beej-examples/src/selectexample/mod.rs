@@ -9,7 +9,7 @@ pub fn selectexample() {
     fd_set.clear();
     let stdin = io::stdin();
     fd_set.insert(stdin.as_fd());
-    let _ = nix::sys::select::select(stdin.as_raw_fd(), &mut fd_set, None, None, &mut tv);
+    let _ = nix::sys::select::select(stdin.as_raw_fd() + 1, &mut fd_set, None, None, &mut tv);
     if fd_set.contains(stdin.as_fd()) {
         println!("A key was pressed\n");
     } else {
