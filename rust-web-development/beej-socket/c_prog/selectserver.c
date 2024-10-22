@@ -20,5 +20,11 @@ void *get_in_addr(struct sockaddr *sa) {
 int main(void) {
   fd_set master;
   fd_set read_fds;
+  int fdmax;
+
+  int listener;
+  int newfd;
+  struct sockaddr_storage remoteaddr;
+  socklen_t addrlen;
 }
 
