@@ -26,5 +26,20 @@ int main(void) {
   int newfd;
   struct sockaddr_storage remoteaddr;
   socklen_t addrlen;
+
+  char buf[256];
+  int nbytes;
+
+  char remoteIP[INET6_ADDRSTRLEN];
+
+  int yes = 1;
+  int i, j, rv;
+
+  struct addrinfo hints, *ai, *p;
+
+  FD_ZERO(&master);
+  FD_ZERO(&read_fds);
+
+  memset(&hints, 0, sizeof hints);
 }
 
