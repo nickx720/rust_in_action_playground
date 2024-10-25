@@ -61,6 +61,31 @@ int main(void) {
     break;
   }
   if (p == NULL) {
+    fprintf(stderr, "select server: failed to bind\n");
+    exit(2);
+  }
+  freeaddrinfo(ai);
+
+  if (listen(listener, 10) == -1) {
+    perror("listen");
+    exit(3);
+  }
+  FD_SET(listener, &master);
+  fdmax = listener;
+
+  for (;;) {
+    read_fds = master;
+    if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
+      perror("select");
+      exit(4);
+    }
+    for (i = 0; i <= fdmax; i++) {
+      if (FD_ISSET(i, &read_fds)) {
+        if (i == listener) {
+          // handle new connections
+        }
+      }
+    }
   }
 }
 
