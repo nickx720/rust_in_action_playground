@@ -83,6 +83,22 @@ int main(void) {
       if (FD_ISSET(i, &read_fds)) {
         if (i == listener) {
           // handle new connections
+          addrlen = sizeof remoteaddr;
+          newfd = accept(listener, (struct sockaddr *)&remoteaddr, &addrlen);
+
+          if (newfd == -1) {
+            perror("accept");
+          } else {
+            FD_SET(newfd, &master);
+            if (newfd > fdmax) {
+              printf("selectserver: new connection from %s on"
+                     "socket %d\n",
+                     inet_ntop(remoteaddr.ss_family,
+                               get_in_addr((struct sockaddr *)&remoteaddr),
+                               remoteIP, INET6_ADDRSTRLEN),
+                     newfd);
+            }
+          }
         }
       }
     }
