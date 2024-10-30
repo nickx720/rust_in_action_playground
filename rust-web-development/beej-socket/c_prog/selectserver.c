@@ -92,7 +92,6 @@ int main(void) {
             FD_SET(newfd, &master);
             if (newfd > fdmax) {
               fdmax = newfd;
-<<<<<<< HEAD
             }
             printf("selectserver: new connection from %s on"
                    "socket %d\n",
@@ -119,25 +118,7 @@ int main(void) {
                   }
                 }
               }
-=======
->>>>>>> main
             }
-            printf("selectserver: new connection from %s on"
-                   "socket %d\n",
-                   inet_ntop(remoteaddr.ss_family,
-                             get_in_addr((struct sockaddr *)&remoteaddr),
-                             remoteIP, INET6_ADDRSTRLEN),
-                   newfd);
-          }
-        } else {
-          if((nbytes = recv(i,buf,sizeof buf,0)) <= 0){
-            if (nbytes ==0){
-              printf("selectserver: socket %d hung up\n",i);
-            } else {
-              perror("recv");
-            }
-            close(i);
-            FD_CLR(i,&master);
           }
         }
       }
