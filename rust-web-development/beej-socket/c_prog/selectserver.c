@@ -101,18 +101,29 @@ int main(void) {
                    newfd);
           }
         } else {
-          if((nbytes = recv(i,buf,sizeof buf,0)) <= 0){
-            if (nbytes ==0){
-              printf("selectserver: socket %d hung up\n",i);
+          if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
+            if (nbytes == 0) {
+              printf("selectserver: socket %d hung up\n", i);
             } else {
               perror("recv");
             }
             close(i);
-            FD_CLR(i,&master);
+            FD_CLR(i, &master);
+          } else {
+            for (j = 0; j <= fdmax; j++) {
+              if (FD_ISSET(j, &master)) {
+                if (j != listener && j != i) {
+                  if (send(j, buf, nbytes, 0) == -1) {
+                    perror("send");
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
   }
+  return 0;
 }
 
