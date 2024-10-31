@@ -45,7 +45,7 @@ int main(void) {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
   if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
-    printf(stderr, "selectserver: %s\n", gai_strerror(rv));
+    fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
     exit(1);
   }
   for (p = ai; p != NULL; p = p->ai_next) {
@@ -101,14 +101,19 @@ int main(void) {
                    newfd);
           }
         } else {
-          if((nbytes = recv(i,buf,sizeof buf,0)) <= 0){
-            if (nbytes ==0){
-              printf("selectserver: socket %d hung up\n",i);
+          if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
+            if (nbytes == 0) {
+              printf("selectserver: socket %d hung up\n", i);
             } else {
               perror("recv");
             }
             close(i);
-            FD_CLR(i,&master);
+            FD_CLR(i, &master);
+          } else {
+            for (j = 0; j <= fdmax; j++) {
+              if (FD_ISSET(j, &master)) {
+              }
+            }
           }
         }
       }
