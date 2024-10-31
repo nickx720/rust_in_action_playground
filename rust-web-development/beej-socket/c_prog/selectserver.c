@@ -45,7 +45,7 @@ int main(void) {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
   if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
-    printf(stderr, "selectserver: %s\n", gai_strerror(rv));
+    fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
     exit(1);
   }
   for (p = ai; p != NULL; p = p->ai_next) {
@@ -112,11 +112,6 @@ int main(void) {
           } else {
             for (j = 0; j <= fdmax; j++) {
               if (FD_ISSET(j, &master)) {
-                if (j != listener && j != i) {
-                  if (send(j, buf, nbytes, 0) == -1) {
-                    perror("send");
-                  }
-                }
               }
             }
           }
@@ -124,6 +119,5 @@ int main(void) {
       }
     }
   }
-  return 0;
 }
 
