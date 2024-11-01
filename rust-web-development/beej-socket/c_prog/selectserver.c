@@ -112,6 +112,11 @@ int main(void) {
           } else {
             for (j = 0; j <= fdmax; j++) {
               if (FD_ISSET(j, &master)) {
+                if (j != listener & j != i) {
+                  if (send(j, buf, nbytes, 0) == -1) {
+                    perror("send");
+                  }
+                }
               }
             }
           }
@@ -119,5 +124,6 @@ int main(void) {
       }
     }
   }
+  return 0;
 }
 
