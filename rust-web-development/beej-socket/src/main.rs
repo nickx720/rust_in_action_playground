@@ -2,8 +2,8 @@ use std::net::IpAddr;
 
 use beej_examples::{
     self, listener::socketlistener, pollexample::pollexample, pollserver::pollserver,
-    selectexample, showip::show_ip, streamclient::streamclient, streamserver::streamserver,
-    talker::sockettalker,
+    selectexample, selectserver, showip::show_ip, streamclient::streamclient,
+    streamserver::streamserver, talker::sockettalker,
 };
 use clap::{Parser, Subcommand};
 use types::Family;
@@ -42,6 +42,9 @@ pub enum Commands {
         port: u16,
     },
     SelectExample,
+    SelectServer {
+        port: u16,
+    },
 }
 
 fn main() {
@@ -63,5 +66,6 @@ fn main() {
         Commands::PollExample => pollexample(),
         Commands::PollServer { port } => pollserver(port),
         Commands::SelectExample => selectexample::selectexample(),
+        Commands::SelectServer { port } => selectserver::selectserver(port),
     };
 }
