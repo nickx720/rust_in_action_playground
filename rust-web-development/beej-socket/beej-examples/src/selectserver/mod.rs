@@ -1,4 +1,7 @@
-use std::net::{Ipv6Addr, SocketAddrV6};
+use std::{
+    net::{Ipv6Addr, SocketAddrV6},
+    os::fd::{AsFd, AsRawFd},
+};
 
 pub fn selectserver(port: u16) {
     let unspec = SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, port, 0, 0);
@@ -12,4 +15,16 @@ pub fn selectserver(port: u16) {
     .expect("Failed to create socket");
     nix::sys::socket::setsockopt(&listener, nix::sys::socket::sockopt::ReuseAddr, &true)
         .expect("Failed to set socket options");
+
+    nix::sys::socket::bind(listener.as_raw_fd(), &socket).expect("Failed to bind to socket");
+    let backlog = nix::sys::socket::Backlog::new(10).expect("Failed to create backlog");
+    nix::sys::socket::listen(&listener, backlog).expect("Failed to listen on socket");
+
+    let mut main = nix::sys::select::FdSet::new();
+    main.insert(listener.as_fd());
+
+    println!("Listening on {}", unspec);
+    loop {
+        todo!()
+    }
 }
