@@ -25,6 +25,9 @@ pub fn selectserver(port: u16) {
 
     println!("Listening on {}", unspec);
     loop {
+        let mut read_fds = main.clone();
+        let _ = nix::sys::select::select(None, Some(&mut read_fds), None, None, None)
+            .expect("Failed to select...");
         todo!()
     }
 }
