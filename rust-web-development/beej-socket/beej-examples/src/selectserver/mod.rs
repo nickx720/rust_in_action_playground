@@ -1,6 +1,6 @@
 use std::{
     net::{Ipv6Addr, SocketAddrV6},
-    os::fd::{AsFd, AsRawFd},
+    os::fd::{AsFd, AsRawFd, RawFd},
 };
 
 pub fn selectserver(port: u16) {
@@ -28,6 +28,11 @@ pub fn selectserver(port: u16) {
         let mut read_fds = main.clone();
         let _ = nix::sys::select::select(None, Some(&mut read_fds), None, None, None)
             .expect("Failed to select...");
+        let active_fd: Vec<RawFd> = read_fds
+            .fds(None)
+            .map(|borrowed_fd| borrowed_fd.as_raw_fd())
+            .collect();
+
         todo!()
     }
 }
