@@ -5,6 +5,26 @@
 #[cfg(test)]
 mod tests {
     use super::*;
+    struct DropBomb {
+        panic: bool,
+    }
+
+    impl DropBomb {
+        fn new() -> Self {
+            Self { panic: true }
+        }
+        pub fn defuse(&mut self) {
+            self.panic = false;
+        }
+    }
+    impl Drop for DropBomb {
+        fn drop(&mut self) {
+            if self.panic {
+                dbg!(self.panic);
+                panic!("Hello")
+            }
+        }
+    }
 
     #[test]
     #[should_panic]
