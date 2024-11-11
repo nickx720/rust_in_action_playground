@@ -1,6 +1,6 @@
 use std::{
     net::{Ipv6Addr, SocketAddrV6},
-    os::fd::{AsFd, AsRawFd, RawFd},
+    os::fd::{AsFd, AsRawFd, BorrowedFd, RawFd},
 };
 
 pub fn selectserver(port: u16) {
@@ -32,6 +32,23 @@ pub fn selectserver(port: u16) {
             .fds(None)
             .map(|borrowed_fd| borrowed_fd.as_raw_fd())
             .collect();
+
+        active_fd.iter().for_each(|fd| {
+            if fd.as_raw_fd() == listener.as_raw_fd() {
+                println!("[Server] Starting new connection...");
+                let new_rfd = nix::sys::socket::accept(listener.as_raw_fd())
+                    .expect("Failed to accept new conn");
+                let new_fd = unsafe { BorrowedFd::borrow_raw(new_rfd) };
+                let ss: nix::sys::socket::SockaddrStorage =
+                    nix::sys::socket::getpeername(new_fd.as_raw_fd()).expect("getpeername failed");
+                main.insert(new_fd);
+                println!(
+                    "[Server] New connection {}",
+                    ss.as_sockaddr_in6().expect("sockaddr not ipv6")
+                );
+            } else {
+            }
+        });
 
         todo!()
     }
