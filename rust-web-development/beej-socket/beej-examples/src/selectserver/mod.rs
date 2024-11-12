@@ -47,6 +47,24 @@ pub fn selectserver(port: u16) {
                     ss.as_sockaddr_in6().expect("sockaddr not ipv6")
                 );
             } else {
+                let mut buf = [0u8; 1024];
+                let nbytes = nix::sys::socket::recv(
+                    fd.as_raw_fd(),
+                    &mut buf,
+                    nix::sys::socket::MsgFlags::empty(),
+                )
+                .expect("failed to receive data");
+
+                match nbytes {
+                    0 => {
+                        println!("connection closed by socket!");
+                        let new_fd = unsafe { BorrowedFd::borrow_raw(fd.as_raw_fd()) };
+                        main.remove(new_fd);
+                    }
+                    _ => {
+                        main.fds(None).for_each(|mfd| {});
+                    }
+                }
             }
         });
 
