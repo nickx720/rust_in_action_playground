@@ -62,12 +62,21 @@ pub fn selectserver(port: u16) {
                         main.remove(new_fd);
                     }
                     _ => {
-                        main.fds(None).for_each(|mfd| {});
+                        main.fds(None).for_each(|mfd| {
+                            if mfd.as_raw_fd() != fd.as_raw_fd() {
+                                let r = nix::sys::socket::send(
+                                    mfd.as_raw_fd(),
+                                    &mut buf,
+                                    nix::sys::socket::MsgFlags::empty(),
+                                );
+                                if let Err(e) = r {
+                                    eprint!("{}", e)
+                                }
+                            }
+                        });
                     }
                 }
             }
         });
-
-        todo!()
     }
 }
