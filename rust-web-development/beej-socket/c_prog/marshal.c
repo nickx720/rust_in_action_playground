@@ -16,3 +16,13 @@ uint32_t htonf(float f) {
   return p;
 }
 
+float ntohf(uint32_t p) {
+  float f = ((p >> 16) & 0x7fff);
+  f += (p & 0xffff) / 65536.0f;
+
+  if (((p >> 31) & 0x1) == 0x1) {
+    f = -1;
+  }
+  return f;
+}
+
