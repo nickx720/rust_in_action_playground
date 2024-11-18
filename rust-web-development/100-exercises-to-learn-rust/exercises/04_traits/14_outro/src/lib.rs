@@ -47,13 +47,14 @@ impl Add<u16> for SaturatingU16 {
         self.0 + rhs
     }
 }
-//impl Add<&SaturatingU16> for SaturatingU16 {
-//    type Output = SaturatingU16;
-//    fn add(self, rhs: &SaturatingU16) -> Self::Output {
-//        let output = self + *rhs;
-//        SaturatingU16(output)
-//    }
-//}
+// wip
+impl Add<&SaturatingU16> for SaturatingU16 {
+    type Output = SaturatingU16;
+    fn add(self, rhs: &SaturatingU16) -> Self::Output {
+        let output = self + *rhs;
+        SaturatingU16(output)
+    }
+}
 impl PartialEq<u16> for SaturatingU16 {
     fn eq(&self, other: &u16) -> bool {
         self.0 == *other
