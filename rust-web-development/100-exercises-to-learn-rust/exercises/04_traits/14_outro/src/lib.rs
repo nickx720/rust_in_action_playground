@@ -37,20 +37,20 @@ impl From<&u8> for SaturatingU16 {
 impl Add for SaturatingU16 {
     type Output = SaturatingU16;
     fn add(self, rhs: SaturatingU16) -> Self::Output {
-        let output = self.0 + rhs.0;
+        let output = self.0.saturating_add(rhs.0);
         SaturatingU16(output)
     }
 }
 impl Add<u16> for SaturatingU16 {
     type Output = u16;
     fn add(self, rhs: u16) -> Self::Output {
-        self.0 + rhs
+        self.0.saturating_add(rhs)
     }
 }
 impl Add<&SaturatingU16> for SaturatingU16 {
     type Output = SaturatingU16;
     fn add(self, rhs: &SaturatingU16) -> Self::Output {
-        SaturatingU16(self.0 + rhs.0)
+        SaturatingU16(self.0.saturating_add(rhs.0))
     }
 }
 impl PartialEq<u16> for SaturatingU16 {
