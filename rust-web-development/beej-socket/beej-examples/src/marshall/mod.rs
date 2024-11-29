@@ -9,8 +9,8 @@ fn hton(number: f32) -> u32 {
         0u32
     };
     //   p = ((((uint32_t)f) & 0x7fff) << 16) | (sign << 31);
-    let mut p = ((number.to_bits() & 0x7fff) << 16u32) | (sign << 31);
-    p |= ((number - number.trunc()) * 65536.0f32).to_bits() & 0xffff;
+    let mut p = (((number as u32) & 0x7fff) << 16u32) | (sign << 31);
+    p |= (((number - number.trunc()) * 65536.0f32) as u32) & 0xffff;
     p
 }
 
