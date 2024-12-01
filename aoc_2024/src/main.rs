@@ -19,11 +19,14 @@ fn main() {
     match &cli.command {
         Some(Commands::One { part_one, part_two }) => {
             println!("Invoking Day one");
+            let file = "./assets/day_one/question.txt";
             if part_one.is_some() {
-                day_one::partone::part_one();
+                let output = day_one::partone::part_one(file).unwrap();
+                println!("The output of day one first part is {}", output);
             }
             if part_two.is_some() {
-                day_one::parttwo::part_two()
+                let output = day_one::parttwo::part_two(file).unwrap();
+                println!("The output of day one second part is {}", output);
             }
         }
         _ => panic!("Invalid day"),
