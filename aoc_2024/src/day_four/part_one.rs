@@ -15,8 +15,7 @@ fn traverse(input: &Vec<Vec<char>>, pos: (i32, i32), dir: (i32, i32)) -> bool {
             && pos_x < input[0].len() as i32
             && pos_y >= 0
             && pos_y < input.len() as i32
-            && input[(pos.1 + dir.1 * (1 + index)) as usize][(pos.0 + dir.0 * (1 + index)) as usize]
-                == *character
+            && input[pos_y as usize][pos_x as usize] == *character
     })
 }
 
