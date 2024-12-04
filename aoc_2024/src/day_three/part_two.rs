@@ -45,7 +45,6 @@ pub fn part_two(path: &str) -> Result<i32, Box<dyn Error>> {
             }
         }
     }
-    dbg!(output);
     Ok(output)
 }
 
@@ -54,7 +53,7 @@ mod tests {
     use super::*;
     #[test]
     pub fn day_three_part_two() -> Result<(), Box<dyn Error>> {
-        let output = part_two("./assets/day_three/sample.txt")?;
+        let output = part_two("./assets/day_three/sample2.txt")?;
         assert_eq!(48, output);
         Ok(())
     }
