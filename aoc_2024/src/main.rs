@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 mod day_five;
 mod day_four;
 mod day_one;
+mod day_seven;
 mod day_six;
 mod day_three;
 mod day_two;
@@ -34,6 +35,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     Six {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Seven {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -172,6 +177,28 @@ fn main() {
                     }
                 }
                 _ => println!("Ignoring day six part two"),
+            }
+        }
+        Some(Commands::Seven { part_one, part_two }) => {
+            println!("Invoking Day Six");
+            let file = "./assets/day_seven/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_seven::part_one::part_one(file).unwrap();
+                        println!("The output of day seven first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day seven part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_seven::part_two::part_two(file).unwrap();
+                        println!("The output of day seven second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day seven part two"),
             }
         }
         _ => panic!("Invalid day"),
