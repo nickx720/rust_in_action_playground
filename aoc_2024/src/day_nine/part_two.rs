@@ -47,7 +47,7 @@ pub fn part_two(path: &str) -> Result<usize, Box<dyn Error>> {
     }
     let mut defrag = files.len() - 1;
     while defrag > 0 {
-        for rs in 0..space.len() {
+        for (rs, _) in space.iter().enumerate() {
             if space[rs].len >= files[defrag].len && space[rs].start < files[defrag].start {
                 files[defrag].start = space[rs].start;
                 space[rs].start += files[defrag].len;

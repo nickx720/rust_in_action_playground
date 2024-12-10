@@ -6,6 +6,7 @@ mod day_nine;
 mod day_one;
 mod day_seven;
 mod day_six;
+mod day_ten;
 mod day_three;
 mod day_two;
 #[derive(Parser)]
@@ -49,6 +50,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     Nine {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Ten {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -253,6 +258,28 @@ fn main() {
                     }
                 }
                 _ => println!("Ignoring day nine part two"),
+            }
+        }
+        Some(Commands::Ten { part_one, part_two }) => {
+            println!("Invoking Day Ten");
+            let file = "./assets/day_ten/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_ten::part_one::part_one(file).unwrap();
+                        println!("The output of day ten first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day ten part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_ten::part_two::part_two(file).unwrap();
+                        println!("The output of day ten second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day ten part two"),
             }
         }
         _ => panic!("Invalid day"),
