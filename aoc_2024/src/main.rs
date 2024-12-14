@@ -3,11 +3,13 @@ mod day_eight;
 mod day_eleven;
 mod day_five;
 mod day_four;
+mod day_fourteen;
 mod day_nine;
 mod day_one;
 mod day_seven;
 mod day_six;
 mod day_ten;
+mod day_thirteen;
 mod day_three;
 mod day_twelve;
 mod day_two;
@@ -64,6 +66,14 @@ enum Commands {
         part_two: Option<bool>,
     },
     Twelve {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Thirteen {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Fourteen {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -334,6 +344,50 @@ fn main() {
                     }
                 }
                 _ => println!("Ignoring day twelve part two"),
+            }
+        }
+        Some(Commands::Thirteen { part_one, part_two }) => {
+            println!("Invoking Day Thirteen");
+            let file = "./assets/day_thirteen/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_thirteen::part_one::part_one(file).unwrap();
+                        println!("The output of day thirteen first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day thirteen part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_thirteen::part_two::part_two(file).unwrap();
+                        println!("The output of day thirteen second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day thirteen part two"),
+            }
+        }
+        Some(Commands::Fourteen { part_one, part_two }) => {
+            println!("Invoking Day Fourteen");
+            let file = "./assets/day_fourteen/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_fourteen::part_one::part_one(file).unwrap();
+                        println!("The output of day fourteen first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day fourteen part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_fourteen::part_two::part_two(file).unwrap();
+                        println!("The output of day fourteen second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day fourteen part two"),
             }
         }
         _ => panic!("Invalid day"),
