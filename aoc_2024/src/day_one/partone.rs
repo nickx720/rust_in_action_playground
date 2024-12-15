@@ -4,7 +4,8 @@ use std::{
     io::{self, BufRead},
 };
 
-pub fn part_one(file: &str) -> Result<u32, Box<dyn Error>> {
+#[allow(dead_code)]
+fn part_one(file: &str) -> Result<u32, Box<dyn Error>> {
     let mut first_set = Vec::new();
     let mut second_set = Vec::new();
     let file = File::open(file)?;
