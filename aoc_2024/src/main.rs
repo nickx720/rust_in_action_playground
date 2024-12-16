@@ -9,6 +9,7 @@ mod day_nine;
 mod day_one;
 mod day_seven;
 mod day_six;
+mod day_sixteen;
 mod day_ten;
 mod day_thirteen;
 mod day_three;
@@ -79,6 +80,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     Fifteen {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Sixteen {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -415,6 +420,28 @@ fn main() {
                     }
                 }
                 _ => println!("Ignoring day fifteen part two"),
+            }
+        }
+        Some(Commands::Sixteen { part_one, part_two }) => {
+            println!("Invoking Day Sixteen");
+            let file = "./assets/day_sixteen/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_sixteen::part_one::part_one(file).unwrap();
+                        println!("The output of day sixteen first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day sixteen part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_sixteen::part_two::part_two(file).unwrap();
+                        println!("The output of day sixteen second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day sixteen part two"),
             }
         }
         _ => panic!("Invalid day"),
