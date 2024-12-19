@@ -7,6 +7,7 @@ mod day_five;
 mod day_four;
 mod day_fourteen;
 mod day_nine;
+mod day_nineteen;
 mod day_one;
 mod day_seven;
 mod day_seventeen;
@@ -94,6 +95,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     Eighteen {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Nineteen {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -491,11 +496,33 @@ fn main() {
             match part_two {
                 Some(value) => {
                     if *value {
-                        let output = day_eighteen::part_two::part_two(file).unwrap();
-                        println!("The output of day eighteen second part is {}", output);
+                        let output = day_nineteen::part_two::part_two(file).unwrap();
+                        println!("The output of day nineteen second part is {}", output);
                     }
                 }
-                _ => println!("Ignoring day eighteen part two"),
+                _ => println!("Ignoring day nineteen part two"),
+            }
+        }
+        Some(Commands::Nineteen { part_one, part_two }) => {
+            println!("Invoking Day Nineteen");
+            let file = "./assets/day_nineteen/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_nineteen::part_one::part_one(file).unwrap();
+                        println!("The output of day nineteen first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day nineteen part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_nineteen::part_two::part_two(file).unwrap();
+                        println!("The output of day nineteen second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day nineteen part two"),
             }
         }
         _ => panic!("Invalid day"),
