@@ -17,6 +17,7 @@ mod day_ten;
 mod day_thirteen;
 mod day_three;
 mod day_twelve;
+mod day_twenty;
 mod day_two;
 #[derive(Parser)]
 struct Cli {
@@ -99,6 +100,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     Nineteen {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    Twenty {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
@@ -523,6 +528,28 @@ fn main() {
                     }
                 }
                 _ => println!("Ignoring day nineteen part two"),
+            }
+        }
+        Some(Commands::Twenty { part_one, part_two }) => {
+            println!("Invoking Day Twenty");
+            let file = "./assets/day_twenty/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_twenty::part_one::part_one::<100>(file).unwrap();
+                        println!("The output of day twenty first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day twenty part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_twenty::part_two::part_two::<100>(file).unwrap();
+                        println!("The output of day twenty second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day twenty part two"),
             }
         }
         _ => panic!("Invalid day"),
