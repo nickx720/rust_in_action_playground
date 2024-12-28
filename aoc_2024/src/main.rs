@@ -18,6 +18,7 @@ mod day_thirteen;
 mod day_three;
 mod day_twelve;
 mod day_twenty;
+mod day_twenty_four;
 mod day_twenty_one;
 mod day_twenty_three;
 mod day_twenty_two;
@@ -119,6 +120,10 @@ enum Commands {
         part_two: Option<bool>,
     },
     TwentyThree {
+        part_one: Option<bool>,
+        part_two: Option<bool>,
+    },
+    TwentyFour {
         part_one: Option<bool>,
         part_two: Option<bool>,
     },
