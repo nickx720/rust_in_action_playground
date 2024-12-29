@@ -638,6 +638,28 @@ fn main() {
                 _ => println!("Ignoring day twenty_three part two"),
             }
         }
+        Some(Commands::TwentyFour { part_one, part_two }) => {
+            println!("Invoking Day TwentyFour");
+            let file = "./assets/day_twenty_four/question.txt";
+            match part_one {
+                Some(value) => {
+                    if *value {
+                        let output = day_twenty_four::part_one::part_one(file).unwrap();
+                        println!("The output of day twenty_four first part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day twenty_four part one"),
+            }
+            match part_two {
+                Some(value) => {
+                    if *value {
+                        let output = day_twenty_four::part_two::part_two(file).unwrap();
+                        println!("The output of day twenty_four second part is {}", output);
+                    }
+                }
+                _ => println!("Ignoring day twenty_four part two"),
+            }
+        }
         _ => panic!("Invalid day"),
     }
 }
