@@ -1,9 +1,26 @@
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
+    fs::read_to_string,
 };
 
+use crate::day_twenty_four::parse_input;
+
 use super::{Gate, GateOp};
+
+fn build_input_map(wires: &Vec<String>, gates: &Vec<Gate>) -> HashMap<String, Vec<Gate>> {
+    let mut map = HashMap::new();
+    for wire in wires {
+        let mut gates_in = Vec::new();
+        for gate in gates {
+            if &gate.inputs.0 == wire || &gate.inputs.1 == wire {
+                gates_in.push(gate.clone());
+            }
+        }
+        map.insert(wire.to_string(), gates_in);
+    }
+    map
+}
 
 fn find_nth_bit_adder(n: usize, input_map: &HashMap<String, Vec<Gate>>) {
     let x_name = format!("x{:02}", n);
@@ -172,8 +189,57 @@ fn xor_with_non_xy_in_has_z_out(gates: &Vec<Gate>) -> Vec<String> {
     bad_wires
 }
 
-pub fn part_two(path: &str) -> Result<usize, Box<dyn Error>> {
-    todo!()
+pub fn part_two(path: &str) -> Result<String, Box<dyn Error>> {
+    let input = read_to_string(path).unwrap();
+    let (wires, gates) = parse_input(&input);
+    let input_map = build_input_map(&wires.keys().cloned().collect(), &gates);
+    for n in 0..45 {
+        find_nth_bit_adder(n, &input_map);
+        println!("");
+    }
+
+    let mut bad_wires: HashSet<String> = HashSet::new();
+    let bad = or_gates_no_xyz(&gates);
+    println!("CHECK: OR gates can't have xyz wires in or out: {:?}", bad);
+    bad_wires.extend(bad);
+
+    let bad = and_gates_no_xyz_output(&gates);
+    println!("CHECK: AND gates can't have xyz outputs: {:?}", bad);
+    bad_wires.extend(bad);
+
+    let bad = and_xor_gates_both_xyz_or_none(&gates);
+    println!(
+        "CHECK: AND/XOR gate inputs are both or neither xyz: {:?}",
+        bad
+    );
+    bad_wires.extend(bad);
+
+    let bad = and_output_is_or_input(&gates, &input_map);
+    println!("CHECK: AND outputs are followed by a single OR: {:?}", bad);
+    bad_wires.extend(bad);
+
+    let bad = or_output_goes_in_one_and_one_xor(&gates, &input_map);
+    println!(
+        "CHECK: OR outputs go in exactly one AND & one XOR: {:?}",
+        bad
+    );
+    bad_wires.extend(bad);
+
+    let bad = xor_output_non_z_goes_in_one_and_one_xor(&gates, &input_map);
+    println!(
+        "CHECK: Non-z XOR outputs go in exactly one AND & one XOR: {:?}",
+        bad
+    );
+    bad_wires.extend(bad);
+
+    let bad = xor_with_non_xy_in_has_z_out(&gates);
+    println!("CHECK: XOR with non-xy inputs has z output: {:?}", bad);
+    bad_wires.extend(bad);
+
+    let mut sorted: Vec<String> = bad_wires.into_iter().collect();
+    sorted.sort();
+    println!("");
+    Ok(sorted.join(","))
 }
 
 #[cfg(test)]
@@ -181,7 +247,8 @@ mod tests {
     use super::*;
     #[test]
     fn day_twenty_four_part_two() -> Result<(), Box<dyn Error>> {
-        assert_eq!(1, 1);
+        let output = part_two("./assets/day_twenty_four/sample.txt")?;
+        assert_eq!(output, "aaa,aoc,bbb,ccc,eee,ooo,z24,z99");
         Ok(())
     }
 }
