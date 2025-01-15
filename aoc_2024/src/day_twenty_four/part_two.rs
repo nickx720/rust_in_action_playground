@@ -4,242 +4,173 @@ use std::{
     fs::read_to_string,
 };
 
-use crate::day_twenty_four::parse_input;
+use itertools::Itertools;
 
-use super::{Gate, GateOp};
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
+enum OP {
+    OR,
+    AND,
+    XOR,
+}
 
-fn build_input_map(wires: &Vec<String>, gates: &Vec<Gate>) -> HashMap<String, Vec<Gate>> {
-    let mut map = HashMap::new();
-    for wire in wires {
-        let mut gates_in = Vec::new();
-        for gate in gates {
-            if &gate.inputs.0 == wire || &gate.inputs.1 == wire {
-                gates_in.push(gate.clone());
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+struct Gate {
+    in1: String,
+    in2: String,
+    out: String,
+    op: OP,
+}
+
+#[derive(Debug, Clone)]
+struct Machine {
+    inputs: HashMap<String, u8>,
+    finished: HashSet<Gate>,
+    unfinished: HashSet<Gate>,
+}
+
+impl Machine {
+    fn new(gates: Vec<Gate>, inputs: HashMap<String, u8>) -> Self {
+        Machine {
+            inputs,
+            finished: HashSet::new(),
+            unfinished: gates.into_iter().collect(),
+        }
+    }
+
+    fn is_output(label: &String) -> bool {
+        label.starts_with('z')
+    }
+
+    fn waiting_outputs(&self) -> HashSet<String> {
+        self.unfinished
+            .iter()
+            .filter_map(|g| Self::is_output(&g.out).then_some(g.out.clone()))
+            .collect()
+    }
+
+    fn calc(inputs: &HashMap<String, u8>, gate: &Gate) -> Option<u8> {
+        let in1 = inputs.get(&gate.in1)?;
+        let in2 = inputs.get(&gate.in2)?;
+        match gate.op {
+            OP::OR => Some(in1 | in2),
+            OP::AND => Some(in1 & in2),
+            OP::XOR => Some(in1 ^ in2),
+        }
+    }
+    fn output(&self) -> u64 {
+        self.inputs
+            .iter()
+            .filter_map(|(l, v)| Self::is_output(l).then_some((l, v)))
+            .sorted_by(|a, b| a.0.cmp(b.0))
+            .rev()
+            .fold(0, |acc, x| (acc * 2) + *x.1 as u64)
+    }
+
+    fn tick(&mut self) {
+        let mut f = Vec::new();
+        let mut i = Vec::new();
+        let mut u = Vec::new();
+        for g in self.unfinished.drain() {
+            if let Some(v) = Self::calc(&self.inputs, &g) {
+                i.push((g.out.clone(), v));
+                f.push(g);
+            } else {
+                u.push(g);
             }
         }
-        map.insert(wire.to_string(), gates_in);
+        self.inputs.extend(i);
+        self.finished.extend(f);
+        self.unfinished = u.into_iter().collect();
     }
-    map
+}
+fn parse(input: String) -> Result<Machine, Box<dyn Error>> {
+    let (ws, gs) = input.split_once("\n\n").expect("Something went wrong");
+    let wires: Result<HashMap<String, u8>, Box<dyn Error>> = Ok(ws).and_then(|sw| {
+        sw.lines()
+            .map(|sl| {
+                let (l, v) = sl.split_once(": ").expect("split failed");
+                let label = l.to_string();
+                let value = v.parse().expect("parsing error");
+                Ok((label, value))
+            })
+            .collect()
+    });
+    let gates: Result<Vec<Gate>, Box<dyn Error>> = Ok(gs).and_then(|sg| {
+        sg.lines()
+            .map(|sl| {
+                let (lhs, rhs) = sl.split_once(" -> ").expect("split failed");
+                let tokens = lhs.split_whitespace().collect_vec();
+                Ok(Gate {
+                    in1: tokens[0].to_string(),
+                    in2: tokens[2].to_string(),
+                    out: rhs.to_string(),
+                    op: match tokens[1] {
+                        "OR" => OP::OR,
+                        "AND" => OP::AND,
+                        "XOR" => OP::XOR,
+                        _ => panic!("Something went wrong"),
+                    },
+                })
+            })
+            .collect()
+    });
+    Ok(Machine::new(gates.unwrap(), wires.unwrap()))
 }
 
-fn find_nth_bit_adder(n: usize, input_map: &HashMap<String, Vec<Gate>>) {
-    let x_name = format!("x{:02}", n);
-    let y_name = format!("y{:02}", n);
+fn solve(m: &Machine) -> String {
+    let gs: HashMap<(&String, &String, OP), &Gate> = m
+        .unfinished
+        .iter()
+        .map(|g| ((&g.in1, &g.in2, g.op), g))
+        .collect();
+    let mut swapped = Vec::new();
+    for g in &m.unfinished {
+        if swapped.contains(&&g.out) {
+            continue;
+        }
+        //g is OR/AND and ouputs zXX - swap with 2nd xor from xXX yXX -> xor ->xor
+        if g.op != OP::XOR && g.out.starts_with('z') {
+            let idx = g.out.strip_prefix('z').unwrap();
+            if idx == "45" {
+                continue;
+            } //last one is fine
+            let (p1, p2) = (String::from("x") + idx, String::from("y") + idx);
+            let x1 = gs
+                .get(&(&p1, &p2, OP::XOR))
+                .or(gs.get(&(&p2, &p1, OP::XOR)))
+                .unwrap();
+            let x2 = m
+                .unfinished
+                .iter()
+                .find(|g| g.op == OP::XOR && (g.in1 == x1.out || g.in2 == x1.out))
+                .unwrap();
+            swapped.push(&g.out);
+            swapped.push(&x2.out);
+        }
 
-    let mut gates: HashSet<Gate> = HashSet::new();
-    for gate in input_map.get(&x_name).unwrap() {
-        gates.insert(gate.clone());
-    }
-    for gate in input_map.get(&y_name).unwrap() {
-        gates.insert(gate.clone());
-    }
-    let mut next_gates: HashSet<Gate> = HashSet::new();
-    for gate in &gates {
-        if !gate.output.starts_with("z") {
-            for next_gate in input_map.get(&gate.output).unwrap() {
-                next_gates.insert(next_gate.clone());
+        //XOR connected to OR - swap with AND from same inputs
+        if g.op == OP::XOR {
+            if m.unfinished
+                .iter()
+                .find(|x| x.op == OP::OR && (x.in2 == g.out || x.in1 == g.out))
+                .is_some()
+            {
+                let x = gs
+                    .get(&(&g.in1, &g.in2, OP::AND))
+                    .or(gs.get(&(&g.in2, &g.in1, OP::AND)))
+                    .unwrap();
+                swapped.push(&g.out);
+                swapped.push(&x.out);
             }
         }
     }
-    gates.extend(next_gates);
-
-    for gate in gates {
-        gate.print();
-        println!(" is part of bit {}", n);
-    }
+    swapped.iter().sorted().join(",")
 }
-
-fn is_xyz(wire: &str) -> bool {
-    wire.starts_with("x") || wire.starts_with("y") || wire.starts_with("z")
-}
-
-fn or_gates_no_xyz(gates: &Vec<Gate>) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if gate.op != GateOp::OR {
-            continue;
-        }
-        if is_xyz(&gate.inputs.0) {
-            bad_wires.push(gate.inputs.0.clone());
-        }
-        if is_xyz(&gate.inputs.1) {
-            bad_wires.push(gate.inputs.1.clone());
-        }
-        if is_xyz(&gate.output) {
-            if gate.output != "z45" {
-                bad_wires.push(gate.output.clone());
-            }
-        }
-    }
-    bad_wires
-}
-
-fn and_gates_no_xyz_output(gates: &Vec<Gate>) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if gate.op != GateOp::AND {
-            continue;
-        }
-        if is_xyz(&gate.output) {
-            bad_wires.push(gate.output.clone());
-        }
-    }
-    bad_wires
-}
-
-fn and_xor_gates_both_xyz_or_none(gates: &Vec<Gate>) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if ![GateOp::AND, GateOp::XOR].contains(&gate.op) {
-            continue;
-        }
-        if (is_xyz(&gate.inputs.0) && !is_xyz(&gate.inputs.1))
-            || (!is_xyz(&gate.inputs.0) && is_xyz(&gate.inputs.1))
-        {
-            bad_wires.push(gate.inputs.0.clone());
-            bad_wires.push(gate.inputs.1.clone());
-        }
-    }
-    bad_wires
-}
-
-fn and_output_is_or_input(
-    gates: &Vec<Gate>,
-    input_map: &HashMap<String, Vec<Gate>>,
-) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        // pjf is my bit-0 input carry, this has to be changed
-        // for other inputs
-        if gate.op != GateOp::AND || gate.output == "pjf" {
-            continue;
-        }
-        let next_gates = input_map.get(&gate.output).unwrap();
-        if next_gates.len() != 1 {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-        if next_gates[0].op != GateOp::OR {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-    }
-    bad_wires
-}
-
-fn or_output_goes_in_one_and_one_xor(
-    gates: &Vec<Gate>,
-    input_map: &HashMap<String, Vec<Gate>>,
-) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if gate.op != GateOp::OR || gate.output == "z45" {
-            continue;
-        }
-        let next_gates = input_map.get(&gate.output).unwrap();
-        if next_gates.len() != 2 {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-        if !((next_gates[0].op == GateOp::AND && next_gates[1].op == GateOp::XOR)
-            || (next_gates[0].op == GateOp::XOR && next_gates[1].op == GateOp::AND))
-        {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-    }
-    bad_wires
-}
-
-fn xor_output_non_z_goes_in_one_and_one_xor(
-    gates: &Vec<Gate>,
-    input_map: &HashMap<String, Vec<Gate>>,
-) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if gate.op != GateOp::XOR || gate.output.starts_with("z") {
-            continue;
-        }
-        let next_gates = input_map.get(&gate.output).unwrap();
-        if next_gates.len() != 2 {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-        if !((next_gates[0].op == GateOp::AND && next_gates[1].op == GateOp::XOR)
-            || (next_gates[0].op == GateOp::XOR && next_gates[1].op == GateOp::AND))
-        {
-            bad_wires.push(gate.output.clone());
-            continue;
-        }
-    }
-    bad_wires
-}
-
-fn xor_with_non_xy_in_has_z_out(gates: &Vec<Gate>) -> Vec<String> {
-    let mut bad_wires = Vec::new();
-    for gate in gates {
-        if gate.op != GateOp::XOR || is_xyz(&gate.inputs.0) || is_xyz(&gate.inputs.1) {
-            continue;
-        }
-
-        if !gate.output.starts_with("z") {
-            bad_wires.push(gate.output.clone());
-        }
-    }
-    bad_wires
-}
-
 pub fn part_two(path: &str) -> Result<String, Box<dyn Error>> {
     let input = read_to_string(path).unwrap();
-    let (wires, gates) = parse_input(&input);
-    let input_map = build_input_map(&wires.keys().cloned().collect(), &gates);
-    for n in 0..45 {
-        find_nth_bit_adder(n, &input_map);
-        println!("");
-    }
-
-    let mut bad_wires: HashSet<String> = HashSet::new();
-    let bad = or_gates_no_xyz(&gates);
-    println!("CHECK: OR gates can't have xyz wires in or out: {:?}", bad);
-    bad_wires.extend(bad);
-
-    let bad = and_gates_no_xyz_output(&gates);
-    println!("CHECK: AND gates can't have xyz outputs: {:?}", bad);
-    bad_wires.extend(bad);
-
-    let bad = and_xor_gates_both_xyz_or_none(&gates);
-    println!(
-        "CHECK: AND/XOR gate inputs are both or neither xyz: {:?}",
-        bad
-    );
-    bad_wires.extend(bad);
-
-    let bad = and_output_is_or_input(&gates, &input_map);
-    println!("CHECK: AND outputs are followed by a single OR: {:?}", bad);
-    bad_wires.extend(bad);
-
-    let bad = or_output_goes_in_one_and_one_xor(&gates, &input_map);
-    println!(
-        "CHECK: OR outputs go in exactly one AND & one XOR: {:?}",
-        bad
-    );
-    bad_wires.extend(bad);
-
-    let bad = xor_output_non_z_goes_in_one_and_one_xor(&gates, &input_map);
-    println!(
-        "CHECK: Non-z XOR outputs go in exactly one AND & one XOR: {:?}",
-        bad
-    );
-    bad_wires.extend(bad);
-
-    let bad = xor_with_non_xy_in_has_z_out(&gates);
-    println!("CHECK: XOR with non-xy inputs has z output: {:?}", bad);
-    bad_wires.extend(bad);
-
-    let mut sorted: Vec<String> = bad_wires.into_iter().collect();
-    sorted.sort();
-    println!("");
-    Ok(sorted.join(","))
+    let input = parse(input)?;
+    let input = solve(&input);
+    Ok(input)
 }
 
 #[cfg(test)]
