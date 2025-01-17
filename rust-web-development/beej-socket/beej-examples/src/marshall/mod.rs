@@ -24,7 +24,10 @@ fn ntoh(number: u32) -> f32 {
     // return f;
     let mut float: f32 = ((number >> 16) & 0x7fff) as f32;
     float += (number & 0xffff) as f32 / 65536.0f32;
-    todo!()
+    if ((number >> 31) & 0x1) == 0x1 {
+        float = -1f32;
+    }
+    float
 }
 
 pub fn marshall() {
@@ -32,4 +35,6 @@ pub fn marshall() {
     let converted_u32 = hton(value);
     println!("Original {}", value);
     println!("Network 0x{:08X}", converted_u32);
+    let converted_val = ntoh(converted_u32);
+    println!("Reformatted {}", converted_val);
 }
