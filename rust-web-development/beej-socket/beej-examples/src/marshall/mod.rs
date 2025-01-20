@@ -28,5 +28,5 @@ pub fn marshall() {
     println!("Original {}", value);
     println!("Network 0x{:08X}", converted_u32);
     let converted_val = ntoh(converted_u32);
-    println!("Reformatted {}", converted_val);
+    println!("Converted {}", converted_val);
 }
