@@ -32,5 +32,25 @@ int main(int argc, char *argv[]) {
     perror("socket");
     exit(1);
   }
+
+  if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast,
+                 sizeof broadcast) == -1) {
+    perror("setsockopt (SO_BROADCAST)");
+    exit(1);
+  }
+  their_addr.sin_family = AF_INET;
+  their_addr.sin_port = htons(SERVERPORT);
+  their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+  memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
+
+  if ((numbytes = sendto(sockfd, argv[2], strlen(argv[2]), 0,
+                         (struct sockaddr *)&their_addr, sizeof their_addr)) ==
+      -1) {
+    perror("sendto");
+    exit(1);
+  }
+  printf("sent %d bytes to %s\n", numbytes, inet_ntoa(their_addr.sin_addr));
+  close(sockfd);
+  return 0;
 }
 
