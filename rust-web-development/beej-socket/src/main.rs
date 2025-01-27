@@ -1,8 +1,8 @@
 use std::net::IpAddr;
 
 use beej_examples::{
-    self, listener::socketlistener, marshall::marshall, pollexample::pollexample,
-    pollserver::pollserver, selectexample, selectserver, showip::show_ip,
+    self, broadcast::socketbroadcaster, listener::socketlistener, marshall::marshall,
+    pollexample::pollexample, pollserver::pollserver, selectexample, selectserver, showip::show_ip,
     streamclient::streamclient, streamserver::streamserver, talker::sockettalker,
 };
 use clap::{Parser, Subcommand};
@@ -46,6 +46,11 @@ pub enum Commands {
         port: u16,
     },
     MarshallExample,
+    BroadcastExample {
+        host: IpAddr,
+        port: u16,
+        message: String,
+    },
 }
 
 fn main() {
@@ -69,5 +74,10 @@ fn main() {
         Commands::SelectExample => selectexample::selectexample(),
         Commands::SelectServer { port } => selectserver::selectserver(port),
         Commands::MarshallExample => marshall(),
+        Commands::BroadcastExample {
+            host,
+            port,
+            message,
+        } => socketbroadcaster(host, port, message),
     };
 }
