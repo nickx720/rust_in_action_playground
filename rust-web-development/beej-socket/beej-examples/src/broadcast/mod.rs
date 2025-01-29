@@ -1,5 +1,6 @@
 use std::net::{IpAddr, SocketAddrV4, SocketAddrV6};
 
+use libc::{SOL_SOCKET, SO_BROADCAST};
 use nix::unistd;
 
 pub fn socketbroadcaster(host: IpAddr, port: u16, message: String) {
@@ -15,6 +16,7 @@ pub fn socketbroadcaster(host: IpAddr, port: u16, message: String) {
                 None,
             )
             .expect("Failed to create sockfd");
+            nix::sys::socket::setsockopt(sockfd, SO_BROADCAST, true).unwrap();
         }
         IpAddr::V6(addr) => {
             let socket = SocketAddrV6::new(addr, port, 0, 0);
