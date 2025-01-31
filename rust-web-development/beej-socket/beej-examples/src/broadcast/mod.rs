@@ -1,18 +1,25 @@
-use std::net::{IpAddr, SocketAddr, SocketAddrV4, SocketAddrV6, ToSocketAddrs};
+use std::net::{IpAddr, SocketAddrV4, SocketAddrV6};
 
-use nix::{ifaddrs::getifaddrs, unistd};
+use nix::{ifaddrs::getifaddrs, net::if_::InterfaceFlags, unistd};
 
 pub fn socketbroadcaster(host: IpAddr, port: u16, message: String) {
     match host {
         IpAddr::V4(addr) => {
             let socket = SocketAddrV4::new(addr, port);
-            let hostname = getifaddrs().ok().unwrap();
-            for ifaddr in hostname {
-                if let Some(address) = ifaddr.address {
-                    // TODO try to print machine address
-                    dbg!();
-                }
-            }
+            let hostname: Vec<_> = getifaddrs()
+                .ok()
+                .unwrap()
+                .filter(|ifaddr| {
+                    ifaddr.flags.contains(InterfaceFlags::IFF_LOOPBACK)
+                        || ifaddr.flags.contains(InterfaceFlags::IFF_BROADCAST)
+                })
+                .filter_map(|ifaddr| {
+                    ifaddr
+                        .address
+                        .and_then(|addr| addr.as_sockaddr_in().map(|inet| inet.ip().to_string()))
+                })
+                .collect();
+            dbg!(hostname);
             let socket: nix::sys::socket::SockaddrIn = socket.into();
             let sockfd = nix::sys::socket::socket(
                 nix::sys::socket::AddressFamily::Inet,
