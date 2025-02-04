@@ -47,7 +47,6 @@ pub enum Commands {
     },
     MarshallExample,
     BroadcastExample {
-        host: IpAddr,
         port: u16,
         message: String,
     },
@@ -74,10 +73,6 @@ fn main() {
         Commands::SelectExample => selectexample::selectexample(),
         Commands::SelectServer { port } => selectserver::selectserver(port),
         Commands::MarshallExample => marshall(),
-        Commands::BroadcastExample {
-            host,
-            port,
-            message,
-        } => socketbroadcaster(host, port, message),
+        Commands::BroadcastExample { port, message } => socketbroadcaster(port, message),
     };
 }
