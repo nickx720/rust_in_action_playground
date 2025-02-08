@@ -730,7 +730,7 @@ dependencies = [
  "pest_derive",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 1.0.60",
 ]
 
 [[package]]
@@ -1122,7 +1122,7 @@ dependencies = [
 name = "locks"
 version = "0.1.0"
 dependencies = [
- "thiserror",
+ "thiserror 1.0.60",
  "ticket_fields",
 ]
 
@@ -1428,7 +1428,7 @@ dependencies = [
 name = "patch"
 version = "0.1.0"
 dependencies = [
- "thiserror",
+ "thiserror 1.0.60",
  "ticket_fields",
 ]
 
@@ -1451,7 +1451,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "560131c633294438da9f7c4b08189194b20946c8274c6b9e38881a7874dc8ee8"
 dependencies = [
  "memchr",
- "thiserror",
+ "thiserror 1.0.60",
  "ucd-trie",
 ]
 
@@ -1598,9 +1598,9 @@ checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.82"
+version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ad3d49ab951a01fbaafe34f2ec74122942fe18a3f9814c3268f1bb72042131b"
+checksum = "60946a68e5f9d28b0dc1c21bb8a97ee7d018a8b322fa57838ba31cc878e22d99"
 dependencies = [
  "unicode-ident",
 ]
@@ -1755,7 +1755,7 @@ dependencies = [
 name = "rwlock"
 version = "0.1.0"
 dependencies = [
- "thiserror",
+ "thiserror 1.0.60",
  "ticket_fields",
 ]
 
@@ -1931,7 +1931,7 @@ name = "source"
 version = "0.1.0"
 dependencies = [
  "common",
- "thiserror",
+ "thiserror 1.0.60",
 ]
 
 [[package]]
@@ -2001,9 +2001,9 @@ version = "0.1.0"
 
 [[package]]
 name = "syn"
-version = "2.0.63"
+version = "2.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf5be731623ca1a1fb7d8be6f261a3be6d3e2337b8a1f97be944d020c8fcb704"
+checksum = "36147f1a48ae0ec2b5b3bc5b537d267457555a10dc06f3dbc8cb11ba3006d3b1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2057,7 +2057,16 @@ version = "1.0.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "579e9083ca58dd9dcf91a9923bb9054071b9ebbd800b342194c9feb0ee89fc18"
 dependencies = [
- "thiserror-impl",
+ "thiserror-impl 1.0.60",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d452f284b73e6d76dd36758a0c8684b1d5be31f92b89d07fd5822175732206fc"
+dependencies = [
+ "thiserror-impl 2.0.11",
 ]
 
 [[package]]
@@ -2072,10 +2081,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "thiserror-impl"
+version = "2.0.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "thiserror_"
 version = "0.1.0"
 dependencies = [
  "common",
+ "thiserror 2.0.11",
 ]
 
 [[package]]
@@ -2087,7 +2108,7 @@ name = "ticket_fields"
 version = "0.1.0"
 dependencies = [
  "common",
- "thiserror",
+ "thiserror 1.0.60",
 ]
 
 [[package]]
@@ -2233,7 +2254,7 @@ dependencies = [
  "log",
  "rand",
  "sha1",
- "thiserror",
+ "thiserror 1.0.60",
  "url",
  "utf-8",
 ]
