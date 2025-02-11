@@ -14,6 +14,16 @@ fn main() {
     cache(&84, &mut var2);
     let mut s = Box::new(42);
     replace_with_84(&mut s);
+    let mut x = Box::new(42);
+    let r = &x;
+    if rand() > 0.5 {
+        *x = 84;
+    } else {
+        println!("{}", r);
+    }
+}
+fn rand() -> f32 {
+    2.5
 }
 
 fn cache(input: &i32, sum: &mut i32) {
