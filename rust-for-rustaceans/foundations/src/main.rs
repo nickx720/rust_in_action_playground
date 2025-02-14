@@ -29,6 +29,9 @@ fn main() {
         z = &x;
     }
     println!("{}", z);
+    let mut s = "hello";
+    *MutStr { s: &mut s }.s = "world";
+    println!("{}", s);
 }
 fn rand() -> f32 {
     2.5
@@ -65,4 +68,8 @@ fn str_before(s: &str, c: char) -> Option<&str> {
         delimiter: &c.to_string(),
     }
     .next()
+}
+
+struct MutStr<'a, 'b> {
+    s: &'a mut &'b str,
 }
