@@ -10,7 +10,7 @@ enum TicketDescriptionError {
     DescriptionCannotLongerThan500bytes,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TicketDescription(String);
 
 impl TryFrom<String> for TicketDescription {
