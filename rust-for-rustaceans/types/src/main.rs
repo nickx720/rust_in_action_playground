@@ -1,8 +1,11 @@
 fn main() {
     dbg!("{}", std::mem::size_of::<Foo>());
-    let new_val: [u8; 4] = [1, 2, 3, 4];
-    let output = &new_val[..].stringify();
-    println!("I am here {}", output);
+    let heap_box: Box<[u8; 4]> = Box::new([1, 2, 3, 4]);
+    print(heap_box as Box<dyn Printable>);
+}
+
+fn random<const N: usize>(val: &[u8; N]) {
+    println!("{}", val.len());
 }
 
 trait Printable {
@@ -28,12 +31,18 @@ impl Printable for &[u8] {
         self.to_owned().stringify()
     }
 }
-// TODO get it to work with [u8:4]
+impl<const N: usize> Printable for [u8; N] {
+    fn stringify(&self) -> String {
+        let mut output = String::new();
+        for item in self.iter() {
+            output.push_str(item.to_string().as_str());
+        }
+        output
+    }
+}
 fn print(a: Box<dyn Printable>) {
     println!("{}", a.stringify());
 }
-// #[repr(align(1024))] 1024 bytes
-// #[repr(packed)] 16 bytes
 #[repr(C)] // 32 bytes with padding
 #[derive(Debug)]
 struct Foo {
