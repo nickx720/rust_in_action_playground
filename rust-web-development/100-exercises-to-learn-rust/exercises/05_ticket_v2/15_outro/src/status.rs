@@ -9,7 +9,7 @@ pub enum Status {
 }
 
 #[derive(Debug, thiserror::Error)]
-enum StatusError {
+pub enum StatusError {
     #[error("Converting to Status Failed")]
     StatusConversionFailed,
 }
