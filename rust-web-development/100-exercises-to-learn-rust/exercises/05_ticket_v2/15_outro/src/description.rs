@@ -3,7 +3,7 @@
 //   Implement the traits required to make the tests pass too.
 
 #[derive(Debug, thiserror::Error)]
-enum TicketDescriptionError {
+pub enum TicketDescriptionError {
     #[error("The description cannot be empty")]
     DescriptionCannotBeEmpty,
     #[error("The description cannot be longer than 500 bytes")]

@@ -7,9 +7,9 @@ pub struct TicketTitle(String);
 
 #[derive(Debug, thiserror::Error)]
 pub enum TicketTitleError {
-    #[error("The title cannot be longer than 50 bytes")]
-    TicketNotEmpty,
     #[error("The title cannot be empty")]
+    TicketNotEmpty,
+    #[error("The title cannot be longer than 50 bytes")]
     TicketLongerThan50,
 }
 impl TryFrom<&str> for TicketTitle {
