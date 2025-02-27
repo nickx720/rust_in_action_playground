@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-
 use actix_web::{
     App, HttpResponse, HttpServer, Responder, get, middleware, post,
     web::{self, Json},
 };
-use r2d2::Pool;
+mod db;
+use db::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct RequestPayload {
@@ -44,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .service(detokenize)
     })
     .bind(("127.0.0.1", 8080))?
+    .workers(2)
     .run()
     .await
 }
