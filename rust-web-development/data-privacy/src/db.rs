@@ -27,6 +27,17 @@ pub async fn execute(
     let conn = web::block(move || pool.get())
         .await?
         .map_err(error::ErrorInternalServerError)?;
+    web::block(move || match query {
+        Queries::InsertTokens => insert_token(conn, values),
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)
+}
+pub async fn initialize_db(pool: &Pool) -> Result<(), Error> {
+    let pool = pool.clone();
+    let conn = web::block(move || pool.get())
+        .await?
+        .map_err(error::ErrorInternalServerError)?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS value (
             id INTEGER PRIMARY KEY,
@@ -36,11 +47,7 @@ pub async fn execute(
         [],
     )
     .unwrap();
-    web::block(move || match query {
-        Queries::InsertTokens => insert_token(conn, values),
-    })
-    .await?
-    .map_err(error::ErrorInternalServerError)
+    Ok(())
 }
 
 fn insert_token(conn: Connection, values: DataPrivacyStore) -> DataPrivacyStoreError {
