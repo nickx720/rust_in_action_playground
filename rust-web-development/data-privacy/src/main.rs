@@ -3,7 +3,7 @@ use actix_web::{
     web::{self, Json},
 };
 mod db;
-use db::Pool;
+use db::{Pool, initialize_db};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -33,6 +33,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
     let manager = SqliteConnectionManager::file("dataprivacy.db");
     let pool = Pool::new(manager).unwrap();
+    let _ = initialize_db(&pool).await;
 
     log::info!("starting server at http://localhost:8080");
     HttpServer::new(move || {
