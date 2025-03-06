@@ -2,7 +2,7 @@ pub type Pool = r2d2::Pool<r2d2_sqlite::SqliteConnectionManager>;
 pub type Connection = r2d2::PooledConnection<r2d2_sqlite::SqliteConnectionManager>;
 use actix_web::{
     Error,
-    error::{self, ErrorInternalServerError},
+    error::{self, BlockingError, ErrorInternalServerError},
     web,
 };
 use rusqlite::params;
@@ -18,21 +18,23 @@ pub struct DataPrivacyStore {
 }
 
 #[derive(Error, Debug)]
-enum DBError {
-    #[error("Actix Error")]
-    ActixError(#[from] Error),
+pub enum DBError {
     #[error("DB Error")]
-    RusqLiteError(#[from] rusqlite::Error),
+    RusqLite(#[from] rusqlite::Error),
     #[error("R2D2 Error")]
-    R2D2Error(#[from] r2d2::Error),
+    R2D2(#[from] r2d2::Error),
+    #[error("BlockingError")]
+    Blocking(#[from] BlockingError),
+    #[error("Generic Actix Error")]
+    GenericActixBlocking(#[from] Error),
 }
 
 // TODO handle error
 pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     let pool = pool.clone();
     let conn = web::block(move || pool.get())
-        .await
-        .map_err(ErrorInternalServerError)?;
+        .await?
+        .map_err(DBError::R2D2)?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS value (
             id INTEGER PRIMARY KEY,
