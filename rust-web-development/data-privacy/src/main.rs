@@ -1,9 +1,11 @@
 use actix_web::{
-    App, HttpResponse, HttpServer, Responder, get, middleware, post,
+    App, HttpResponse, HttpServer, Responder, ResponseError, get,
+    http::StatusCode,
+    middleware, post,
     web::{self, Json},
 };
 mod db;
-use db::{Pool, initialize_db};
+use db::{DataPrivacyStore, Pool, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -20,8 +22,21 @@ async fn hello() -> impl Responder {
 }
 
 #[post("/tokenize")]
-async fn tokenize(req_body: Json<RequestPayload>) -> impl Responder {
-    HttpResponse::Ok().body(serde_json::to_string(&req_body).unwrap())
+async fn tokenize(req_body: Json<RequestPayload>, pool: web::Data<Pool>) -> impl Responder {
+    let token = DataPrivacyStore::new(
+        req_body.id.parse::<u32>().unwrap(),
+        "yes".to_string(),
+        "no".to_string(),
+    );
+    match insert_token(&pool, token).await {
+        Ok(val) => HttpResponse::Ok().body(val.to_string()),
+        Err(e) => {
+            dbg!(e);
+            HttpResponse::InternalServerError()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .finish()
+        }
+    }
 }
 #[post("/detokenize")]
 async fn detokenize(req_body: String) -> impl Responder {
