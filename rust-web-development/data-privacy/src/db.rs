@@ -16,6 +16,15 @@ pub struct DataPrivacyStore {
     original: String,
     token: String,
 }
+impl DataPrivacyStore {
+    pub fn new(id: u32, original: String, token: String) -> Self {
+        Self {
+            id,
+            original,
+            token,
+        }
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum DBError {
@@ -29,14 +38,13 @@ pub enum DBError {
     GenericActixBlocking(#[from] Error),
 }
 
-// TODO handle error
 pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     let pool = pool.clone();
     let conn = web::block(move || pool.get())
         .await?
         .map_err(DBError::R2D2)?;
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS value (
+        "CREATE TABLE IF NOT EXISTS vault (
             id INTEGER PRIMARY KEY,
             original TEXT NOT NULL,
             token INTEGER NOT NULL
@@ -57,5 +65,6 @@ INSERT into vault (id,original,token) VALUES (?1,?2,?3)
 ",
         params![values.id, values.original, values.token],
     )?;
+    dbg!("I am here");
     Ok(stmt)
 }
