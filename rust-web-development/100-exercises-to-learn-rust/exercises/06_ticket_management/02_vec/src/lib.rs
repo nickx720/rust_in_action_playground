@@ -10,12 +10,28 @@
 //
 // We expect `fibonacci(0)` to return `0`, `fibonacci(1)` to return `1`,
 // `fibonacci(2)` to return `1`, and so on.
+fn fibonacci_helper(memo: &mut Vec<Option<u32>>, n: u32) -> u32 {
+    if n == 0 {
+        return 0;
+    }
+    if n == 1 {
+        return 1;
+    }
+    if let Some(value) = memo[n as usize] {
+        return value;
+    }
+    let first_value = fibonacci_helper(memo, n - 1);
+    let second_value = fibonacci_helper(memo, n - 2);
+    memo.insert(n as usize, Some(first_value + second_value));
+    first_value + second_value
+}
 pub fn fibonacci(n: u32) -> u32 {
     // TODO: implement the `fibonacci` function
     //
     // Hint: use a `Vec` to memoize the results you have already calculated
     // so that you don't have to recalculate them several times.
-    todo!()
+    let mut memo = vec![None; (n + 1) as usize];
+    fibonacci_helper(&mut memo, n)
 }
 
 #[cfg(test)]

@@ -1,8 +1,5 @@
-// TODO: Flesh out the `WeekTemperatures` struct and its method implementations to pass the tests.
-
 #[derive(Default)]
 pub struct WeekTemperatures {
-    // TODO
     internal: [Option<i32>; 7],
 }
 
