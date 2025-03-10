@@ -4,6 +4,11 @@ use actix_web::{
     middleware, post,
     web::{self, Json},
 };
+use aes_gcm::{
+    Aes256Gcm, Key, Nonce,
+    aead::{AeadCore, KeyInit, OsRng},
+};
+use rand::Rng;
 mod db;
 use db::{DataPrivacyStore, Pool, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
@@ -21,11 +26,30 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
+fn encrypt_data(data: &str, key: &[u8; 32]) -> Vec<u8> {
+    let key = Key::<Aes256Gcm>::from_slice(key);
+    let cipher = Aes256Gcm::new(&key);
+    let nonce = Aes256Gcm::generate_nonce(&mut OsRng); // 96-bits; unique per message
+    let ciphertext = cipher.encrypt(&nonce, data.as_bytes()).unwrap();
+    [nonce.to_vec(), ciphertext].concat()
+}
+
+fn decrypt_data(encrypted_data: &[u8], key: &[u8; 32]) -> String {
+    let cipher = Aes256Gcm::new(Key::from_slice(key));
+    let (nonce, ciphertext) = encrypted_data.split_at(12); // Extract nonce
+    let plaintext = cipher
+        .decrypt(Nonce::from_slice(nonce), ciphertext)
+        .unwrap();
+    String::from_utf8(plaintext).unwrap()
+}
+
 #[post("/tokenize")]
 async fn tokenize(req_body: Json<RequestPayload>, pool: web::Data<Pool>) -> impl Responder {
+    let original = serde_json::to_string(&req_body.data).unwrap();
+    for (_key, tokenize) in req_body.data.to_owned().iter_mut() {}
     let token = DataPrivacyStore::new(
         req_body.id.parse::<u32>().unwrap(),
-        "yes".to_string(),
+        original,
         "no".to_string(),
     );
     match insert_token(&pool, token).await {
@@ -48,12 +72,14 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
     let manager = SqliteConnectionManager::file("dataprivacy.db");
     let pool = Pool::new(manager).unwrap();
+    let key: [u8; 32] = rand::rng().random::<[u8; 32]>();
     let _ = initialize_db(&pool).await;
 
     log::info!("starting server at http://localhost:8080");
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(key))
             .wrap(middleware::Logger::default())
             .service(tokenize)
             .service(hello)
