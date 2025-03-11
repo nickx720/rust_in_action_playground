@@ -15,13 +15,15 @@ pub struct DataPrivacyStore {
     id: u32,
     original: String,
     token: String,
+    nonce: Vec<u8>,
 }
 impl DataPrivacyStore {
-    pub fn new(id: u32, original: String, token: String) -> Self {
+    pub fn new(id: u32, original: String, token: String, nonce: Vec<u8>) -> Self {
         Self {
             id,
             original,
             token,
+            nonce,
         }
     }
 }
@@ -47,7 +49,8 @@ pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
         "CREATE TABLE IF NOT EXISTS vault (
             id INTEGER PRIMARY KEY,
             original TEXT NOT NULL,
-            token INTEGER NOT NULL
+            token TEXT NOT NULL,
+            none BLOB NOT NULL
         )",
         [],
     )
@@ -61,9 +64,9 @@ pub async fn insert_token(pool: &Pool, values: DataPrivacyStore) -> Result<usize
         .map_err(ErrorInternalServerError)?;
     let stmt = conn.execute(
         "
-INSERT into vault (id,original,token) VALUES (?1,?2,?3)
+INSERT into vault (id,original,token,nonce) VALUES (?1,?2,?3,?4)
 ",
-        params![values.id, values.original, values.token],
+        params![values.id, values.original, values.token, values.nonce],
     )?;
     dbg!("I am here");
     Ok(stmt)
