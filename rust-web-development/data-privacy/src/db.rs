@@ -50,7 +50,7 @@ pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
             id INTEGER PRIMARY KEY,
             original TEXT NOT NULL,
             token TEXT NOT NULL,
-            none BLOB NOT NULL
+            nonce BLOB NOT NULL
         )",
         [],
     )
