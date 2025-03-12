@@ -1,5 +1,5 @@
 use actix_web::{
-    App, HttpResponse, HttpServer, Responder, ResponseError, get,
+    App, HttpResponse, HttpServer, Responder, get,
     http::StatusCode,
     middleware, post,
     web::{self, Json},
@@ -10,10 +10,11 @@ use aes_gcm::{
 };
 use rand::Rng;
 mod db;
+use base64::prelude::*;
 use db::{DataPrivacyStore, Pool, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, io::Read};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct RequestPayload {
@@ -54,7 +55,9 @@ async fn tokenize(
     for (_index, tokenize) in req_body.data.to_owned().iter_mut() {
         let token = encrypt_data(&tokenize, &key);
         nonce = token.0;
-        *tokenize = String::from_utf8(token.1).expect("Conversion failed");
+        let string = BASE64_STANDARD.encode(token.1);
+        dbg!(&string);
+        *tokenize = string;
     }
     let token = serde_json::to_string(&req_body.data).unwrap();
     let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), original, token, nonce);

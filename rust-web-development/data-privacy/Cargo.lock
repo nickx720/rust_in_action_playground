@@ -493,6 +493,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "aes-gcm",
+ "base64",
  "env_logger",
  "log",
  "r2d2",
