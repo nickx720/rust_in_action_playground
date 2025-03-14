@@ -50,7 +50,6 @@ async fn tokenize(
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> impl Responder {
-    let original = serde_json::to_string(&req_body.data).unwrap();
     let token = req_body
         .data
         .iter()
@@ -62,7 +61,7 @@ async fn tokenize(
         .collect::<HashMap<String, String>>();
     let token = serde_json::to_string(&token).unwrap();
     dbg!(&token);
-    let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), original, token);
+    let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), token);
     match insert_token(&pool, token).await {
         Ok(val) => HttpResponse::Ok().body(val.to_string()),
         Err(e) => {
@@ -74,7 +73,11 @@ async fn tokenize(
     }
 }
 #[post("/detokenize")]
-async fn detokenize(req_body: String) -> impl Responder {
+async fn detokenize(
+    req_body: String,
+    pool: web::Data<Pool>,
+    key: web::Data<[u8; 32]>,
+) -> impl Responder {
     HttpResponse::Ok().body(req_body)
 }
 

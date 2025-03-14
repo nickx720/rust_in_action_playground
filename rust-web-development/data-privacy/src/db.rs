@@ -13,16 +13,11 @@ use crate::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DataPrivacyStore {
     id: u32,
-    original: String,
     token: String,
 }
 impl DataPrivacyStore {
-    pub fn new(id: u32, original: String, token: String) -> Self {
-        Self {
-            id,
-            original,
-            token,
-        }
+    pub fn new(id: u32, token: String) -> Self {
+        Self { id, token }
     }
 }
 
@@ -46,7 +41,6 @@ pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS vault (
             id INTEGER PRIMARY KEY,
-            original TEXT NOT NULL,
             token TEXT NOT NULL
         )",
         [],
@@ -61,10 +55,27 @@ pub async fn insert_token(pool: &Pool, values: DataPrivacyStore) -> Result<usize
         .map_err(ErrorInternalServerError)?;
     let stmt = conn.execute(
         "
-INSERT into vault (id,original,token) VALUES (?1,?2,?3)
+INSERT into vault (id,token) VALUES (?1,?2)
 ",
-        params![values.id, values.original, values.token],
+        params![values.id, values.token],
     )?;
     dbg!("I am here");
     Ok(stmt)
+}
+pub async fn get_token(pool: &Pool, id: u32) -> Result<DataPrivacyStore, DBError> {
+    let pool = pool.clone();
+    let conn = web::block(move || pool.get())
+        .await?
+        .map_err(ErrorInternalServerError)?;
+    let mut stmt = conn.prepare(
+        "
+SELECT id, token FROM vault where id = ?
+",
+    )?;
+    stmt.query_row([id], |row| {
+        let id = row.get(0)?;
+        let token = row.get(1)?;
+        Ok(DataPrivacyStore::new(id, token))
+    })
+    .map_err(DBError::RusqLite)
 }
