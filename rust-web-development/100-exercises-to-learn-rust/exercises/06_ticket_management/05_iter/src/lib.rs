@@ -5,7 +5,11 @@ use ticket_fields::{TicketDescription, TicketTitle};
 pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
-
+impl TicketStore {
+    pub fn iter(&self) -> std::slice::Iter<Ticket> {
+        self.tickets.iter()
+    }
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ticket {
     title: TicketTitle,
