@@ -6,6 +6,7 @@ use actix_web::{
     web,
 };
 use rusqlite::params;
+use serde_json::Value;
 use thiserror::Error;
 
 use crate::{Deserialize, Serialize};
@@ -13,11 +14,11 @@ use crate::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DataPrivacyStore {
     id: u32,
-    token: String,
+    data: String,
 }
 impl DataPrivacyStore {
-    pub fn new(id: u32, token: String) -> Self {
-        Self { id, token }
+    pub fn new(id: u32, data: String) -> Self {
+        Self { id, data }
     }
 }
 
@@ -33,6 +34,11 @@ pub enum DBError {
     GenericActixBlocking(#[from] Error),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DataPrivacyStoreResponse {
+    id: u32,
+    data: Value,
+}
 pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     let pool = pool.clone();
     let conn = web::block(move || pool.get())
@@ -41,7 +47,7 @@ pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS vault (
             id INTEGER PRIMARY KEY,
-            token TEXT NOT NULL
+            data TEXT NOT NULL
         )",
         [],
     )
@@ -55,27 +61,29 @@ pub async fn insert_token(pool: &Pool, values: DataPrivacyStore) -> Result<usize
         .map_err(ErrorInternalServerError)?;
     let stmt = conn.execute(
         "
-INSERT into vault (id,token) VALUES (?1,?2)
+INSERT INTO vault (id, data) VALUES (?1,?2)
 ",
-        params![values.id, values.token],
+        params![values.id, values.data],
     )?;
     dbg!("I am here");
     Ok(stmt)
 }
-pub async fn get_token(pool: &Pool, id: u32) -> Result<DataPrivacyStore, DBError> {
+pub async fn get_token(pool: &Pool, id: u32) -> Result<DataPrivacyStoreResponse, DBError> {
     let pool = pool.clone();
     let conn = web::block(move || pool.get())
         .await?
         .map_err(ErrorInternalServerError)?;
     let mut stmt = conn.prepare(
         "
-SELECT id, token FROM vault where id = ?
+SELECT id, data FROM vault where id = ?
 ",
     )?;
     stmt.query_row([id], |row| {
         let id = row.get(0)?;
-        let token = row.get(1)?;
-        Ok(DataPrivacyStore::new(id, token))
+        let token: String = row.get(1)?;
+        let data = serde_json::from_str(&token).unwrap();
+        let data = DataPrivacyStoreResponse { id, data };
+        Ok(data)
     })
     .map_err(DBError::RusqLite)
 }
