@@ -11,7 +11,7 @@ use aes_gcm::{
 use rand::Rng;
 mod db;
 use base64::prelude::*;
-use db::{DataPrivacyStore, Pool, initialize_db, insert_token};
+use db::{DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, io::Read};
@@ -63,7 +63,13 @@ async fn tokenize(
     dbg!(&token);
     let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), token);
     match insert_token(&pool, token).await {
-        Ok(val) => HttpResponse::Ok().body(val.to_string()),
+        Ok(_val) => {
+            let tokenized_value = get_token(&pool, req_body.id.parse::<u32>().unwrap())
+                .await
+                .unwrap();
+            let body = serde_json::to_string(&tokenized_value).unwrap();
+            HttpResponse::Ok().body(body)
+        }
         Err(e) => {
             dbg!(e);
             HttpResponse::InternalServerError()
