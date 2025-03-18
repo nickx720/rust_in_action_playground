@@ -80,11 +80,22 @@ async fn tokenize(
 }
 #[post("/detokenize")]
 async fn detokenize(
-    req_body: String,
+    req_body: Json<RequestPayload>,
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
+    let original_token = req_body
+        .data
+        .iter()
+        .map(|item| {
+            let (index, token) = item;
+            let detoken = decrypt_data(token.as_bytes(), &key);
+            let string = BASE64_STANDARD.decode(detoken).unwrap();
+            dbg!(string);
+            (index.clone(), "sample".to_owned())
+        })
+        .collect::<HashMap<String, String>>();
+    HttpResponse::Ok().body("body")
 }
 
 #[actix_web::main]

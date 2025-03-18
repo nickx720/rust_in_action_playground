@@ -65,7 +65,6 @@ INSERT INTO vault (id, data) VALUES (?1,?2)
 ",
         params![values.id, values.data],
     )?;
-    dbg!("I am here");
     Ok(stmt)
 }
 pub async fn get_token(pool: &Pool, id: u32) -> Result<DataPrivacyStoreResponse, DBError> {
