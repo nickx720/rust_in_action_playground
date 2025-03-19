@@ -39,6 +39,11 @@ pub struct DataPrivacyStoreResponse {
     id: u32,
     data: Value,
 }
+impl DataPrivacyStoreResponse {
+    pub fn get_data(&self) -> Option<&serde_json::Map<String, Value>> {
+        self.data.as_object()
+    }
+}
 pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     let pool = pool.clone();
     let conn = web::block(move || pool.get())

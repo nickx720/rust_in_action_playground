@@ -14,12 +14,17 @@ use base64::prelude::*;
 use db::{DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 use std::{collections::HashMap, io::Read};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct RequestPayload {
+struct TokenPayload {
     id: String,
     data: HashMap<String, String>,
+}
+#[derive(Deserialize)]
+struct DeTokenPayload {
+    id: u32,
 }
 
 #[get("/")]
@@ -46,7 +51,7 @@ fn decrypt_data(encrypted_data: &[u8], key: &[u8; 32]) -> String {
 
 #[post("/tokenize")]
 async fn tokenize(
-    req_body: Json<RequestPayload>,
+    req_body: Json<TokenPayload>,
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> impl Responder {
@@ -80,22 +85,25 @@ async fn tokenize(
 }
 #[post("/detokenize")]
 async fn detokenize(
-    req_body: Json<RequestPayload>,
+    req_body: Json<DeTokenPayload>,
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> impl Responder {
-    let original_token = req_body
-        .data
+    let id = req_body.id;
+    let retrieved_token = get_token(&pool, id).await.unwrap();
+    let original_token = retrieved_token
+        .get_data()
         .iter()
-        .map(|item| {
-            let (index, token) = item;
-            let detoken = decrypt_data(token.as_bytes(), &key);
-            let string = BASE64_STANDARD.decode(detoken).unwrap();
-            dbg!(string);
-            (index.clone(), "sample".to_owned())
+        .map(|item: &&Map<String, Value>| {
+            // TODO figure this out
+            let (key, val) = item;
+            let string = BASE64_STANDARD.decode(token).unwrap();
+            let detoken = decrypt_data(string.as_ref(), &key);
+            (index.clone(), detoken)
         })
         .collect::<HashMap<String, String>>();
-    HttpResponse::Ok().body("body")
+    let body = serde_json::to_string(&original_token).unwrap();
+    HttpResponse::Ok().body(body)
 }
 
 #[actix_web::main]
