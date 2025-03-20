@@ -14,7 +14,7 @@ use base64::prelude::*;
 use db::{DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
+use serde_json::{Map, Value, map::Values};
 use std::{collections::HashMap, io::Read};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -93,11 +93,13 @@ async fn detokenize(
     let retrieved_token = get_token(&pool, id).await.unwrap();
     let original_token = retrieved_token
         .get_data()
+        .unwrap()
         .iter()
-        .map(|item: &&Map<String, Value>| {
-            // TODO figure this out
-            let (key, val) = item;
-            let string = BASE64_STANDARD.decode(token).unwrap();
+        .map(|item| {
+            // TODO test
+            let (index, val) = item;
+            let temp_token = val.as_str().unwrap();
+            let string = BASE64_STANDARD.decode(temp_token).unwrap();
             let detoken = decrypt_data(string.as_ref(), &key);
             (index.clone(), detoken)
         })
