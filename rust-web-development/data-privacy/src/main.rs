@@ -6,7 +6,7 @@ use actix_web::{
 };
 use aes_gcm::{
     Aes256Gcm, Key, Nonce,
-    aead::{Aead, AeadCore, KeyInit, OsRng},
+    aead::{Aead, AeadCore, KeyInit, OsRng, consts::U12},
 };
 use rand::Rng;
 mod db;
@@ -24,7 +24,7 @@ struct TokenPayload {
 }
 #[derive(Deserialize)]
 struct DeTokenPayload {
-    id: u32,
+    id: String,
 }
 
 #[get("/")]
@@ -89,7 +89,7 @@ async fn detokenize(
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> impl Responder {
-    let id = req_body.id;
+    let id = req_body.id.parse::<u32>().unwrap();
     let retrieved_token = get_token(&pool, id).await.unwrap();
     let original_token = retrieved_token
         .get_data()
@@ -99,6 +99,7 @@ async fn detokenize(
             // TODO test
             let (index, val) = item;
             let temp_token = val.as_str().unwrap();
+            dbg!(&temp_token);
             let string = BASE64_STANDARD.decode(temp_token).unwrap();
             let detoken = decrypt_data(string.as_ref(), &key);
             (index.clone(), detoken)
