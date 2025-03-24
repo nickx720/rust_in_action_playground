@@ -49,6 +49,7 @@ pub async fn initialize_db(pool: &Pool) -> Result<(), DBError> {
     let conn = web::block(move || pool.get())
         .await?
         .map_err(DBError::R2D2)?;
+    conn.execute("DROP TABLE IF EXISTS vault", []).unwrap();
     conn.execute(
         "CREATE TABLE IF NOT EXISTS vault (
             id INTEGER PRIMARY KEY,
