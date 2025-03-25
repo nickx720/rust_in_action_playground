@@ -2,6 +2,10 @@ use aes_gcm::{
     Aes256Gcm, Key, Nonce,
     aead::{Aead, AeadCore, KeyInit, OsRng},
 };
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum EncryptionError {}
 
 pub fn encrypt_data(data: &str, key: &[u8; 32]) -> Vec<u8> {
     let key = Key::<Aes256Gcm>::from_slice(key);
