@@ -4,18 +4,16 @@ use actix_web::{
     middleware, post,
     web::{self, Json},
 };
-use aes_gcm::{
-    Aes256Gcm, Key, Nonce,
-    aead::{Aead, AeadCore, KeyInit, OsRng, consts::U12},
-};
-use rand::Rng;
-mod db;
 use base64::prelude::*;
 use db::{DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
+use encryption::{decrypt_data, encrypt_data};
 use r2d2_sqlite::SqliteConnectionManager;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value, map::Values};
-use std::{collections::HashMap, io::Read};
+use std::collections::HashMap;
+
+mod db;
+mod encryption;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct TokenPayload {
@@ -30,23 +28,6 @@ struct DeTokenPayload {
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
-}
-
-fn encrypt_data(data: &str, key: &[u8; 32]) -> Vec<u8> {
-    let key = Key::<Aes256Gcm>::from_slice(key);
-    let cipher = Aes256Gcm::new(&key);
-    let nonce = Aes256Gcm::generate_nonce(&mut OsRng); // 96-bits; unique per message
-    let ciphertext = cipher.encrypt(&nonce, data.as_bytes()).unwrap();
-    [nonce.to_vec(), ciphertext].concat()
-}
-
-fn decrypt_data(encrypted_data: &[u8], key: &[u8; 32]) -> String {
-    let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(key));
-    let (nonce, ciphertext) = encrypted_data.split_at(12); // Extract nonce
-    let plaintext = cipher
-        .decrypt(Nonce::from_slice(nonce), ciphertext)
-        .unwrap();
-    String::from_utf8(plaintext).unwrap()
 }
 
 #[post("/tokenize")]
@@ -65,7 +46,6 @@ async fn tokenize(
         })
         .collect::<HashMap<String, String>>();
     let token = serde_json::to_string(&token).unwrap();
-    dbg!(&token);
     let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), token);
     match insert_token(&pool, token).await {
         Ok(_val) => {
