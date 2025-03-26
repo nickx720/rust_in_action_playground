@@ -40,7 +40,7 @@ async fn tokenize(
         .data
         .iter()
         .map(|(index, tokenize)| {
-            let token = encrypt_data(tokenize, &key);
+            let token = encrypt_data(tokenize, &key).unwrap();
             let string = BASE64_STANDARD.encode(token);
             (index.clone(), string)
         })
