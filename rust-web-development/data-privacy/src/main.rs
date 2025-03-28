@@ -81,7 +81,7 @@ async fn detokenize(
             let temp_token = val.as_str().unwrap();
             dbg!(&temp_token);
             let string = BASE64_STANDARD.decode(temp_token).unwrap();
-            let detoken = decrypt_data(string.as_ref(), &key);
+            let detoken = decrypt_data(string.as_ref(), &key).unwrap();
             (index.clone(), detoken)
         })
         .collect::<HashMap<String, String>>();

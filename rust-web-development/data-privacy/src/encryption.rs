@@ -30,5 +30,5 @@ pub fn decrypt_data(encrypted_data: &[u8], key: &[u8; 32]) -> Result<String, Enc
     let plaintext = cipher
         .decrypt(Nonce::from_slice(nonce), ciphertext)
         .map_err(EncryptionError::Encrypt)?;
-    String::from_utf8(plaintext)?
+    String::from_utf8(plaintext).map_err(EncryptionError::StringConvFailed)
 }
