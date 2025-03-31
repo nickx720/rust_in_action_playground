@@ -1,16 +1,17 @@
 use actix_web::{
-    App, HttpResponse, HttpServer, Responder, get,
-    http::StatusCode,
+    App, HttpResponse, HttpServer, Responder,
+    http::{StatusCode, header::ContentType},
     middleware, post,
     web::{self, Json},
 };
 use base64::prelude::*;
-use db::{DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
+use db::{DBError, DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
 use encryption::{decrypt_data, encrypt_data};
 use r2d2_sqlite::SqliteConnectionManager;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, num::ParseIntError};
+use thiserror::Error;
 
 mod db;
 mod encryption;
@@ -25,11 +26,26 @@ struct DeTokenPayload {
     id: String,
 }
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+#[derive(Debug, Error)]
+pub enum DeTokenError {
+    #[error("ParseInt Failure")]
+    ParseInt(#[from] ParseIntError),
+    #[error("DB Error")]
+    DB(#[from] DBError),
 }
-
+impl actix_web::error::ResponseError for DeTokenError {
+    fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+        HttpResponse::build(self.status_code())
+            .insert_header(ContentType::html())
+            .body(self.to_string())
+    }
+    fn status_code(&self) -> StatusCode {
+        match *self {
+            DeTokenError::ParseInt(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            DeTokenError::DB(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}
 #[post("/tokenize")]
 async fn tokenize(
     req_body: Json<TokenPayload>,
@@ -68,9 +84,9 @@ async fn detokenize(
     req_body: Json<DeTokenPayload>,
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
-) -> impl Responder {
-    let id = req_body.id.parse::<u32>().unwrap();
-    let retrieved_token = get_token(&pool, id).await.unwrap();
+) -> Result<impl Responder, DeTokenError> {
+    let id = req_body.id.parse::<u32>()?;
+    let retrieved_token = get_token(&pool, id).await?;
     let original_token = retrieved_token
         .get_data()
         .unwrap()
@@ -86,7 +102,7 @@ async fn detokenize(
         })
         .collect::<HashMap<String, String>>();
     let body = serde_json::to_string(&original_token).unwrap();
-    HttpResponse::Ok().body(body)
+    Ok(HttpResponse::Ok().body(body))
 }
 
 #[actix_web::main]
@@ -104,7 +120,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(key))
             .wrap(middleware::Logger::default())
             .service(tokenize)
-            .service(hello)
             .service(detokenize)
     })
     .bind(("127.0.0.1", 8080))?
