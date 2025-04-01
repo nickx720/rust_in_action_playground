@@ -87,22 +87,24 @@ async fn detokenize(
 ) -> Result<impl Responder, DeTokenError> {
     let id = req_body.id.parse::<u32>()?;
     let retrieved_token = get_token(&pool, id).await?;
-    let original_token = retrieved_token
-        .get_data()
-        .unwrap()
-        .iter()
-        .map(|item| {
-            // TODO test
-            let (index, val) = item;
-            let temp_token = val.as_str().unwrap();
-            dbg!(&temp_token);
-            let string = BASE64_STANDARD.decode(temp_token).unwrap();
-            let detoken = decrypt_data(string.as_ref(), &key).unwrap();
-            (index.clone(), detoken)
-        })
-        .collect::<HashMap<String, String>>();
-    let body = serde_json::to_string(&original_token).unwrap();
-    Ok(HttpResponse::Ok().body(body))
+    if let Some(token) = retrieved_token.get_data() {
+        let original_token = token
+            .iter()
+            .map(|item| {
+                // TODO test
+                let (index, val) = item;
+                let temp_token = val.as_str().unwrap();
+                let string = BASE64_STANDARD.decode(temp_token).unwrap();
+                let detoken = decrypt_data(string.as_ref(), &key).unwrap();
+                (index.clone(), detoken)
+            })
+            .collect::<HashMap<String, String>>();
+
+        let body = serde_json::to_string(&original_token).unwrap();
+        Ok(HttpResponse::Ok().body(body))
+    } else {
+        Ok(HttpResponse::BadRequest().body("Bad Request"))
+    }
 }
 
 #[actix_web::main]
