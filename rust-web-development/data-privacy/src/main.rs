@@ -93,12 +93,12 @@ async fn detokenize(
             .map(|item| {
                 // TODO test
                 let (index, val) = item;
-                let temp_token = val.as_str().unwrap();
-                let string = BASE64_STANDARD.decode(temp_token).unwrap();
-                let detoken = decrypt_data(string.as_ref(), &key).unwrap();
+                let temp_token = val.as_str()?;
+                let string = BASE64_STANDARD.decode(temp_token)?;
+                let detoken = decrypt_data(string.as_ref(), &key)?;
                 (index.clone(), detoken)
             })
-            .collect::<HashMap<String, String>>();
+            .collect::<Result<HashMap<String, String>, DBError>>()?;
 
         let body = serde_json::to_string(&original_token).unwrap();
         Ok(HttpResponse::Ok().body(body))
