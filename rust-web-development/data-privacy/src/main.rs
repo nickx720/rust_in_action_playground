@@ -4,7 +4,7 @@ use actix_web::{
     middleware, post,
     web::{self, Json},
 };
-use base64::prelude::*;
+use base64::{DecodeError, prelude::*};
 use db::{DBError, DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
 use encryption::{decrypt_data, encrypt_data};
 use r2d2_sqlite::SqliteConnectionManager;
@@ -32,6 +32,8 @@ pub enum DeTokenError {
     ParseInt(#[from] ParseIntError),
     #[error("DB Error")]
     DB(#[from] DBError),
+    #[error("Base 64 Decode")]
+    Decode(#[from] DecodeError),
 }
 impl actix_web::error::ResponseError for DeTokenError {
     fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
@@ -41,8 +43,7 @@ impl actix_web::error::ResponseError for DeTokenError {
     }
     fn status_code(&self) -> StatusCode {
         match *self {
-            DeTokenError::ParseInt(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            DeTokenError::DB(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -88,20 +89,20 @@ async fn detokenize(
     let id = req_body.id.parse::<u32>()?;
     let retrieved_token = get_token(&pool, id).await?;
     if let Some(token) = retrieved_token.get_data() {
-        let original_token = token
+        let original_token: Result<HashMap<String, String>, DeTokenError> = token
             .iter()
             .map(|item| {
                 // TODO test
                 let (index, val) = item;
-                let temp_token = val.as_str()?;
+                let temp_token = val.as_str().ok_or(DeTokenError::ParseInt)?;
                 let string = BASE64_STANDARD.decode(temp_token)?;
                 let detoken = decrypt_data(string.as_ref(), &key)?;
-                (index.clone(), detoken)
+                Ok((index.clone(), detoken))
             })
-            .collect::<Result<HashMap<String, String>, DBError>>()?;
-
-        let body = serde_json::to_string(&original_token).unwrap();
-        Ok(HttpResponse::Ok().body(body))
+            .collect();
+        todo!()
+        // let body = serde_json::to_string(&original_token).unwrap();
+        // Ok(HttpResponse::Ok().body(body))
     } else {
         Ok(HttpResponse::BadRequest().body("Bad Request"))
     }
