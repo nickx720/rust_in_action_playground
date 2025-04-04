@@ -34,6 +34,8 @@ pub enum DeTokenError {
     DB(#[from] DBError),
     #[error("Base 64 Decode")]
     Decode(#[from] DecodeError),
+    #[error("Random Error")]
+    Other,
 }
 impl actix_web::error::ResponseError for DeTokenError {
     fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
@@ -94,10 +96,13 @@ async fn detokenize(
             .map(|item| {
                 // TODO test
                 let (index, val) = item;
-                let temp_token = val.as_str().ok_or(DeTokenError::ParseInt)?;
-                let string = BASE64_STANDARD.decode(temp_token)?;
-                let detoken = decrypt_data(string.as_ref(), &key)?;
-                Ok((index.clone(), detoken))
+                if let Some(temp_token) = val.as_str() {
+                    let string = BASE64_STANDARD.decode(temp_token)?;
+                    let detoken = decrypt_data(string.as_ref(), &key)?;
+                    Ok((index.clone(), detoken))
+                } else {
+                    Err(DeTokenError::Other)
+                }
             })
             .collect();
         todo!()
