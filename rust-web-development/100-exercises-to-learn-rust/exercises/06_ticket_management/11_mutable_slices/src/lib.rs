@@ -1,6 +1,13 @@
 // TODO: Define a function named `lowercase` that converts all characters in a string to lowercase,
 //  modifying the input in place.
 //  Does it need to take a `&mut String`? Does a `&mut str` work? Why or why not?
+pub fn lowercase(item: &mut str) {
+    for byte in unsafe { item.as_bytes_mut() } {
+        if b'A' <= *byte && *byte <= b'Z' {
+            *byte = *byte + (b'a' - b'A');
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
