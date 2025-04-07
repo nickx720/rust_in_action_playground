@@ -6,7 +6,7 @@ use actix_web::{
 };
 use base64::{DecodeError, prelude::*};
 use db::{DBError, DataPrivacyStore, Pool, get_token, initialize_db, insert_token};
-use encryption::{decrypt_data, encrypt_data};
+use encryption::{EncryptionError, decrypt_data, encrypt_data};
 use r2d2_sqlite::SqliteConnectionManager;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -34,6 +34,8 @@ pub enum DeTokenError {
     DB(#[from] DBError),
     #[error("Base 64 Decode")]
     Decode(#[from] DecodeError),
+    #[error("Encryption Error")]
+    Encrypt(#[from] EncryptionError),
     #[error("Random Error")]
     Other,
 }
@@ -105,9 +107,8 @@ async fn detokenize(
                 }
             })
             .collect();
-        todo!()
-        // let body = serde_json::to_string(&original_token).unwrap();
-        // Ok(HttpResponse::Ok().body(body))
+        let body = serde_json::to_string(&original_token)?;
+        Ok(HttpResponse::Ok().body(body))
     } else {
         Ok(HttpResponse::BadRequest().body("Bad Request"))
     }
