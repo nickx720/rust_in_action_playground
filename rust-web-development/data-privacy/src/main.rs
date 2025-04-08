@@ -36,6 +36,8 @@ pub enum DeTokenError {
     Decode(#[from] DecodeError),
     #[error("Encryption Error")]
     Encrypt(#[from] EncryptionError),
+    #[error("JSON parsing error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
     #[error("Random Error")]
     Other,
 }
@@ -51,6 +53,7 @@ impl actix_web::error::ResponseError for DeTokenError {
         }
     }
 }
+
 #[post("/tokenize")]
 async fn tokenize(
     req_body: Json<TokenPayload>,
@@ -107,6 +110,7 @@ async fn detokenize(
                 }
             })
             .collect();
+        let original_token = original_token?;
         let body = serde_json::to_string(&original_token)?;
         Ok(HttpResponse::Ok().body(body))
     } else {
