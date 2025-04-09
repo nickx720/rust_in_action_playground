@@ -59,7 +59,7 @@ async fn tokenize(
     req_body: Json<TokenPayload>,
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
-) -> impl Responder {
+) -> Result<impl Responder, DeTokenError> {
     let token = req_body
         .data
         .iter()
@@ -77,14 +77,9 @@ async fn tokenize(
                 .await
                 .unwrap();
             let body = serde_json::to_string(&tokenized_value).unwrap();
-            HttpResponse::Ok().body(body)
+            Ok(HttpResponse::Ok().body(body))
         }
-        Err(e) => {
-            dbg!(e);
-            HttpResponse::InternalServerError()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .finish()
-        }
+        Err(e) => Err(DeTokenError::Other),
     }
 }
 #[post("/detokenize")]
