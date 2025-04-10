@@ -60,15 +60,16 @@ async fn tokenize(
     pool: web::Data<Pool>,
     key: web::Data<[u8; 32]>,
 ) -> Result<impl Responder, DeTokenError> {
-    let token = req_body
+    let token: Result<HashMap<String, String>, DeTokenError> = req_body
         .data
         .iter()
         .map(|(index, tokenize)| {
-            let token = encrypt_data(tokenize, &key).unwrap();
+            let token = encrypt_data(tokenize, &key)?;
             let string = BASE64_STANDARD.encode(token);
-            (index.clone(), string)
+            Ok((index.clone(), string))
         })
-        .collect::<HashMap<String, String>>();
+        .collect();
+    let token = token?;
     let token = serde_json::to_string(&token).unwrap();
     let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), token);
     match insert_token(&pool, token).await {
