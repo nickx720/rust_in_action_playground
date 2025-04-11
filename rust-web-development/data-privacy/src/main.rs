@@ -70,14 +70,12 @@ async fn tokenize(
         })
         .collect();
     let token = token?;
-    let token = serde_json::to_string(&token).unwrap();
+    let token = serde_json::to_string(&token)?;
     let token = DataPrivacyStore::new(req_body.id.parse::<u32>().unwrap(), token);
     match insert_token(&pool, token).await {
         Ok(_val) => {
-            let tokenized_value = get_token(&pool, req_body.id.parse::<u32>().unwrap())
-                .await
-                .unwrap();
-            let body = serde_json::to_string(&tokenized_value).unwrap();
+            let tokenized_value = get_token(&pool, req_body.id.parse::<u32>()?).await.unwrap();
+            let body = serde_json::to_string(&tokenized_value)?;
             Ok(HttpResponse::Ok().body(body))
         }
         Err(e) => Err(DeTokenError::Other),
@@ -95,7 +93,6 @@ async fn detokenize(
         let original_token: Result<HashMap<String, String>, DeTokenError> = token
             .iter()
             .map(|item| {
-                // TODO test
                 let (index, val) = item;
                 if let Some(temp_token) = val.as_str() {
                     let string = BASE64_STANDARD.decode(temp_token)?;
