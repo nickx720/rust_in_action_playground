@@ -5,6 +5,14 @@ pub fn md5() {
         15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
     ];
     let mut k: Vec<u32> = Vec::new();
+    //https://en.wikipedia.org/wiki/MD5?utm_source=substack&utm_medium=email#Algorithm
+    for i in 0..=63usize {
+        let sin = (i + 1) as f32;
+        let abs = sin.sin().abs();
+        let floored = (2f32.powf(32f32) * abs).floor();
+        k.push(floored as u32)
+    }
+    dbg!(k[1]);
 }
 
 #[cfg(test)]
