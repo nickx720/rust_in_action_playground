@@ -55,8 +55,15 @@ impl TicketStore {
         self.tickets.push(ticket);
         Some(id)
     }
-    pub fn get(&mut self, index: TicketId) -> Option<TicketDraft> {
-        self.tickets.get(index)
+    pub fn get(&self, index: Option<TicketId>) -> Option<Ticket> {
+        let index = match index {
+            Some(val) => val.0 as usize,
+            None => panic!("Invalid index"),
+        };
+        if index > self.tickets.len() || index < self.tickets.len() {
+            return None;
+        }
+        Some(self.tickets[index - 1].clone())
     }
 }
 
