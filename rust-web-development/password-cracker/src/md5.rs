@@ -38,7 +38,10 @@ pub fn md5() {
     k[29] = 0xfcefa3f8;
     k[30] = 0x676f02d9;
     k[31] = 0x8d2a4c8a;
-    //K[32..35] := { 0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c }
+    k[32] = 0xfffa3942;
+    k[33] = 0x8771f681;
+    k[34] = 0x6d9d6122;
+    k[35] = 0xfde5380c;
     //K[36..39] := { 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70 }
     //K[40..43] := { 0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05 }
     //K[44..47] := { 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665 }
