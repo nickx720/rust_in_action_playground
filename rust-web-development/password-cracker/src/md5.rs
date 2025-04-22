@@ -1,10 +1,11 @@
 pub fn md5() {
+    let mut message = "H1".to_string().into_bytes();
     let s: Vec<u32> = vec![
         7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5,
         9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10,
         15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
     ];
-    let mut k: Vec<u32> = vec![0; 63];
+    let mut k: Vec<u32> = vec![0; 64];
     //https://en.wikipedia.org/wiki/MD5?utm_source=substack&utm_medium=email#Algorithm
     k[0] = 0xd76aa478;
     k[1] = 0xe8c7b756;
@@ -42,14 +43,38 @@ pub fn md5() {
     k[33] = 0x8771f681;
     k[34] = 0x6d9d6122;
     k[35] = 0xfde5380c;
-    //K[36..39] := { 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70 }
-    //K[40..43] := { 0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05 }
-    //K[44..47] := { 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665 }
-    //K[48..51] := { 0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039 }
-    //K[52..55] := { 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1 }
-    //K[56..59] := { 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1 }
-    //K[60..63] := { 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 }
-    dbg!(k[1]);
+    k[36] = 0xa4beea44;
+    k[37] = 0x4bdecfa9;
+    k[38] = 0xf6bb4b60;
+    k[39] = 0xbebfbc70;
+    k[40] = 0x289b7ec6;
+    k[41] = 0xeaa127fa;
+    k[42] = 0xd4ef3085;
+    k[43] = 0x04881d05;
+    k[44] = 0xd9d4d039;
+    k[45] = 0xe6db99e5;
+    k[46] = 0x1fa27cf8;
+    k[47] = 0xc4ac5665;
+    k[48] = 0xf4292244;
+    k[49] = 0x432aff97;
+    k[50] = 0xab9423a7;
+    k[51] = 0xfc93a039;
+    k[52] = 0x655b59c3;
+    k[53] = 0x8f0ccc92;
+    k[54] = 0xffeff47d;
+    k[55] = 0x85845dd1;
+    k[56] = 0x6fa87e4f;
+    k[57] = 0xfe2ce6e0;
+    k[58] = 0xa3014314;
+    k[59] = 0x4e0811a1;
+    k[60] = 0xf7537e82;
+    k[61] = 0xbd3af235;
+    k[62] = 0x2ad7d2bb;
+    k[63] = 0xeb86d391;
+    let (a0, b0, c0, d0) = (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
+    let append_one = "1".as_bytes();
+    message.extend_from_slice(append_one);
+    dbg!(&message);
 }
 
 #[cfg(test)]
