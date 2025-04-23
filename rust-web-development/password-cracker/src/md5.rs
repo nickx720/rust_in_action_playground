@@ -72,9 +72,20 @@ pub fn md5() {
     k[62] = 0x2ad7d2bb;
     k[63] = 0xeb86d391;
     let (a0, b0, c0, d0) = (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
-    let append_one = "1".as_bytes();
-    message.extend_from_slice(append_one);
-    dbg!(&message);
+    let append_one = [0x80u8];
+    message.extend_from_slice(&append_one);
+    loop {
+        // the following is done so that the message length is always a multiple of 64 for the
+        // above function to work
+        if message.len() % 64 == 56 {
+            break;
+        }
+        message.extend_from_slice(&[0x00]);
+    }
+    dbg!(message.len());
+    for byte in &message {
+        print!("{:08b} ", byte);
+    }
 }
 
 #[cfg(test)]
