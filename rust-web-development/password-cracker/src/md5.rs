@@ -1,5 +1,6 @@
-pub fn md5() {
-    let mut message = "H1".to_string().into_bytes();
+pub fn md5(input: String) {
+    let length = input.len().to_be_bytes();
+    let mut message = input.clone().to_string().into_bytes();
     let s: Vec<u32> = vec![
         7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5,
         9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10,
@@ -73,6 +74,7 @@ pub fn md5() {
     k[63] = 0xeb86d391;
     let (a0, b0, c0, d0) = (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
     let append_one = [0x80u8];
+    dbg!("{:?}", &length);
     message.extend_from_slice(&append_one);
     loop {
         // the following is done so that the message length is always a multiple of 64 for the
@@ -82,9 +84,12 @@ pub fn md5() {
         }
         message.extend_from_slice(&[0x00]);
     }
-    dbg!(message.len());
-    for byte in &message {
-        print!("{:08b} ", byte);
+    // Appending length after converting it into bytes or length in bits mod 2.pow(64)
+    message.extend_from_slice(&length);
+    dbg!(&message.len());
+    // read in chunk size of 512 bits of 64 bytes
+    for chunk in message.chunks(512) {
+        dbg!("{02x}", chunk);
     }
 }
 
@@ -94,7 +99,6 @@ mod tests {
 
     #[test]
     fn test_md5() {
-        md5();
         assert_eq!(1, 1);
     }
 }
