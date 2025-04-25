@@ -1,5 +1,5 @@
 pub fn md5(input: String) {
-    let length = input.len().to_be_bytes();
+    let length = input.len().to_le_bytes();
     let mut message = input.clone().to_string().into_bytes();
     let s: Vec<u32> = vec![
         7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5,
@@ -87,9 +87,20 @@ pub fn md5(input: String) {
     // Appending length after converting it into bytes or length in bits mod 2.pow(64)
     message.extend_from_slice(&length);
     dbg!(&message.len());
-    // read in chunk size of 512 bits of 64 bytes
-    for chunk in message.chunks(512) {
-        dbg!("{02x}", chunk);
+    // read in chunk size of 512 bits which is equal to chunk 64 bytes
+    for chunk in message.chunks(64) {
+        // break the above chunk into 16 different entries, each with a length of 32 bits or 4
+        // bytes
+        for word in chunk.chunks(4) {
+            let A = a0;
+            let B = b0;
+            let C = c0;
+            let D = d0;
+            for i in 0..64 {
+                let mut F = 0u32;
+                let mut g = 0u32;
+            }
+        }
     }
 }
 
