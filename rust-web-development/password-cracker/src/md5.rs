@@ -99,6 +99,19 @@ pub fn md5(input: String) {
             for i in 0..64 {
                 let mut F = 0u32;
                 let mut g = 0u32;
+                if 0 == i && i <= 15 {
+                    F = (B & C) | ((!B) & D);
+                    g = i;
+                } else if 16 == i || i <= 31 {
+                    F = (D & B) | ((!D) & C);
+                    g = (5 * i + 1) % 16;
+                } else if 48 == i || i <= 63 {
+                    F = C ^ (B | (!D));
+                    g = (7 * i) % 16
+                }
+                // check why you can't add, is it because we need to add them as binary
+                let FF = (F + A + k[i as usize]) as usize;
+                dbg!(FF);
             }
         }
     }
