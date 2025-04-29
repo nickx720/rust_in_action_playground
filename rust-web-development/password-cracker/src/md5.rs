@@ -92,10 +92,10 @@ pub fn md5(input: String) {
         // break the above chunk into 16 different entries, each with a length of 32 bits or 4
         // bytes
         for word in chunk.chunks(4) {
-            let A = a0;
-            let B = b0;
-            let C = c0;
-            let D = d0;
+            let mut A = a0;
+            let mut B = b0;
+            let mut C = c0;
+            let mut D = d0;
             for i in 0..64 {
                 let mut F = 0u32;
                 let mut g = 0u32;
@@ -110,13 +110,15 @@ pub fn md5(input: String) {
                     g = (7 * i) % 16
                 }
                 // check why you can't add, is it because we need to add them as binary
-                let FF = (F + A + k[i as usize]) as usize;
-                dbg!(FF);
+                let F = F as usize + A as usize + k[i as usize] as usize;
+                A = D;
+                D = C;
+                C = B;
+                dbg!(F);
             }
         }
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
