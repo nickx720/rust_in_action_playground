@@ -119,6 +119,10 @@ pub fn md5(input: String) {
         }
     }
 }
+//TODO what is left rotate?
+fn leftroate(x: u32, y: u32) -> u32 {
+    todo!()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
