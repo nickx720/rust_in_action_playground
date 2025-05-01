@@ -114,6 +114,7 @@ pub fn md5(input: String) {
                 A = D;
                 D = C;
                 C = B;
+                B = B + leftroate(F as u32, s[i as usize]);
                 dbg!(F);
             }
         }
@@ -121,6 +122,9 @@ pub fn md5(input: String) {
 }
 //TODO what is left rotate?
 fn leftroate(x: u32, y: u32) -> u32 {
+    // shift to left, capture offset and then do or
+    let original_shifted = x << y;
+    // TODO how to find the offset value
     todo!()
 }
 #[cfg(test)]
@@ -130,5 +134,21 @@ mod tests {
     #[test]
     fn test_md5() {
         assert_eq!(1, 1);
+    }
+    #[test]
+    fn test_left_rotate() {
+        //       input    decimal rotate-left-by expected-output decimal
+        // 1	   00000000	0	       3	           00000000	        0
+        // 2	   11111111	255	     4	           11111111	        255
+        //3	     10110011	179	     3	           10011101	        157
+        //4    	01101001	105	     2	           10100101	        165
+        //5	    10000001	129	     1	           00000011	        3
+        //6	    00001111	15	     4	           11110000	        240
+        //7	    11000000	192	     2	           00000011	        3
+        //8	    01010101	85	     1	           10101010	        170
+        let preleft = 0b10110011;
+        let afterleft = 0b10011101;
+        let after = leftroate(preleft, 3);
+        assert_eq!(afterleft, after)
     }
 }
