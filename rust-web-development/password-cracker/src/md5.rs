@@ -122,8 +122,15 @@ pub fn md5(input: String) {
 }
 //TODO what is left rotate?
 fn leftroate(x: u32, y: u32) -> u32 {
+    // ensure y doesn't exceed 32 bits
+    let y = y % 32;
+
+    let mask = !(1 << (32 - y)) - 1;
+    let offset = x & mask;
     // shift to left, capture offset and then do or
-    let original_shifted = x << y;
+    let mut original_shifted = x << y;
+    // https://www.geeksforgeeks.org/rotate-bits-of-an-integer/
+
     // TODO how to find the offset value
     todo!()
 }
