@@ -72,9 +72,9 @@ pub fn md5(input: String) {
     k[61] = 0xbd3af235;
     k[62] = 0x2ad7d2bb;
     k[63] = 0xeb86d391;
-    let (a0, b0, c0, d0) = (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
+    let (mut a0, mut b0, mut c0, mut d0) =
+        (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
     let append_one = [0x80u8];
-    dbg!("{:?}", &length);
     message.extend_from_slice(&append_one);
     loop {
         // the following is done so that the message length is always a multiple of 64 for the
@@ -86,39 +86,48 @@ pub fn md5(input: String) {
     }
     // Appending length after converting it into bytes or length in bits mod 2.pow(64)
     message.extend_from_slice(&length);
-    dbg!(&message.len());
     // read in chunk size of 512 bits which is equal to chunk 64 bytes
     for chunk in message.chunks(64) {
         // break the above chunk into 16 different entries, each with a length of 32 bits or 4
         // bytes
         for word in chunk.chunks(4) {
-            let mut A = a0;
-            let mut B = b0;
-            let mut C = c0;
-            let mut D = d0;
+            let mut a = a0;
+            let mut b = b0;
+            let mut c = c0;
+            let mut d = d0;
             for i in 0..64 {
-                let mut F = 0u32;
+                let mut f = 0u32;
                 let mut g = 0u32;
                 if 0 == i && i <= 15 {
-                    F = (B & C) | ((!B) & D);
+                    f = (b & c) | ((!b) & d);
                     g = i;
                 } else if 16 == i || i <= 31 {
-                    F = (D & B) | ((!D) & C);
+                    f = (d & b) | ((!d) & c);
                     g = (5 * i + 1) % 16;
                 } else if 48 == i || i <= 63 {
-                    F = C ^ (B | (!D));
+                    f = c ^ (b | (!d));
                     g = (7 * i) % 16
                 }
                 // check why you can't add, is it because we need to add them as binary
-                let F = F as usize + A as usize + k[i as usize] as usize;
-                A = D;
-                D = C;
-                C = B;
-                B = B + leftroate(F as u32, s[i as usize]);
-                dbg!(F);
+                let f =
+                    f as usize + a as usize + k[i as usize] as usize + word[g as usize] as usize;
+                a = d;
+                d = c;
+                c = b;
+                b = b + leftroate(f as u32, s[i as usize]);
             }
+            a0 = a0 + a;
+            b0 = b0 + b;
+            c0 = c0 + c;
+            d0 = d0 + d;
         }
     }
+    let mut output: Vec<u32> = Vec::new();
+    output.extend_from_slice(&[a0]);
+    output.extend_from_slice(&[b0]);
+    output.extend_from_slice(&[c0]);
+    output.extend_from_slice(&[d0]);
+    dbg!(output);
 }
 //TODO what is left rotate?
 fn leftroate(x: u32, y: u32) -> u32 {
@@ -136,18 +145,14 @@ mod tests {
     }
     #[test]
     fn test_left_rotate() {
-        //       input    decimal rotate-left-by expected-output decimal
-        // 1	   00000000	0	       3	           00000000	        0
-        // 2	   11111111	255	     4	           11111111	        255
-        //3	     10110011	179	     3	           10011101	        157
-        //4    	01101001	105	     2	           10100101	        165
-        //5	    10000001	129	     1	           00000011	        3
-        //6	    00001111	15	     4	           11110000	        240
-        //7	    11000000	192	     2	           00000011	        3
-        //8	    01010101	85	     1	           10101010	        170
-        let preleft = 0b10110011;
-        let afterleft = 0b10011101;
+        let preleft = 0b00000000;
+        let afterleft = 0b00000000;
         let after = leftroate(preleft, 3);
-        assert_eq!(afterleft, after)
+        assert_eq!(afterleft, after);
+        let preleft = 0b00000000_00000000_00000000_11110000;
+        let afterleft = 0b00000000_00000000_00001111_00000000;
+        let after = leftroate(preleft, 4);
+        println!("expected {:0b}   actual: {:0b}", afterleft, after);
+        assert_eq!(afterleft, after);
     }
 }
