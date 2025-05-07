@@ -122,11 +122,11 @@ pub fn md5(input: String) {
             d0 = d0 + d;
         }
     }
-    let mut output: Vec<u32> = Vec::new();
-    output.extend_from_slice(&[a0]);
-    output.extend_from_slice(&[b0]);
-    output.extend_from_slice(&[c0]);
-    output.extend_from_slice(&[d0]);
+    let mut output: Vec<u8> = Vec::new();
+    output.extend_from_slice(&a0.to_le_bytes());
+    output.extend_from_slice(&b0.to_le_bytes());
+    output.extend_from_slice(&c0.to_le_bytes());
+    output.extend_from_slice(&d0.to_le_bytes());
     dbg!(output);
 }
 //TODO what is left rotate?
