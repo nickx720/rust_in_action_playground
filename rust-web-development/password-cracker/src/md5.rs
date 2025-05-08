@@ -7,7 +7,7 @@ pub fn md5(input: String) {
         15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
     ];
     let mut k: Vec<u32> = vec![0; 64];
-    //https://en.wikipedia.org/wiki/MD5?utm_source=substack&utm_medium=email#Algorithm
+    // https://en.wikipedia.org/wiki/MD5?utm_source=substack&utm_medium=email#Algorithm
     k[0] = 0xd76aa478;
     k[1] = 0xe8c7b756;
     k[2] = 0x242070db;
@@ -108,13 +108,15 @@ pub fn md5(input: String) {
                     f = c ^ (b | (!d));
                     g = (7 * i) % 16
                 }
-                // check why you can't add, is it because we need to add them as binary
-                let f =
-                    f as usize + a as usize + k[i as usize] as usize + word[g as usize] as usize;
+                // why is len 4 but index is at 6
+                let f = f
+                    .wrapping_add(a)
+                    .wrapping_add(k[i as usize])
+                    .wrapping_add(word[g as usize] as u32);
                 a = d;
                 d = c;
                 c = b;
-                b = b + leftroate(f as u32, s[i as usize]);
+                b = b.wrapping_add(leftroate(f, s[i as usize]));
             }
             a0 = a0 + a;
             b0 = b0 + b;
