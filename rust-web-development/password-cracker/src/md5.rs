@@ -91,6 +91,10 @@ pub fn md5(input: String) {
         // break the above chunk into 16 different entries, each with a length of 32 bits or 4
         // bytes
         for word in chunk.chunks(4) {
+            let mut new_word = [0u32; 16];
+            for (i, chunk) in word.chunks_exact(4).enumerate() {
+                new_word[i] = u32::from_le_bytes(chunk.try_into().unwrap());
+            }
             let mut a = a0;
             let mut b = b0;
             let mut c = c0;
@@ -112,16 +116,16 @@ pub fn md5(input: String) {
                 let f = f
                     .wrapping_add(a)
                     .wrapping_add(k[i as usize])
-                    .wrapping_add(word[g as usize] as u32);
+                    .wrapping_add(new_word[g as usize]);
                 a = d;
                 d = c;
                 c = b;
                 b = b.wrapping_add(leftroate(f, s[i as usize]));
             }
-            a0 = a0 + a;
-            b0 = b0 + b;
-            c0 = c0 + c;
-            d0 = d0 + d;
+            a0 = a0.wrapping_add(a);
+            b0 = b0.wrapping_add(b);
+            c0 = c0.wrapping_add(c);
+            d0 = d0.wrapping_add(d);
         }
     }
     let mut output: Vec<u8> = Vec::new();
@@ -129,7 +133,8 @@ pub fn md5(input: String) {
     output.extend_from_slice(&b0.to_le_bytes());
     output.extend_from_slice(&c0.to_le_bytes());
     output.extend_from_slice(&d0.to_le_bytes());
-    dbg!(output);
+    let digest: String = output.iter().map(|item| format!("{:02x}", item)).collect();
+    dbg!(digest);
 }
 //TODO what is left rotate?
 fn leftroate(x: u32, y: u32) -> u32 {
