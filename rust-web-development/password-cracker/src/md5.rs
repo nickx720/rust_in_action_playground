@@ -1,4 +1,4 @@
-pub fn md5(input: String) {
+pub fn md5(input: String) -> String {
     let length = input.len().to_le_bytes();
     let mut message = input.clone().to_string().into_bytes();
     let s: Vec<u32> = vec![
@@ -133,8 +133,7 @@ pub fn md5(input: String) {
     output.extend_from_slice(&b0.to_le_bytes());
     output.extend_from_slice(&c0.to_le_bytes());
     output.extend_from_slice(&d0.to_le_bytes());
-    let digest: String = output.iter().map(|item| format!("{:02x}", item)).collect();
-    dbg!(digest);
+    output.iter().map(|item| format!("{:02x}", item)).collect()
 }
 //TODO what is left rotate?
 fn leftroate(x: u32, y: u32) -> u32 {
@@ -148,7 +147,18 @@ mod tests {
 
     #[test]
     fn test_md5() {
-        assert_eq!(1, 1);
+        let test_vectors = [
+            ("", "d41d8cd98f00b204e9800998ecf8427e"),
+            ("a", "0cc175b9c0f1b6a831c399e269772661"),
+            ("abc", "900150983cd24fb0d6963f7d28e17f72"),
+            ("message digest", "f96b697d7cb7938d525a2f31aaf161d0"),
+            (
+                "abcdefghijklmnopqrstuvwxyz",
+                "c3fcd3d76192e4007dfb496cca67e13b",
+            ),
+        ];
+        let output = md5(test_vectors[2].0.to_string());
+        assert_eq!(test_vectors[0].1, output);
     }
     #[test]
     fn test_left_rotate() {
