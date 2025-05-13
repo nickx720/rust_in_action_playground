@@ -74,6 +74,7 @@ pub fn md5(input: String) -> String {
     k[63] = 0xeb86d391;
     let (mut a0, mut b0, mut c0, mut d0) =
         (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
+    message.extend_from_slice(&length);
     let append_one = [0x80u8];
     message.extend_from_slice(&append_one);
     loop {
@@ -85,7 +86,6 @@ pub fn md5(input: String) -> String {
         message.extend_from_slice(&[0x00]);
     }
     // Appending length after converting it into bytes or length in bits mod 2.pow(64)
-    message.extend_from_slice(&length);
     // read in chunk size of 512 bits which is equal to chunk 64 bytes
     for chunk in message.chunks(64) {
         // break the above chunk into 16 different entries, each with a length of 32 bits or 4
