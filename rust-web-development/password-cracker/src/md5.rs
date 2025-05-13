@@ -1,5 +1,5 @@
 pub fn md5(input: String) -> String {
-    let length = input.len().to_le_bytes();
+    let length = (input.len() as u64 * 8).to_le_bytes();
     let mut message = input.clone().to_string().into_bytes();
     let s: Vec<u32> = vec![
         7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5,
@@ -90,11 +90,9 @@ pub fn md5(input: String) -> String {
     for chunk in message.chunks(64) {
         // break the above chunk into 16 different entries, each with a length of 32 bits or 4
         // bytes
-        for word in chunk.chunks(4) {
-            let mut new_word = [0u32; 16];
-            for (i, chunk) in word.chunks_exact(4).enumerate() {
-                new_word[i] = u32::from_le_bytes(chunk.try_into().unwrap());
-            }
+        let mut new_word = [0u32; 16];
+        for (index, word) in chunk.chunks_exact(4).enumerate() {
+            new_word[index] = u32::from_le_bytes(word.try_into().unwrap());
             let mut a = a0;
             let mut b = b0;
             let mut c = c0;
@@ -102,15 +100,18 @@ pub fn md5(input: String) -> String {
             for i in 0..64 {
                 let mut f = 0u32;
                 let mut g = 0u32;
-                if 0 == i && i <= 15 {
+                if i <= 15 {
                     f = (b & c) | ((!b) & d);
                     g = i;
-                } else if 16 == i || i <= 31 {
+                } else if i <= 31 {
                     f = (d & b) | ((!d) & c);
                     g = (5 * i + 1) % 16;
-                } else if 48 == i || i <= 63 {
+                } else if i <= 47 {
+                    f = b ^ c ^ d;
+                    g = (3 * i + 5) % 16;
+                } else {
                     f = c ^ (b | (!d));
-                    g = (7 * i) % 16
+                    g = (7 * i) % 16;
                 }
                 // why is len 4 but index is at 6
                 let f = f
@@ -157,7 +158,7 @@ mod tests {
                 "c3fcd3d76192e4007dfb496cca67e13b",
             ),
         ];
-        let output = md5(test_vectors[2].0.to_string());
+        let output = md5(test_vectors[0].0.to_string());
         assert_eq!(test_vectors[0].1, output);
     }
     #[test]
