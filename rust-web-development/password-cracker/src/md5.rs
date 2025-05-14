@@ -74,17 +74,13 @@ pub fn md5(input: String) -> String {
     k[63] = 0xeb86d391;
     let (mut a0, mut b0, mut c0, mut d0) =
         (0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32);
-    message.extend_from_slice(&length);
     let append_one = [0x80u8];
     message.extend_from_slice(&append_one);
-    loop {
-        // the following is done so that the message length is always a multiple of 64 for the
-        // above function to work
-        if message.len() % 64 == 56 {
-            break;
-        }
-        message.extend_from_slice(&[0x00]);
+    while message.len() % 64 != 56 {
+        message.push(0x00);
     }
+
+    message.extend_from_slice(&length);
     // Appending length after converting it into bytes or length in bits mod 2.pow(64)
     // read in chunk size of 512 bits which is equal to chunk 64 bytes
     for chunk in message.chunks(64) {
@@ -93,41 +89,41 @@ pub fn md5(input: String) -> String {
         let mut new_word = [0u32; 16];
         for (index, word) in chunk.chunks_exact(4).enumerate() {
             new_word[index] = u32::from_le_bytes(word.try_into().unwrap());
-            let mut a = a0;
-            let mut b = b0;
-            let mut c = c0;
-            let mut d = d0;
-            for i in 0..64 {
-                let mut f = 0u32;
-                let mut g = 0u32;
-                if i <= 15 {
-                    f = (b & c) | ((!b) & d);
-                    g = i;
-                } else if i <= 31 {
-                    f = (d & b) | ((!d) & c);
-                    g = (5 * i + 1) % 16;
-                } else if i <= 47 {
-                    f = b ^ c ^ d;
-                    g = (3 * i + 5) % 16;
-                } else {
-                    f = c ^ (b | (!d));
-                    g = (7 * i) % 16;
-                }
-                // why is len 4 but index is at 6
-                let f = f
-                    .wrapping_add(a)
-                    .wrapping_add(k[i as usize])
-                    .wrapping_add(new_word[g as usize]);
-                a = d;
-                d = c;
-                c = b;
-                b = b.wrapping_add(leftroate(f, s[i as usize]));
-            }
-            a0 = a0.wrapping_add(a);
-            b0 = b0.wrapping_add(b);
-            c0 = c0.wrapping_add(c);
-            d0 = d0.wrapping_add(d);
         }
+        let mut a = a0;
+        let mut b = b0;
+        let mut c = c0;
+        let mut d = d0;
+        for i in 0..64 {
+            let mut f = 0u32;
+            let mut g = 0u32;
+            if i <= 15 {
+                f = (b & c) | ((!b) & d);
+                g = i;
+            } else if i <= 31 {
+                f = (d & b) | ((!d) & c);
+                g = (5 * i + 1) % 16;
+            } else if i <= 47 {
+                f = b ^ c ^ d;
+                g = (3 * i + 5) % 16;
+            } else {
+                f = c ^ (b | (!d));
+                g = (7 * i) % 16;
+            }
+            // why is len 4 but index is at 6
+            let f = f
+                .wrapping_add(a)
+                .wrapping_add(k[i as usize])
+                .wrapping_add(new_word[g as usize]);
+            a = d;
+            d = c;
+            c = b;
+            b = b.wrapping_add(leftroate(f, s[i as usize]));
+        }
+        a0 = a0.wrapping_add(a);
+        b0 = b0.wrapping_add(b);
+        c0 = c0.wrapping_add(c);
+        d0 = d0.wrapping_add(d);
     }
     let mut output: Vec<u8> = Vec::new();
     output.extend_from_slice(&a0.to_le_bytes());
@@ -160,6 +156,7 @@ mod tests {
         ];
         let output = md5(test_vectors[0].0.to_string());
         assert_eq!(test_vectors[0].1, output);
+        assert_eq!(test_vectors[1].1, md5(test_vectors[1].0.to_string()));
     }
     #[test]
     fn test_left_rotate() {
