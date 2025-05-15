@@ -1,4 +1,5 @@
 pub fn md5(input: String) -> String {
+    // md5 uses u64 instead of u32, so it can cover file size of very large sizes
     let length = (input.len() as u64 * 8).to_le_bytes();
     let mut message = input.clone().to_string().into_bytes();
     let s: Vec<u32> = vec![
@@ -118,7 +119,7 @@ pub fn md5(input: String) -> String {
             a = d;
             d = c;
             c = b;
-            b = b.wrapping_add(leftroate(f, s[i as usize]));
+            b = b.wrapping_add(leftrotate(f, s[i as usize]));
         }
         a0 = a0.wrapping_add(a);
         b0 = b0.wrapping_add(b);
@@ -132,8 +133,8 @@ pub fn md5(input: String) -> String {
     output.extend_from_slice(&d0.to_le_bytes());
     output.iter().map(|item| format!("{:02x}", item)).collect()
 }
-//TODO what is left rotate?
-fn leftroate(x: u32, y: u32) -> u32 {
+
+fn leftrotate(x: u32, y: u32) -> u32 {
     // ensure y doesn't exceed 32 bits
     let y = y % 32;
     (x << y) | (x >> (32 - y))
@@ -154,19 +155,21 @@ mod tests {
                 "c3fcd3d76192e4007dfb496cca67e13b",
             ),
         ];
-        let output = md5(test_vectors[0].0.to_string());
-        assert_eq!(test_vectors[0].1, output);
+        assert_eq!(test_vectors[0].1, md5(test_vectors[0].0.to_string()));
         assert_eq!(test_vectors[1].1, md5(test_vectors[1].0.to_string()));
+        assert_eq!(test_vectors[2].1, md5(test_vectors[2].0.to_string()));
+        assert_eq!(test_vectors[3].1, md5(test_vectors[3].0.to_string()));
+        assert_eq!(test_vectors[4].1, md5(test_vectors[4].0.to_string()));
     }
     #[test]
     fn test_left_rotate() {
         let preleft = 0b00000000;
         let afterleft = 0b00000000;
-        let after = leftroate(preleft, 3);
+        let after = leftrotate(preleft, 3);
         assert_eq!(afterleft, after);
         let preleft = 0b00000000_00000000_00000000_11110000;
         let afterleft = 0b00000000_00000000_00001111_00000000;
-        let after = leftroate(preleft, 4);
+        let after = leftrotate(preleft, 4);
         println!("expected {:0b}   actual: {:0b}", afterleft, after);
         assert_eq!(afterleft, after);
     }
