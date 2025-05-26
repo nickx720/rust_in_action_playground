@@ -1,8 +1,10 @@
 use brute::crack;
+use db::dbsetup;
 use md5::md5;
 use wordlist::wordlist_reader;
 
 mod brute;
+mod db;
 mod md5;
 
 mod wordlist {
@@ -26,8 +28,10 @@ mod wordlist {
     }
 }
 
-fn main() {
-    md5("abc".to_string());
-    crack("pass".to_uppercase().to_string());
-    let _ = wordlist_reader().unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = dbsetup();
+    //    md5("abc".to_string());
+    //    crack("pass".to_uppercase().to_string());
+    //    let _ = wordlist_reader().unwrap();
+    Ok(())
 }
