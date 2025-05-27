@@ -26,7 +26,7 @@ id INTEGER PRIMARY KEY,
 original TEXT NOT NULL,
 md5_hash BLOB NOT NULL
 );
-CREATE UNIQUE INDEX idx_md5 on cracked(md5_hash);
+CREATE INDEX idx_md5 on cracked(md5_hash);
 ",
     )?;
     let file = read("assets/realhuman_phill.txt")?;
@@ -44,7 +44,8 @@ CREATE UNIQUE INDEX idx_md5 on cracked(md5_hash);
         let md5_hash = hash.as_bytes();
         stmt.execute(params![item, md5_hash]).unwrap();
     }
-
+    //    drop(stmt);
+    //    transaction.commit()?;
     println!("DB has been initialized");
     //   } else {
     //       println!("SQLite DB already exists");
