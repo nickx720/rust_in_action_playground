@@ -39,13 +39,14 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
     let mut stmt =
         transaction.prepare("INSERT INTO cracked (original, md5_hash) VALUES(?1, ?2)")?;
     dbg!("I am here");
-    for item in content {
+    for (index, item) in content.iter().enumerate() {
         let hash = md5(item.clone());
         let md5_hash = hash.as_bytes();
         stmt.execute(params![item, md5_hash]).unwrap();
+        println!("Committed item {}", index);
     }
-    //    drop(stmt);
-    //    transaction.commit()?;
+    drop(stmt);
+    transaction.commit()?;
     println!("DB has been initialized");
     //   } else {
     //       println!("SQLite DB already exists");
