@@ -54,3 +54,7 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
     println!("cargo:rerun-if-changed=build.rs");
     Ok(())
 }
+
+pub fn get_query(hash: &str) -> Result<(), BuildError> {
+    todo!()
+}
