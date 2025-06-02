@@ -13,13 +13,18 @@ pub enum BuildError {
     FileIO(#[from] std::io::Error),
 }
 
+pub fn setupconnpool() -> Result<(Connection), BuildError> {
+    let path = "assets/data.sqlite3";
+    let conn = Connection::open(path)?;
+    Ok(conn)
+}
+
 pub fn dbsetup() -> Result<(), BuildError> {
     let path = "assets/data.sqlite3";
 
     if !Path::new(path).exists() {
         println!("Creating SQLite3 DB at {}", path);
-        let mut conn = Connection::open(path)?;
-
+        let mut conn = setupconnpool()?;
         conn.execute_batch(
             "CREATE TABLE cracked (
 id INTEGER PRIMARY KEY,
@@ -55,6 +60,22 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
     Ok(())
 }
 
-pub fn get_query(hash: &str) -> Result<(), BuildError> {
-    todo!()
+pub struct Content {
+    pub original: String,
+    pub md5_hash: u8,
+}
+
+pub fn get_query(hash: &str) -> Result<Content, BuildError> {
+    let conn = setupconnpool()?;
+    conn.query_row(
+        "SELECT original,md5_hash FROM cracked where md5_hash= ?1",
+        [hash],
+        |row| {
+            Ok(Content {
+                original: row.get(1)?,
+                md5_hash: row.get(2)?,
+            })
+        },
+    )
+    .map_err(|e| BuildError::DBError(e))
 }
