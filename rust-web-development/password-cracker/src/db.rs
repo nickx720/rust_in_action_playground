@@ -1,4 +1,4 @@
-use std::{fs::read, path::Path};
+use std::{error::Error, fs::read, path::Path};
 
 use rusqlite::{Connection, params};
 use thiserror::Error;
@@ -11,9 +11,11 @@ pub enum BuildError {
     DBError(#[from] rusqlite::Error),
     #[error("file reading error")]
     FileIO(#[from] std::io::Error),
+    #[error("wrapped main error")]
+    Other(#[from] Box<dyn Error>),
 }
 
-pub fn setupconnpool() -> Result<(Connection), BuildError> {
+pub fn setupconnpool() -> Result<Connection, BuildError> {
     let path = "assets/data.sqlite3";
     let conn = Connection::open(path)?;
     Ok(conn)
