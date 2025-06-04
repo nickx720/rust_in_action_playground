@@ -62,22 +62,28 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
     Ok(())
 }
 
+#[derive(Debug)]
 pub struct Content {
     pub original: String,
     pub md5_hash: u8,
 }
 
+// TODO use trim or lower
 pub fn get_query(hash: &str) -> Result<Content, BuildError> {
     let conn = setupconnpool()?;
-    conn.query_row(
-        "SELECT original,md5_hash FROM cracked where md5_hash= ?1",
-        [hash],
-        |row| {
-            Ok(Content {
-                original: row.get(1)?,
-                md5_hash: row.get(2)?,
-            })
-        },
-    )
-    .map_err(|e| BuildError::DBError(e))
+    dbg!(hash);
+    let output = conn
+        .query_row(
+            "SELECT original,md5_hash FROM cracked where md5_hash LIKE ?1",
+            [hash],
+            |row| {
+                Ok(Content {
+                    original: row.get(1)?,
+                    md5_hash: row.get(2)?,
+                })
+            },
+        )
+        .map_err(|e| BuildError::DBError(e));
+    dbg!(&output);
+    output
 }

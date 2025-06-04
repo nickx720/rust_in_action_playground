@@ -18,8 +18,8 @@ mod wordlist {
     //Adapt your program to allow the user to specify whether to brute force or use a word list, allowing them to specify the path to the word list. See how quickly you can crack this hash: 2bdb742fc3d075ec6b73ea414f27819a
     pub fn wordlist_reader(hash: &str) -> Result<String, Box<dyn Error>> {
         let _ = dbsetup();
-        let _response = get_query(hash)?;
-        todo!()
+        let response = get_query(hash)?;
+        Ok(response.original)
     }
 }
 
@@ -40,7 +40,7 @@ fn main() -> Result<(), BuildError> {
             return Ok(());
         }
     } else {
-        let respon = crack(args[1].to_uppercase().to_string());
+        let respon = crack(args[0].to_uppercase().to_string());
         response.push_str(respon.as_str());
     }
     println!("The output is {}", response);
