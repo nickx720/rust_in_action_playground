@@ -74,12 +74,12 @@ pub fn get_query(hash: &str) -> Result<Content, BuildError> {
     dbg!(hash);
     let output = conn
         .query_row(
-            "SELECT original,md5_hash FROM cracked where md5_hash LIKE ?1",
+            "SELECT original,HEX(md5_hash) FROM cracked where HEX(md5_hash) = ?1",
             [hash],
             |row| {
                 Ok(Content {
-                    original: row.get(1)?,
-                    md5_hash: row.get(2)?,
+                    original: row.get(0)?,
+                    md5_hash: row.get(1)?,
                 })
             },
         )
