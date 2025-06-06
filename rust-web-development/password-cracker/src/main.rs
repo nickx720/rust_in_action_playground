@@ -9,7 +9,6 @@ mod db;
 mod md5;
 
 mod wordlist {
-    //In this step your goal is to use a word list to speed up the attack. Instead of generated every single possible permutation of letters we’ll use a word list of common passwords. You can get one such list from CrackStation here. Grab the Smaller Wordlist for now.
 
     use std::error::Error;
 
