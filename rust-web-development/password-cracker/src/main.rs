@@ -14,7 +14,7 @@ mod wordlist {
 
     use crate::db::{dbsetup, get_query};
 
-    //Adapt your program to allow the user to specify whether to brute force or use a word list, allowing them to specify the path to the word list. See how quickly you can crack this hash: 2bdb742fc3d075ec6b73ea414f27819a
+    //2bdb742fc3d075ec6b73ea414f27819a
     pub fn wordlist_reader(hash: &str) -> Result<String, Box<dyn Error>> {
         let _ = dbsetup();
         let response = get_query(hash.trim())?;
