@@ -1,4 +1,3 @@
-Step Zero
 
 In many programming languages we index arrays from zero onwards. Coding Challenges is the same, we start with Step 0. It’s the step where you setup your IDE / editor of choice and programming language of choice.
 
