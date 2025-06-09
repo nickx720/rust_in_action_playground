@@ -31,7 +31,7 @@ pub fn dbsetup() -> Result<(), BuildError> {
             "CREATE TABLE cracked (
 id INTEGER PRIMARY KEY,
 original TEXT NOT NULL,
-md5_hash BLOB NOT NULL
+md5_hash TEXT NOT NULL
 );
 CREATE INDEX idx_md5 on cracked(md5_hash);
 ",
@@ -45,10 +45,8 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
         let transaction = conn.transaction()?;
         let mut stmt =
             transaction.prepare("INSERT INTO cracked (original, md5_hash) VALUES(?1, ?2)")?;
-        dbg!("I am here");
         for (index, item) in content.iter().enumerate() {
-            let hash = md5(item.clone());
-            let md5_hash = hash.as_bytes();
+            let md5_hash = md5(item.clone());
             stmt.execute(params![item, md5_hash]).unwrap();
             println!("Committed item {}", index);
         }
@@ -65,7 +63,7 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
 #[derive(Debug)]
 pub struct Content {
     pub original: String,
-    pub md5_hash: u8,
+    pub md5_hash: String,
 }
 
 // TODO use trim or lower
