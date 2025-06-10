@@ -24,7 +24,6 @@ mod wordlist {
 
 fn main() -> Result<(), BuildError> {
     let args: Vec<String> = env::args().into_iter().skip(1).collect();
-    dbg!(&args);
     if args.len() < 1usize {
         println!("Pass the --wordlist flag with value to check example --wordlist crackme");
         return Ok(());
