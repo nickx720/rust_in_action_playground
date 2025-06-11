@@ -63,7 +63,7 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
 #[derive(Debug)]
 pub struct Content {
     pub original: String,
-    pub md5_hash: String,
+    md5_hash: String,
 }
 
 // TODO use trim or lower
