@@ -56,7 +56,6 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
     } else {
         println!("SQLite DB already exists");
     }
-    println!("cargo:rerun-if-changed=build.rs");
     Ok(())
 }
 
@@ -66,22 +65,17 @@ pub struct Content {
     md5_hash: String,
 }
 
-// TODO use trim or lower
 pub fn get_query(hash: &str) -> Result<Content, BuildError> {
     let conn = setupconnpool()?;
-    dbg!(hash);
-    let output = conn
-        .query_row(
-            "SELECT original,HEX(md5_hash) FROM cracked where HEX(md5_hash) = ?1",
-            [hash],
-            |row| {
-                Ok(Content {
-                    original: row.get(0)?,
-                    md5_hash: row.get(1)?,
-                })
-            },
-        )
-        .map_err(|e| BuildError::DBError(e));
-    dbg!(&output);
-    output
+    conn.query_row(
+        "SELECT original,md5_hash FROM cracked where md5_hash = ?1",
+        [hash],
+        |row| {
+            Ok(Content {
+                original: row.get(0)?,
+                md5_hash: row.get(1)?,
+            })
+        },
+    )
+    .map_err(BuildError::DBError)
 }
