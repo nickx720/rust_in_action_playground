@@ -48,7 +48,7 @@ pub fn crack(item: String) -> String {
 //            if letter not in word: // avoid repetition
 //                queue.push(word + letter)
 //
-fn generate_perumates(queue: &mut VecDeque<String>, length: usize) -> Vec<String> {
+pub fn generate_perumates(queue: &mut VecDeque<String>, length: usize) -> Vec<String> {
     let alphabets = "abcdefghijklmnopqrstuvwxyz".to_string();
     let alphabets_vec = alphabets
         .chars()
