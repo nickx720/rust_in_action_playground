@@ -10,6 +10,15 @@ mod md5;
 
 mod wordlist;
 
+mod rainbow_table {
+    use crate::brute::generate_perumates;
+    use crate::md5::md5;
+
+    pub fn rainbow_table_lookup(input: String) {
+        todo!()
+    }
+}
+
 fn main() -> Result<(), BuildError> {
     let args: Vec<String> = env::args().into_iter().skip(1).collect();
     if args.len() < 1usize {
