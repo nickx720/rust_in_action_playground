@@ -1,7 +1,7 @@
 // TODO: Convert the implementation to use bounded channels.
 use crate::data::{Ticket, TicketDraft};
 use crate::store::{TicketId, TicketStore};
-use std::sync::mpsc::{sync_channel, Receiver, Sender, SyncSender};
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError};
 
 pub mod data;
 pub mod store;
@@ -9,32 +9,45 @@ pub mod store;
 #[derive(Clone)]
 pub struct TicketStoreClient {
     sender: SyncSender<Command>,
+    capacity: usize,
 }
 
 impl TicketStoreClient {
-    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, todo!()> {
-        todo!()
+    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, TryRecvError> {
+        let (sender, receiver) = sync_channel(self.capacity);
+        let command = Command::Insert {
+            draft,
+            response_channel: sender,
+        };
+        self.sender.send(command).expect("Something went wrong");
+        receiver.try_recv()
     }
 
-    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, todo!()> {
-        todo!()
+    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, TryRecvError> {
+        let (sender, receiver) = sync_channel(self.capacity);
+        let command = Command::Get {
+            id,
+            response_channel: sender,
+        };
+        self.sender.send(command).expect("Something went wrong");
+        receiver.try_recv()
     }
 }
 
 pub fn launch(capacity: usize) -> TicketStoreClient {
-    let (sender, receiver) = sync_channel(10);
+    let (sender, receiver) = sync_channel(capacity);
     std::thread::spawn(move || server(receiver));
-    TicketStoreClient { sender }
+    TicketStoreClient { sender, capacity }
 }
 
-enum Command {
+pub enum Command {
     Insert {
         draft: TicketDraft,
-        response_channel: todo!(),
+        response_channel: SyncSender<TicketId>,
     },
     Get {
         id: TicketId,
-        response_channel: todo!(),
+        response_channel: SyncSender<Option<Ticket>>,
     },
 }
 
@@ -47,14 +60,18 @@ pub fn server(receiver: Receiver<Command>) {
                 response_channel,
             }) => {
                 let id = store.add_ticket(draft);
-                todo!()
+                response_channel
+                    .try_send(id)
+                    .expect("Send for Insert failed");
             }
             Ok(Command::Get {
                 id,
                 response_channel,
             }) => {
-                let ticket = store.get(id);
-                todo!()
+                let ticket = store.get(id).unwrap().to_owned();
+                response_channel
+                    .try_send(Some(ticket))
+                    .expect("Send for Get failed")
             }
             Err(_) => {
                 // There are no more senders, so we can safely break
