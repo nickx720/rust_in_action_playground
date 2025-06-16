@@ -11,7 +11,8 @@ pub struct TicketStoreClient {
     sender: SyncSender<Command>,
     capacity: usize,
 }
-
+// TODO insert try_recv says empty
+// then send for insert failed: "Disconnected"?
 impl TicketStoreClient {
     pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, TryRecvError> {
         let (sender, receiver) = sync_channel(self.capacity);
@@ -19,7 +20,7 @@ impl TicketStoreClient {
             draft,
             response_channel: sender,
         };
-        self.sender.send(command).expect("Something went wrong");
+        self.sender.try_send(command).expect("Something went wrong");
         receiver.try_recv()
     }
 
@@ -29,7 +30,7 @@ impl TicketStoreClient {
             id,
             response_channel: sender,
         };
-        self.sender.send(command).expect("Something went wrong");
+        self.sender.try_send(command).expect("Something went wrong");
         receiver.try_recv()
     }
 }
@@ -54,7 +55,7 @@ pub enum Command {
 pub fn server(receiver: Receiver<Command>) {
     let mut store = TicketStore::new();
     loop {
-        match receiver.recv() {
+        match receiver.try_recv() {
             Ok(Command::Insert {
                 draft,
                 response_channel,
