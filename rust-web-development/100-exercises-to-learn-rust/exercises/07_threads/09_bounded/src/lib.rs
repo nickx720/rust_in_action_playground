@@ -1,12 +1,14 @@
 // TODO: Convert the implementation to use bounded channels.
 use crate::data::{Ticket, TicketDraft};
 use crate::store::{TicketId, TicketStore};
-use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError};
+use std::sync::mpsc::{sync_channel, Receiver, RecvError, SyncSender, TryRecvError};
+use std::thread;
+use std::time::Duration;
 
 pub mod data;
 pub mod store;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TicketStoreClient {
     sender: SyncSender<Command>,
     capacity: usize,
@@ -14,24 +16,24 @@ pub struct TicketStoreClient {
 // TODO insert try_recv says empty
 // then send for insert failed: "Disconnected"?
 impl TicketStoreClient {
-    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, TryRecvError> {
+    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, RecvError> {
         let (sender, receiver) = sync_channel(self.capacity);
         let command = Command::Insert {
             draft,
             response_channel: sender,
         };
-        self.sender.try_send(command).expect("Something went wrong");
-        receiver.try_recv()
+        self.sender.try_send(command).unwrap();
+        receiver.recv()
     }
 
-    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, TryRecvError> {
+    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, RecvError> {
         let (sender, receiver) = sync_channel(self.capacity);
         let command = Command::Get {
             id,
             response_channel: sender,
         };
         self.sender.try_send(command).expect("Something went wrong");
-        receiver.try_recv()
+        receiver.recv()
     }
 }
 
@@ -41,6 +43,7 @@ pub fn launch(capacity: usize) -> TicketStoreClient {
     TicketStoreClient { sender, capacity }
 }
 
+#[derive(Clone)]
 pub enum Command {
     Insert {
         draft: TicketDraft,
@@ -55,7 +58,7 @@ pub enum Command {
 pub fn server(receiver: Receiver<Command>) {
     let mut store = TicketStore::new();
     loop {
-        match receiver.try_recv() {
+        match receiver.recv() {
             Ok(Command::Insert {
                 draft,
                 response_channel,
