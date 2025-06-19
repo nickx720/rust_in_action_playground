@@ -49,7 +49,7 @@ pub fn crack(item: String) -> String {
 //                queue.push(word + letter)
 //
 pub fn generate_perumates(queue: &mut VecDeque<String>, length: usize) -> Vec<String> {
-    let alphabets = "abcdefghijklmnopqrstuvwxyz".to_string();
+    let alphabets = "abcdefghijklmnopqrstuvwxyz1234567890".to_string();
     let alphabets_vec = alphabets
         .chars()
         .map(|item| item.to_ascii_uppercase().to_string())

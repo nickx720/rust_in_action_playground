@@ -19,9 +19,14 @@ mod rainbow_table {
 
     pub fn rainbow_table_lookup() {
         let mut queue = VecDeque::new();
-        let length = 10;
+        let length = 3;
+        // potentially use streams
         let permutation = generate_perumates(&mut queue, length);
-        dbg!(permutation);
+        let hash: Vec<String> = permutation
+            .iter()
+            .map(|item| md5(item.to_owned()))
+            .collect();
+        dbg!(hash);
         todo!()
     }
 
