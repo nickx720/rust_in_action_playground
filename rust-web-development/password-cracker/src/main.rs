@@ -15,6 +15,7 @@ mod rainbow_table {
     use std::collections::VecDeque;
 
     use crate::brute::generate_perumates;
+    use crate::db::{self, Content};
     use crate::md5::md5;
 
     pub fn rainbow_table_lookup() {
@@ -22,18 +23,19 @@ mod rainbow_table {
         let length = 3;
         // potentially use streams
         let permutation = generate_perumates(&mut queue, length);
-        let hash: Vec<String> = permutation
+        let hash: Vec<Content> = permutation
             .iter()
-            .map(|item| md5(item.to_owned()))
+            .map(|item| {
+                let md5_hash = md5(item.to_owned());
+                Content {
+                    original: item.to_owned(),
+                    md5_hash,
+                }
+            })
             .collect();
-        dbg!(hash);
-        todo!()
-    }
-
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-        fn test_lookup() {}
+        for item in hash {
+            db::insert(item).unwrap();
+        }
     }
 }
 
