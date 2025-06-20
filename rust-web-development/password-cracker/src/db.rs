@@ -62,7 +62,16 @@ CREATE INDEX idx_md5 on cracked(md5_hash);
 #[derive(Debug)]
 pub struct Content {
     pub original: String,
-    md5_hash: String,
+    pub md5_hash: String,
+}
+
+pub fn insert(content: Content) -> Result<(), BuildError> {
+    let conn = setupconnpool()?;
+    conn.execute(
+        "INSERT INTO cracked (original, md5_hash) VALUES(?1,?2)",
+        params![content.original, content.md5_hash],
+    )?;
+    Ok(())
 }
 
 pub fn get_query(hash: &str) -> Result<Content, BuildError> {
