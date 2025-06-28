@@ -18,61 +18,27 @@
 //This is file 2
 //This is file 3
 
-use clap::{Parser, Subcommand};
+use std::io::Read;
+
+use clap::Parser;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
     /// Optional name to operate on
-    name: Option<String>,
-
-    /// Turn debugging information on
-    debug: Option<u8>,
-
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// does testing things
-    Test {
-        /// lists test values
-        #[arg(short, long)]
-        list: bool,
-    },
+    name: Option<Vec<String>>,
 }
 
 fn main() {
+    let mut buffer = String::new();
+    let _ = std::io::stdin().read_to_string(&mut buffer);
+    dbg!(buffer);
     let cli = Cli::parse();
 
     // You can check the value provided by positional arguments, or option arguments
     if let Some(name) = cli.name.as_deref() {
-        println!("Value for name: {name}");
-    }
-
-    // You can see how many times a particular flag or argument occurred
-    // Note, only flags can have multiple occurrences
-    match cli.debug {
-        Some(val) => match val {
-            0 => println!("Yahoo"),
-            _ => println!("Non yahoo"),
-        },
-        None => println!("Don't be crazy"),
-    }
-
-    // You can check for the existence of subcommands, and if found use their
-    // matches just as you would the top level cmd
-    match &cli.command {
-        Some(Commands::Test { list }) => {
-            if *list {
-                println!("Printing testing lists...");
-            } else {
-                println!("Not printing testing lists...");
-            }
+        for item in name {
+            println!("{}", item);
         }
-        None => {}
     }
-
-    // Continued program logic goes here...
 }
