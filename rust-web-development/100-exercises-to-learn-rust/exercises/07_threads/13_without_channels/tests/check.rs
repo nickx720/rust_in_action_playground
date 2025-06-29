@@ -3,11 +3,11 @@ use std::thread::spawn;
 
 use ticket_fields::test_helpers::{ticket_description, ticket_title};
 use without_channels::data::TicketDraft;
-use without_channels::store::TicketStore;
+use without_channels::store::{TicketStore, TicketStoreLock};
 
 #[test]
 fn works() {
-    let store = todo!();
+    let store = TicketStoreLock::new(TicketStore::new());
 
     let store1 = store.clone();
     let client1 = spawn(move || {

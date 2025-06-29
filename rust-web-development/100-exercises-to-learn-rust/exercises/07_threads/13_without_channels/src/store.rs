@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
-use std::sync::{Arc, RwLock};
+use std::error::Error;
+use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard};
 
 use crate::data::{Status, Ticket, TicketDraft};
 
@@ -36,5 +37,28 @@ impl TicketStore {
 
     pub fn get(&self, id: TicketId) -> Option<Arc<RwLock<Ticket>>> {
         self.tickets.get(&id).cloned()
+    }
+}
+
+#[derive(Clone)]
+pub struct TicketStoreLock {
+    ticket_store: Arc<RwLock<TicketStore>>,
+}
+
+impl TicketStoreLock {
+    pub fn new(ticket_store: TicketStore) -> Self {
+        let ticket_store = Arc::new(RwLock::new(ticket_store));
+        Self { ticket_store }
+    }
+    fn read(&self) -> Result<RwLockReadGuard, Box<dyn Error>> {
+        let ticket_store = Arc::clone(&self.ticket_store);
+        ticket_store.read()
+    }
+    fn write(
+        &self,
+    ) -> Result<RwLockWriteGuard<'_, TicketStore>, PoisonError<RwLockWriteGuard<'_, TicketStore>>>
+    {
+        let ticket_store = Arc::clone(&self.ticket_store);
+        ticket_store.write()
     }
 }
