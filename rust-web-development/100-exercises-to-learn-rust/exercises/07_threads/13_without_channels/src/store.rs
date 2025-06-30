@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::error::Error;
-use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard};
+use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use crate::data::{Status, Ticket, TicketDraft};
 
@@ -50,15 +50,14 @@ impl TicketStoreLock {
         let ticket_store = Arc::new(RwLock::new(ticket_store));
         Self { ticket_store }
     }
-    fn read(&self) -> Result<RwLockReadGuard, Box<dyn Error>> {
+    pub fn read(&self) -> Result<TicketStore, PoisonError<TicketStore>> {
         let ticket_store = Arc::clone(&self.ticket_store);
-        ticket_store.read()
+        ticket_store.into_inner()
     }
-    fn write(
+    pub fn write(
         &self,
-    ) -> Result<RwLockWriteGuard<'_, TicketStore>, PoisonError<RwLockWriteGuard<'_, TicketStore>>>
-    {
+    ) -> Result<Arc<RwLock<TicketStore>>, PoisonError<RwLockWriteGuard<TicketStore>>> {
         let ticket_store = Arc::clone(&self.ticket_store);
-        ticket_store.write()
+        Ok(ticket_store)
     }
 }
