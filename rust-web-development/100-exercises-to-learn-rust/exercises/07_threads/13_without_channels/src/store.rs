@@ -50,14 +50,10 @@ impl TicketStoreLock {
         let ticket_store = Arc::new(RwLock::new(ticket_store));
         Self { ticket_store }
     }
-    pub fn read(&self) -> Result<TicketStore, PoisonError<TicketStore>> {
-        let ticket_store = Arc::clone(&self.ticket_store);
-        ticket_store.into_inner()
+    pub fn read(&self) -> Arc<RwLock<TicketStore>> {
+        self.ticket_store.clone()
     }
-    pub fn write(
-        &self,
-    ) -> Result<Arc<RwLock<TicketStore>>, PoisonError<RwLockWriteGuard<TicketStore>>> {
-        let ticket_store = Arc::clone(&self.ticket_store);
-        Ok(ticket_store)
+    pub fn write(&mut self) -> Arc<RwLock<TicketStore>> {
+        self.ticket_store.clone()
     }
 }
