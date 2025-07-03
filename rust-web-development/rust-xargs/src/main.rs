@@ -18,7 +18,7 @@
 //This is file 2
 //This is file 3
 
-use std::io::Read;
+use std::{io::Read, process::Command};
 
 use clap::Parser;
 
@@ -26,19 +26,28 @@ use clap::Parser;
 #[command(version, about, long_about = None)]
 struct Cli {
     /// Optional name to operate on
-    name: Option<Vec<String>>,
+    command: Option<Vec<String>>,
 }
 
 fn main() {
     let mut buffer = String::new();
     let _ = std::io::stdin().read_to_string(&mut buffer);
-    dbg!(buffer);
+    let stdin_input = buffer.split_whitespace().collect::<Vec<&str>>();
     let cli = Cli::parse();
 
     // You can check the value provided by positional arguments, or option arguments
-    if let Some(name) = cli.name.as_deref() {
-        for item in name {
-            println!("{}", item);
+    if let Some(cmd) = cli.command.as_deref() {
+        for command in cmd {
+            for item in &stdin_input {
+                // dbg!("I am ", command, item);
+
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(format!("{} {}", command, *item))
+                    .output()
+                    .expect("failed to execute")
+                    .stdout;
+            }
         }
     }
 }
