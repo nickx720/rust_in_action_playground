@@ -17,18 +17,15 @@ fn main() {
 
     // You can check the value provided by positional arguments, or option arguments
 
-    if let Some(cmd) = cli.command.as_deref() {
-        for command in cmd {
-            for item in &stdin_input {
-                // dbg!("I am ", command, item);
-
-                let _ = Command::new("sh")
-                    .arg("-c")
-                    .arg(format!("{} {}", command, *item))
-                    .spawn()
-                    .expect("failed to execute")
-                    .stdout;
-            }
+    if let Some(cmd) = cli.command {
+        let command = cmd.join(" ");
+        for item in &stdin_input {
+            let _ = Command::new("sh")
+                .arg("-c")
+                .arg(format!("{} {}", command, *item))
+                .spawn()
+                .expect("failed to execute")
+                .stdout;
         }
     }
 }
