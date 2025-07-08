@@ -19,7 +19,7 @@ use std::{io::Read, process::Command};
 //This is file 1
 //This is file 2
 //This is file 3
-use clap::{Parser, Subcommand};
+use clap::Parser;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -27,16 +27,11 @@ struct Cli {
     /// Optional name to operate on
     command: Option<Vec<String>>,
 
-    #[command(subcommand)]
-    morecommand: Option<MoreCommand>,
-}
+    #[arg(short, long)]
+    n: Option<u16>,
 
-#[derive(Subcommand)]
-enum MoreCommand {
-    List {
-        #[arg(short, long)]
-        max_args: Option<u8>,
-    },
+    #[arg(short, long)]
+    max_args: Option<u16>,
 }
 
 fn main() {
@@ -49,10 +44,22 @@ fn main() {
 
     if let Some(cmd) = cli.command {
         let command = cmd.join(" ");
-        for item in &stdin_input {
+        if let Some(number) = cli.n {
+            let number = number as usize;
+            for (index, item) in stdin_input.iter().skip(number).enumerate() {
+                // TODO get the elements for n
+                let _ = Command::new("sh")
+                    .arg("-c")
+                    .arg(format!("{} {}", command, *item))
+                    .spawn()
+                    .expect("failed to execute")
+                    .stdout;
+            }
+        } else {
+            let item = stdin_input.join("");
             let _ = Command::new("sh")
                 .arg("-c")
-                .arg(format!("{} {}", command, *item))
+                .arg(format!("{} {}", command, item))
                 .spawn()
                 .expect("failed to execute")
                 .stdout;
