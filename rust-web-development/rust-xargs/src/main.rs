@@ -46,11 +46,10 @@ fn main() {
         let command = cmd.join(" ");
         if let Some(number) = cli.n {
             let number = number as usize;
-            for (index, item) in stdin_input.iter().skip(number).enumerate() {
-                // TODO get the elements for n
+            for item in stdin_input.chunks(number) {
                 let _ = Command::new("sh")
                     .arg("-c")
-                    .arg(format!("{} {}", command, *item))
+                    .arg(format!("{} {}", command, item.join(" ")))
                     .spawn()
                     .expect("failed to execute")
                     .stdout;
