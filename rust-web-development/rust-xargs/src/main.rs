@@ -1,24 +1,23 @@
 use std::{io::Read, process::Command};
 
-//Step 3
+//Step 4
 //
-//In this step your goal is to support the -n option, which does this (from the man page):
+//In this step your goal is to support the -P option, which does this (from the man page):
 //
-// -n number, --max-args=number
-//             Set the maximum number of arguments taken from standard
-//             input for each invocation of utility.  An invocation of
-//             utility will use less than number standard input arguments
-//             if the number of bytes accumulated (see the -s option)
-//             exceeds the specified size or there are fewer than number
-//             arguments remaining for the last invocation of utility.  The
-//             current default value for number is 5000.
+//     -P maxprocs, --max-procs=maxprocs
+//             Parallel mode: run at most maxprocs invocations of utility
+//             at once.  If maxprocs is set to 0, xargs will run as many
+//             processes as possible.
 //
-//You can then test this like so:
-
-//% ls | ccxargs -n 1 cat
-//This is file 1
-//This is file 2
-//This is file 3
+//To test this I suggest creating a text file with a list of URLs in it, say urls.txt, then use ccxargs to invoke curl to download the pages.
+//
+//% cat urls.txt | ccxargs -n 1 -P 1 curl
+//
+//Which will dump the content of the websites you hit to your console. You might like to time it.
+//
+//Then run the test again with a higher value of P to see the overall time reduced as the curl requests are sent concurrently.
+//
+//% cat urls.txt | ccxargs -n 1 -P 10 curl
 use clap::Parser;
 
 #[derive(Parser)]
@@ -27,11 +26,10 @@ struct Cli {
     /// Optional name to operate on
     command: Option<Vec<String>>,
 
-    #[arg(short, long)]
-    n: Option<u16>,
-
-    #[arg(short, long)]
+    #[arg(short = 'n', long)]
     max_args: Option<u16>,
+    #[arg(short = 'P', long)]
+    max_procs: Option<u16>,
 }
 
 fn main() {
@@ -44,7 +42,7 @@ fn main() {
 
     if let Some(cmd) = cli.command {
         let command = cmd.join(" ");
-        if let Some(number) = cli.n {
+        if let Some(number) = cli.max_args {
             let number = number as usize;
             for item in stdin_input.chunks(number) {
                 let _ = Command::new("sh")
