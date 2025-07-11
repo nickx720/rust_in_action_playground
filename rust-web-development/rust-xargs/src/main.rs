@@ -43,7 +43,7 @@ fn main() {
     if let Some(cmd) = cli.command {
         let command = cmd.join(" ");
         let max_procs = cli.max_procs;
-        dbg!(max_procs);
+        // TODO execute new process for each command
         if let Some(number) = cli.max_args {
             let number = number as usize;
             for item in stdin_input.chunks(number) {
@@ -53,6 +53,7 @@ fn main() {
                     .spawn()
                     .expect("failed to execute")
                     .stdout;
+                println!();
             }
         } else {
             let item = stdin_input.join("");
