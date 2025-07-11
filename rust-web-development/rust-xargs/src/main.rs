@@ -42,6 +42,8 @@ fn main() {
 
     if let Some(cmd) = cli.command {
         let command = cmd.join(" ");
+        let max_procs = cli.max_procs;
+        dbg!(max_procs);
         if let Some(number) = cli.max_args {
             let number = number as usize;
             for item in stdin_input.chunks(number) {
