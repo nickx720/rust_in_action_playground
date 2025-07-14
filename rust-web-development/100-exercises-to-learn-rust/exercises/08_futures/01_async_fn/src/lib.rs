@@ -1,5 +1,5 @@
 use anyhow::Error;
-use tokio::net::TcpListener;
+use tokio::{io::AsyncReadExt, net::TcpListener};
 
 // TODO: write an echo server that accepts incoming TCP connections and
 //  echoes the received data back to the client.
@@ -12,15 +12,19 @@ use tokio::net::TcpListener;
 // - `tokio::net::TcpStream::split` to obtain a reader and a writer from the socket
 // - `tokio::io::copy` to copy data from the reader to the writer
 pub async fn echo(listener: TcpListener) -> Result<(), anyhow::Error> {
-    match listener.accept().await {
-        Ok((mut socket, _addr)) => {
-            dbg!("hello");
+    let result = match listener.accept().await {
+        Ok((mut socket, addr)) => {
             let (mut read, mut write) = socket.split();
-            let _ = tokio::io::copy(&mut read, &mut write).await?;
+            let mut buf = [0u8; 1024];
+            let n = read.read(&mut buf).await?;
+            println!("got {} bytes: {}", n, String::from_utf8_lossy(&buf[..n]));
+
+            //            tokio::io::copy(&mut read, &mut write).await.unwrap();
             Ok(())
         }
         Err(e) => Err(Error::new(e)),
-    }
+    };
+    result
 }
 
 #[cfg(test)]
