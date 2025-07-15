@@ -12,19 +12,11 @@ use tokio::{io::AsyncReadExt, net::TcpListener};
 // - `tokio::net::TcpStream::split` to obtain a reader and a writer from the socket
 // - `tokio::io::copy` to copy data from the reader to the writer
 pub async fn echo(listener: TcpListener) -> Result<(), anyhow::Error> {
-    let result = match listener.accept().await {
-        Ok((mut socket, addr)) => {
-            let (mut read, mut write) = socket.split();
-            let mut buf = [0u8; 1024];
-            let n = read.read(&mut buf).await?;
-            println!("got {} bytes: {}", n, String::from_utf8_lossy(&buf[..n]));
-
-            //            tokio::io::copy(&mut read, &mut write).await.unwrap();
-            Ok(())
-        }
-        Err(e) => Err(Error::new(e)),
-    };
-    result
+    loop {
+        let (mut socket, _addr) = listener.accept().await?;
+        let (mut read, mut write) = socket.split();
+        tokio::io::copy(&mut read, &mut write).await?;
+    }
 }
 
 #[cfg(test)]
