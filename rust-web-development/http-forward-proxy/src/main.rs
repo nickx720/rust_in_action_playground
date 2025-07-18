@@ -16,13 +16,18 @@
 
 // TODO use tokio
 use std::{
-    io::Write,
+    io::{Read, Write},
     net::{TcpListener, TcpStream},
 };
 
 fn handle_client(stream: &mut TcpStream) {
     let response = b"HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
+    let mut buffer = [0; 128];
+    let _ = stream.read(&mut buffer);
     let _ = stream.write_all(response);
+    let val = std::str::from_utf8(&buffer[..]).unwrap();
+    dbg!(val);
+    stream.flush().unwrap();
 }
 
 fn main() -> std::io::Result<()> {
