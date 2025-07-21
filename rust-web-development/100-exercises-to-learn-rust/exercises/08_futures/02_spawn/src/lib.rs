@@ -9,21 +9,19 @@ pub async fn echo(listener: TcpListener) -> Result<(), anyhow::Error> {
         // Spawn a background task to handle the connection
         // thus allowing the main task to immediately start
         // accepting new connections
-        let handle = tokio::spawn(async move {
-            dbg!("Hello");
+        tokio::spawn(async move {
             let (mut reader, mut writer) = socket.split();
             tokio::io::copy(&mut reader, &mut writer).await.unwrap();
         });
-        if handle.await.is_ok() {
-            break Ok(());
-        }
     }
 }
 
 pub async fn echoes(first: TcpListener, second: TcpListener) -> Result<(), anyhow::Error> {
     let servers = vec![first, second];
     for server in servers {
-        echo(server).await.unwrap();
+        tokio::spawn(async move {
+            echo(server).await.unwrap();
+        });
     }
     Ok(())
 }
