@@ -29,7 +29,10 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
     let val = std::str::from_utf8(&buffer[..]).unwrap();
     let query = val.split_terminator("\r\n").collect::<Vec<&str>>();
     if let Some(first) = query.first() {
-        dbg!(first);
+        let collection: Vec<&str> = first.split_whitespace().collect();
+        if let Some(url) = collection.iter().nth(1) {
+            dbg!(url);
+        }
     }
     stream.flush().unwrap();
     Ok(())
@@ -40,7 +43,7 @@ fn main() -> std::io::Result<()> {
 
     // accept connections and process them serially
     for stream in listener.incoming() {
-        handle_client(&mut stream?);
+        let _ = handle_client(&mut stream?);
     }
     Ok(())
 }
