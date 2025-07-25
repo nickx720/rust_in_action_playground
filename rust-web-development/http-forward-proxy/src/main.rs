@@ -25,13 +25,17 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
     let response = b"HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
     let mut buffer = [0; 1024];
     let _ = stream.read(&mut buffer);
-    let _ = stream.write_all(response);
     let val = std::str::from_utf8(&buffer[..]).unwrap();
     let query = val.split_terminator("\r\n").collect::<Vec<&str>>();
     if let Some(first) = query.first() {
         let collection: Vec<&str> = first.split_whitespace().collect();
         if let Some(url) = collection.iter().nth(1) {
-            dbg!(url);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}!",
+                url.len(),
+                url
+            );
+            let _ = stream.write_all(response.as_bytes());
         }
     }
     stream.flush().unwrap();
