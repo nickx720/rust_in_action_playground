@@ -11,7 +11,6 @@
 //    Add the ‘X-Forwarded-For’ header.
 //
 //    Read the response from the target server and set the correct response headers before,
-//
 //    Sending the response to the client.
 
 // TODO use tokio
