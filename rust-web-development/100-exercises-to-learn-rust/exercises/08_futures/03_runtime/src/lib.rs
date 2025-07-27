@@ -10,7 +10,25 @@ where
     // `T` cannot be cloned. How do you share it between the two server tasks?
     T: Display + Send + Sync + 'static,
 {
-    todo!()
+    let mut handles: Vec<tokio::task::JoinHandle<T>> = Vec::new();
+    for item in [first, second] {
+        let handle = tokio::spawn(async move {
+            loop {
+                let (mut socket, _) = item.accept().await.unwrap();
+                // Spawn a background task to handle the connection
+                // thus allowing the main task to immediately start
+                // accepting new connections
+                tokio::spawn(async move {
+                    let (mut reader, mut writer) = socket.split();
+                    tokio::io::copy(&mut reader, &mut writer).await.unwrap();
+                });
+            }
+        });
+        handles.push(handle);
+    }
+    for handle in handles {
+        handle.await.unwrap();
+    }
 }
 
 #[cfg(test)]
