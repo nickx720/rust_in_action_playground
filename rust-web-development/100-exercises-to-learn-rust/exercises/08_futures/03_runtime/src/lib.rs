@@ -13,19 +13,16 @@ where
     tokio::spawn(async move {
         let (mut socket, _) = first.accept().await.unwrap();
         let (_, mut writer) = socket.split();
+        dbg!(reply.to_string().as_bytes());
         writer
             .write_all(reply.to_string().as_bytes())
             .await
             .unwrap();
     });
-    tokio::spawn(async move {
-        let (mut socket, _) = second.accept().await.unwrap();
-        let (_, mut writer) = socket.split();
-        writer
-            .write_all(reply.to_string().as_bytes())
-            .await
-            .unwrap();
-    });
+
+    //    let (mut socket, _) = second.accept().await.unwrap();
+    //    let (_, mut writer) = socket.split();
+    //    writer.write_all(reply).await.unwrap();
 }
 
 #[cfg(test)]
