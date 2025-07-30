@@ -10,19 +10,21 @@ where
     // `T` cannot be cloned. How do you share it between the two server tasks?
     T: Display + Send + Sync + 'static + Copy,
 {
-    tokio::spawn(async move {
-        let (mut socket, _) = first.accept().await.unwrap();
-        let (_, mut writer) = socket.split();
-        dbg!(reply.to_string().as_bytes());
-        writer
-            .write_all(reply.to_string().as_bytes())
-            .await
-            .unwrap();
-    });
-
-    //    let (mut socket, _) = second.accept().await.unwrap();
-    //    let (_, mut writer) = socket.split();
-    //    writer.write_all(reply).await.unwrap();
+    let servers = vec![first, second];
+    for server in servers {
+        tokio::spawn(async move {
+            loop {
+                let (mut socket, _) = server.accept().await.unwrap();
+                tokio::spawn(async move {
+                    let (_, mut writer) = socket.split();
+                    writer
+                        .write_all(reply.to_string().as_bytes())
+                        .await
+                        .unwrap();
+                });
+            }
+        });
+    }
 }
 
 #[cfg(test)]
