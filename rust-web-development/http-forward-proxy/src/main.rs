@@ -20,6 +20,8 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
+use nyquest::blocking::Request;
+
 fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
     let response = b"HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
     let mut buffer = [0; 1024];
@@ -29,6 +31,16 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
     if let Some(first) = query.first() {
         let collection: Vec<&str> = first.split_whitespace().collect();
         if let Some(url) = collection.iter().nth(1) {
+            let client = nyquest::ClientBuilder::default()
+                .user_agent("curl/8.7.1 nyquest/0")
+                .build_blocking()
+                .expect("Failed to build client");
+            dbg!("I am here");
+            let response_from_client = client
+                .request(Request::get(url.to_string()))
+                .expect("Failed to get response");
+            let text = response_from_client.text().expect("Failed to get text");
+            dbg!(text);
             let response = format!(
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}!",
                 url.len(),
@@ -42,6 +54,7 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() -> std::io::Result<()> {
+    nyquest_preset::register();
     let listener = TcpListener::bind("127.0.0.1:8080")?;
 
     // accept connections and process them serially
