@@ -20,7 +20,7 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
-use nyquest::blocking::Request;
+use nyquest::{blocking::Request, header::FORWARDED};
 
 fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
     let response = b"HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
@@ -37,7 +37,11 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
                 .expect("Failed to build client");
             dbg!("I am here");
             let response_from_client = client
-                .request(Request::get(url.to_string()))
+                .request(
+                    Request::get(url.to_string())
+                        // TODO get the value dynamically
+                        .with_header(FORWARDED, "for=1.2.3.4;proto=https;by=5.6.7.8".to_string()),
+                )
                 .expect("Failed to get response");
             let text = response_from_client.text().expect("Failed to get text");
             dbg!(text);
