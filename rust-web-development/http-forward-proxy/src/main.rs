@@ -35,22 +35,17 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
                 .user_agent("curl/8.7.1 nyquest/0")
                 .build_blocking()
                 .expect("Failed to build client");
-            dbg!("I am here");
             let response_from_client = client
                 .request(
                     Request::get(url.to_string())
                         // TODO get the value dynamically
-                        .with_header(FORWARDED, "for=1.2.3.4;proto=https;by=5.6.7.8".to_string()),
+                        .with_header(FORWARDED, "for=127.0.0.1".to_string()),
                 )
                 .expect("Failed to get response");
-            let text = response_from_client.text().expect("Failed to get text");
-            dbg!(text);
-            let response = format!(
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}!",
-                url.len(),
-                url
-            );
-            let _ = stream.write_all(response.as_bytes());
+            let response = response_from_client
+                .bytes()
+                .expect("Unable to send response");
+            let _ = stream.write_all(&response);
         }
     }
     stream.flush().unwrap();
