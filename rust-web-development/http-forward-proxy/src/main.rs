@@ -23,7 +23,6 @@ use std::{
 use nyquest::{blocking::Request, header::FORWARDED};
 
 fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
-    let response = b"HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
     let mut buffer = [0; 1024];
     let _ = stream.read(&mut buffer);
     let val = std::str::from_utf8(&buffer[..]).unwrap();
@@ -42,10 +41,14 @@ fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
                         .with_header(FORWARDED, "for=127.0.0.1".to_string()),
                 )
                 .expect("Failed to get response");
-            let response = response_from_client
-                .bytes()
-                .expect("Unable to send response");
-            let _ = stream.write_all(&response);
+
+            let content = &response_from_client.bytes().unwrap();
+            let mut response_buf: Vec<u8> = Vec::new();
+            response_buf.extend_from_slice(b"HTTP/1.1 200 OK\r\n");
+            response_buf
+                .extend_from_slice(format!("Content-Length: {}\r\n\r\n", content.len()).as_bytes());
+            response_buf.extend_from_slice(content);
+            let _ = stream.write_all(&response_buf);
         }
     }
     stream.flush().unwrap();
