@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 nyquest = {version ="0.2.0", features=["blocking"] }
 nyquest-preset = {version="0.2.0",features=["blocking"]}
+tokio = { version = "1.47.1", features = ["full"] }
