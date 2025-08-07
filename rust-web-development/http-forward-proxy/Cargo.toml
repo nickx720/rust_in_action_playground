@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-nyquest = {version ="0.2.0", features=["blocking"] }
-nyquest-preset = {version="0.2.0",features=["blocking"]}
+nyquest = {version ="0.2.0", features=["async"] }
+nyquest-preset = {version="0.2.0",features=["async"]}
 tokio = { version = "1.47.1", features = ["full"] }

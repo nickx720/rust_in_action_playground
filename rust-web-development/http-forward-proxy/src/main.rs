@@ -14,14 +14,13 @@
 //    Sending the response to the client.
 
 // TODO use tokio
-use std::{
-    error::Error,
-    io::{Read, Write},
-};
+use std::io::{Read, Write};
 
-use nyquest::{blocking::Request, header::FORWARDED};
+use nyquest::ClientBuilder;
+use nyquest::r#async::Request;
+use nyquest::header::FORWARDED;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpListener;
+use tokio::net::{TcpListener, TcpStream};
 
 //fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
 //    let mut buffer = [0; 1024];
@@ -56,9 +55,65 @@ use tokio::net::TcpListener;
 //    Ok(())
 //}
 
+async fn handle_client(mut socket: TcpStream) {
+    let mut buf = [0; 1024];
+
+    // In a loop, read data from the socket and write the data back.
+    loop {
+        let n = match socket.read(&mut buf).await {
+            // socket closed
+            Ok(0) => return,
+            Ok(n) => n,
+            Err(e) => {
+                eprintln!("failed to read from socket; err = {:?}", e);
+                return;
+            }
+        };
+
+        let val = std::str::from_utf8(&buf[0..n]).unwrap();
+        let query = val.split_terminator("\r\n").collect::<Vec<&str>>();
+        if let Some(first) = query.first() {
+            let collection: Vec<&str> = first.split_whitespace().collect();
+            if let Some(url) = collection.iter().nth(1) {
+                let client = ClientBuilder::default()
+                    .build_async()
+                    .await
+                    .expect("Couldn't build");
+                //                let client = nyquest::ClientBuilder::default()
+                //                    .build_async()
+                //                    .await
+                //                    .user_agent("curl/8.7.1 nyquest/0")
+                //                    .expect("Failed to build client");
+                let response_from_client = client
+                    .request(
+                        Request::get(url.to_string())
+                            // TODO get the value dynamically
+                            .with_header(FORWARDED, "for=127.0.0.1".to_string()),
+                    )
+                    .await
+                    .expect("Failed to get response");
+
+                dbg!(&response_from_client);
+                let content = &response_from_client.bytes().await.expect("Couldn't parse");
+                let mut response_buf: Vec<u8> = Vec::new();
+                response_buf.extend_from_slice(b"HTTP/1.1 200 OK\r\n");
+                response_buf.extend_from_slice(
+                    format!("Content-Length: {}\r\n\r\n", content.len()).as_bytes(),
+                );
+                response_buf.extend_from_slice(content);
+                // Write the data back
+                if let Err(e) = socket.write_all(&response_buf).await {
+                    eprintln!("failed to write to socket; err = {:?}", e);
+                    return;
+                }
+            }
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    //    nyquest_preset::register();
+    nyquest_preset::register();
     //    let listener = TcpListener::bind("127.0.0.1:8080")?;
     //
     //    // accept connections and process them serially
@@ -67,31 +122,7 @@ async fn main() -> std::io::Result<()> {
     //    }
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
 
-    loop {
-        let (mut socket, _) = listener.accept().await?;
-
-        tokio::spawn(async move {
-            let mut buf = [0; 1024];
-
-            // In a loop, read data from the socket and write the data back.
-            loop {
-                let n = match socket.read(&mut buf).await {
-                    // socket closed
-                    Ok(0) => return,
-                    Ok(n) => n,
-                    Err(e) => {
-                        eprintln!("failed to read from socket; err = {:?}", e);
-                        return;
-                    }
-                };
-
-                // Write the data back
-                if let Err(e) = socket.write_all(&buf[0..n]).await {
-                    eprintln!("failed to write to socket; err = {:?}", e);
-                    return;
-                }
-            }
-        });
-    }
+    let (mut socket, _) = listener.accept().await?;
+    tokio::spawn(handle_client(socket));
     Ok(())
 }
