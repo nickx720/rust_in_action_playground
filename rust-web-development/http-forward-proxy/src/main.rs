@@ -13,47 +13,11 @@
 //    Read the response from the target server and set the correct response headers before,
 //    Sending the response to the client.
 
-// TODO use tokio
-use std::io::{Read, Write};
-
 use nyquest::ClientBuilder;
 use nyquest::r#async::Request;
 use nyquest::header::FORWARDED;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-
-//fn handle_client(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
-//    let mut buffer = [0; 1024];
-//    let _ = stream.read(&mut buffer);
-//    let val = std::str::from_utf8(&buffer[..]).unwrap();
-//    let query = val.split_terminator("\r\n").collect::<Vec<&str>>();
-//    if let Some(first) = query.first() {
-//        let collection: Vec<&str> = first.split_whitespace().collect();
-//        if let Some(url) = collection.iter().nth(1) {
-//            let client = nyquest::ClientBuilder::default()
-//                .user_agent("curl/8.7.1 nyquest/0")
-//                .build_blocking()
-//                .expect("Failed to build client");
-//            let response_from_client = client
-//                .request(
-//                    Request::get(url.to_string())
-//                        // TODO get the value dynamically
-//                        .with_header(FORWARDED, "for=127.0.0.1".to_string()),
-//                )
-//                .expect("Failed to get response");
-//
-//            let content = &response_from_client.bytes().unwrap();
-//            let mut response_buf: Vec<u8> = Vec::new();
-//            response_buf.extend_from_slice(b"HTTP/1.1 200 OK\r\n");
-//            response_buf
-//                .extend_from_slice(format!("Content-Length: {}\r\n\r\n", content.len()).as_bytes());
-//            response_buf.extend_from_slice(content);
-//            let _ = stream.write_all(&response_buf);
-//        }
-//    }
-//    stream.flush().unwrap();
-//    Ok(())
-//}
 
 async fn handle_client(mut socket: TcpStream) {
     let mut buf = [0; 1024];
@@ -75,25 +39,15 @@ async fn handle_client(mut socket: TcpStream) {
         if let Some(first) = query.first() {
             let collection: Vec<&str> = first.split_whitespace().collect();
             if let Some(url) = collection.iter().nth(1) {
-                let client = ClientBuilder::default()
+                let client = nyquest::ClientBuilder::default()
                     .build_async()
                     .await
-                    .expect("Couldn't build");
-                //                let client = nyquest::ClientBuilder::default()
-                //                    .build_async()
-                //                    .await
-                //                    .user_agent("curl/8.7.1 nyquest/0")
-                //                    .expect("Failed to build client");
-                let response_from_client = client
-                    .request(
-                        Request::get(url.to_string())
-                            // TODO get the value dynamically
-                            .with_header(FORWARDED, "for=127.0.0.1".to_string()),
-                    )
-                    .await
-                    .expect("Failed to get response");
+                    .expect("Failed to build client");
+                let body = Request::get(url.to_string())
+                    // TODO get the value dynamically
+                    .with_header(FORWARDED, "for=127.0.0.1".to_string());
+                let response_from_client = client.request(body).await.unwrap();
 
-                dbg!(&response_from_client);
                 let content = &response_from_client.bytes().await.expect("Couldn't parse");
                 let mut response_buf: Vec<u8> = Vec::new();
                 response_buf.extend_from_slice(b"HTTP/1.1 200 OK\r\n");
@@ -121,8 +75,8 @@ async fn main() -> std::io::Result<()> {
     //        let _ = handle_client(&mut stream?);
     //    }
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
-
-    let (mut socket, _) = listener.accept().await?;
-    tokio::spawn(handle_client(socket));
-    Ok(())
+    loop {
+        let (mut socket, _) = listener.accept().await?;
+        tokio::spawn(async move { handle_client(socket).await });
+    }
 }
