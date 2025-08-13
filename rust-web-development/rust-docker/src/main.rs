@@ -16,7 +16,7 @@ enum Commands {
     Run {
         #[arg(short, long)]
         command: String,
-        #[arg(short, long)]
+        #[arg(short, long,num_args=1..)]
         args: Vec<String>,
     },
 }
