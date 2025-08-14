@@ -33,7 +33,7 @@ In case you’re wondering why you need a Linux virtual machine on Mac and Windo
 
 Please also download a version of Alpine Linux that is appropriate for your hardware. We’ll be using this to test the early versions of our container runtime. Please unpack it in your project directory (don’t forget to add it to .gitignore) and for later testing create a file in the root of the Alpine installation called ALPHINE_FS_ROOT.
 
-Step 1
+# Step 1 - Done
 
 In this step your goal is to be able to run an arbitrary command launched by your docker clone. For example, when using Docker we might do:
 
