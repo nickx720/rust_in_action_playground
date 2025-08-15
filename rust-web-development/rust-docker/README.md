@@ -5,11 +5,6 @@ root password: yahoo1234
 
 Build Your Own Docker
 
-This challenge is to build your own version of Docker.
-
-Docker is a software platform that allows you to build, test, and deploy applications quickly. It does that by packaging software into container images. These container images include everything needed to run the software - libraries, system tools, configuration and application.
-
-There are two key parts of the Docker ecosystem that we’re going to look at in this Coding Challenge, Docker Hub and the Docker Engine.
 
 Docker Hub us a container registry. It allows developers to find use and share container images. Docker Engine, which provides a container runtime that can run these container images ensuring that the containerised software runs the same wherever it is deployed.
 
