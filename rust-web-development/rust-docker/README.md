@@ -21,7 +21,6 @@ In this Coding Challenge we’re going to build an application to pull a contain
 Step Zero
 
 Like all the best programming languages we’re zero indexed! For this step, you will need to setup your IDE / editor and programming language of choice. Pick something you are happy doing systems programming in. Or one you want to learn how to write systems software in.
-
 If you’re not running on Linux, you’ll also need to install some software to be able to run a Linux virtual machine image. For Windows and Intel based Apple hardware VirtualBox is a great option. For Apple M based hardware VMware Fusion is free for personal use.
 
 In case you’re wondering why you need a Linux virtual machine on Mac and Windows when Docker and Kubernetes don’t, well, it’s because they do. It’s just packaged up in the application so you don’t have to worry about it.
