@@ -61,6 +61,7 @@ ls: madeupdir: No such file or directory
 It’s not very exciting so far, but in the next few steps we’ll containerise the command we’re running.
 
 Step 2
+https://docs.rs/nix/latest/nix/sched/struct.CloneFlags.html#associatedconstant.CLONE_NEWUTS
 
 In this step your goal is to be able to give your container it’s own hostname. The goal here is launch the container with it’s own hostname, whilst not affecting the hostname of the host operating system. For me that looks like this on the terminal of my Linux VM:
 
