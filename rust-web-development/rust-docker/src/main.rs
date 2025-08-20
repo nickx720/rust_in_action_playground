@@ -40,11 +40,14 @@ fn main() {
                 if let Err(e) = sethostname("child-ns") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
-                let hn = gethostname().map(|s| s.to_string_lossy().into_owned());
-                match hn {
-                    Ok(h) => println!("[child] hostname: {h}"),
-                    Err(e) => eprintln!("[child] gethostname failed: {e}"),
-                }
+                let h = match gethostname() {
+                    Ok(s) => s.to_string_lossy().into_owned(),
+                    Err(e) => {
+                        eprintln!("[child] gethostname failed: {e}");
+                        return 1; // non-zero exit from the child
+                    }
+                };
+                println!("Child host name {}", h);
                 0 // child's exit status
             }),
             &mut stack,
