@@ -26,6 +26,7 @@ enum Commands {
 }
 
 fn main() {
+    let args = Args::parse();
     let mut stack = vec![0u8; 512 * 1024];
 
     // Show parent hostname
@@ -48,6 +49,16 @@ fn main() {
                     }
                 };
                 println!("Child host name {}", h);
+                if let Some(arguments) = &args.run {
+                    match arguments {
+                        Commands::Run { command, args } => {
+                            let output =
+                                Command::new(command).arg(args.join(" ")).output().unwrap();
+                            let _ = io::stdout().write_all(&output.stdout);
+                            let _ = io::stderr().write_all(&output.stderr);
+                        }
+                    }
+                }
                 0 // child's exit status
             }),
             &mut stack,
@@ -66,14 +77,4 @@ fn main() {
     // Parent hostname is unchanged
     let parent_after = gethostname().unwrap().to_string_lossy().into_owned();
     println!("[parent] hostname after child: {parent_after}");
-    let args = Args::parse();
-    if let Some(arguments) = args.run {
-        match arguments {
-            Commands::Run { command, args } => {
-                let output = Command::new(command).arg(args.join(" ")).output().unwrap();
-                let _ = io::stdout().write_all(&output.stdout);
-                let _ = io::stderr().write_all(&output.stderr);
-            }
-        }
-    }
 }
