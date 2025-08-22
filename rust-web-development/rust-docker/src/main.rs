@@ -38,7 +38,7 @@ fn main() {
         clone(
             Box::new(|| {
                 // --- child process ---
-                if let Err(e) = sethostname("child-ns") {
+                if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
                 let h = match gethostname() {
