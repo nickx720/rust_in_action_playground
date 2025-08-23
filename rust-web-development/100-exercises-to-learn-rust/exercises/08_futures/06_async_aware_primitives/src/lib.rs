@@ -4,8 +4,7 @@
 ///  the testing code too, yes).
 ///
 /// Can you understand the sequence of events that can lead to a deadlock?
-use std::sync::mpsc;
-
+use tokio::sync::mpsc;
 pub struct Message {
     payload: String,
     response_channel: mpsc::Sender<Message>,
@@ -15,14 +14,15 @@ pub struct Message {
 /// channel to continue communicating with the caller.
 pub async fn pong(mut receiver: mpsc::Receiver<Message>) {
     loop {
-        if let Ok(msg) = receiver.recv() {
+        if let Some(msg) = receiver.recv().await {
             println!("Pong received: {}", msg.payload);
-            let (sender, new_receiver) = mpsc::channel();
+            let (sender, new_receiver) = mpsc::channel(2);
             msg.response_channel
                 .send(Message {
                     payload: "pong".into(),
                     response_channel: sender,
                 })
+                .await
                 .unwrap();
             receiver = new_receiver;
         }
@@ -31,23 +31,25 @@ pub async fn pong(mut receiver: mpsc::Receiver<Message>) {
 
 #[cfg(test)]
 mod tests {
+    use tokio::sync::mpsc;
+
     use crate::{pong, Message};
-    use std::sync::mpsc;
 
     #[tokio::test]
     async fn ping() {
-        let (sender, receiver) = mpsc::channel();
-        let (response_sender, response_receiver) = mpsc::channel();
+        let (sender, receiver) = mpsc::channel(2);
+        let (response_sender, mut response_receiver) = mpsc::channel(2);
         sender
             .send(Message {
                 payload: "pong".into(),
                 response_channel: response_sender,
             })
+            .await
             .unwrap();
 
         tokio::spawn(pong(receiver));
 
-        let answer = response_receiver.recv().unwrap().payload;
+        let answer = response_receiver.recv().await.unwrap().payload;
         assert_eq!(answer, "pong");
     }
 }
