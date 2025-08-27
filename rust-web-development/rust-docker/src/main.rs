@@ -4,10 +4,10 @@ use std::{
 };
 
 use clap::{Parser, Subcommand};
-use nix::libc::SIGCHLD;
 use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
 use nix::unistd::{Pid, chroot, gethostname, sethostname};
+use nix::{libc::SIGCHLD, unistd::chdir};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -52,12 +52,10 @@ fn main() {
                 if let Some(arguments) = &args.run {
                     match arguments {
                         Commands::Run { command, args } => {
-                            let result = chroot("/").expect("Unable to change directory");
+                            let result = chroot("/play").expect("Chroot failed");
+                            chdir("/").expect("Unable to set directory");
                             dbg!(result);
-                            let output =
-                                Command::new(command).arg(args.join(" ")).output().unwrap();
-                            let _ = io::stdout().write_all(&output.stdout);
-                            let _ = io::stderr().write_all(&output.stderr);
+                            Command::new(command).args(args).status().unwrap();
                         }
                     }
                 }
