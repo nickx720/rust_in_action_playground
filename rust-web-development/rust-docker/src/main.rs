@@ -4,10 +4,13 @@ use std::{
 };
 
 use clap::{Parser, Subcommand};
-use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
 use nix::unistd::{Pid, chroot, gethostname, sethostname};
 use nix::{libc::SIGCHLD, unistd::chdir};
+use nix::{
+    sched::{CloneFlags, clone},
+    unistd::getcwd,
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -54,8 +57,16 @@ fn main() {
                         Commands::Run { command, args } => {
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
-                            dbg!(result);
-                            Command::new(command).args(args).status().unwrap();
+                            dbg!(getcwd().unwrap().display());
+                            let cmd = Command::new(command).args(args).spawn();
+                            match cmd {
+                                Ok(val) => {
+                                    println!("Went well");
+                                }
+                                Err(e) => {
+                                    eprintln!("Something went wrong {}", e)
+                                }
+                            }
                         }
                     }
                 }
