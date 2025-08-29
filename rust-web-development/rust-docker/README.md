@@ -12,7 +12,6 @@ Are You Interested In A Course On How To Build Your Own Docker?
 
 If so, please sign up to the waitlist. If there is enough interest I’ll build a course that explains how to create your own solution to the Docker Coding Challenge in Python, Go and Rust.
 
-Anyone on the waitlist will be offered a 50% discount.
 
 The Challenge - Building Your Own Docker
 
