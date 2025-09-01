@@ -61,7 +61,7 @@ fn main() {
                             let cmd = Command::new(command).args(args).spawn();
                             match cmd {
                                 Ok(val) => {
-                                    println!("Went well");
+                                    println!("Works");
                                 }
                                 Err(e) => {
                                     eprintln!("Something went wrong {}", e)
