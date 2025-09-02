@@ -41,6 +41,7 @@ fn main() {
         clone(
             Box::new(|| {
                 // --- child process ---
+                // https://docs.rs/nix/latest/nix/mount/fn.mount.html
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
@@ -73,7 +74,7 @@ fn main() {
                 0 // child's exit status
             }),
             &mut stack,
-            CloneFlags::CLONE_NEWUTS,
+            CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWNS,
             Some(SIGCHLD),
         )
         .unwrap()
