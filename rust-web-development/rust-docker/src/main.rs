@@ -43,6 +43,7 @@ fn main() {
                 // --- child process ---
                 // https://docs.rs/nix/latest/nix/mount/fn.mount.html
                 // TODO setup new process using CLONE_NEWPID
+                // https://lwn.net/Articles/531419/
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
