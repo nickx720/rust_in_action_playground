@@ -61,15 +61,15 @@ fn main() {
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             dbg!(getcwd().unwrap().display());
-                            let cmd = Command::new(command).args(args).spawn();
-                            match cmd {
-                                Ok(val) => {
-                                    println!("Works");
-                                }
-                                Err(e) => {
-                                    eprintln!("Something went wrong {}", e)
-                                }
-                            }
+                            //                            let cmd = Command::new(command).args(args).spawn();
+                            //                            match cmd {
+                            //                                Ok(val) => {
+                            //                                    println!("Works");
+                            //                                }
+                            //                                Err(e) => {
+                            //                                    eprintln!("Something went wrong {}", e)
+                            //                                }
+                            //                            }
                         }
                     }
                 }
