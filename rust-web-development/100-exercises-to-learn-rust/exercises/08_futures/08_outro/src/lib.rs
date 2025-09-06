@@ -20,7 +20,9 @@ async fn hello(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
 
 async fn router(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     match (req.method(), req.uri().path()) {
-        (&Method::GET, "/hello") => hello(req).await,
+        (&Method::POST, "/create") => hello(req).await,
+        (&Method::GET, "/read") => hello(req).await,
+        (&Method::PATCH, "/update") => hello(req).await,
         _ => {
             let mut not_found = Response::new(Body::from("Not Found"));
             *not_found.status_mut() = StatusCode::NOT_FOUND;
@@ -30,7 +32,6 @@ async fn router(req: Request<Body>) -> Result<Response<Body>, Infallible> {
 }
 
 pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    println!("Hello world");
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
 
     let make_svc = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(router)) });
