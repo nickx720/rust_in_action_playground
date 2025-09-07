@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
 hyper = { version = "0.14", features = ["full"] }
+ticket_fields = { path = "../../../helpers/ticket_fields" }

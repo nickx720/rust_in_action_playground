@@ -13,6 +13,7 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use std::convert::Infallible;
 use std::net::SocketAddr;
+mod ticket;
 
 async fn hello(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
     Ok(Response::new(Body::from("Hello, world!")))
