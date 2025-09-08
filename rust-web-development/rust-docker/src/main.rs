@@ -1,15 +1,19 @@
 use std::{
+    ffi::CString,
     io::{self, Write},
     process::Command,
 };
 
 use clap::{Parser, Subcommand};
-use nix::sys::wait::{WaitStatus, waitpid};
 use nix::unistd::{Pid, chroot, gethostname, sethostname};
 use nix::{libc::SIGCHLD, unistd::chdir};
 use nix::{
     sched::{CloneFlags, clone},
     unistd::getcwd,
+};
+use nix::{
+    sys::wait::{WaitStatus, waitpid},
+    unistd::execvp,
 };
 
 #[derive(Parser, Debug)]
@@ -61,6 +65,15 @@ fn main() {
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             dbg!(getcwd().unwrap().display());
+                            let shell = CString::new(command.to_string()).unwrap();
+                            let mut arguments: Vec<CString>;
+                            if !args.is_empty() {
+                                let args = CString::new(args.join(" ").to_string()).unwrap();
+                                arguments = vec![shell.clone(), args.clone()];
+                            } else {
+                                arguments = vec![shell.clone()];
+                            }
+                            execvp(&shell, &arguments.to_owned()).expect("execvp failed");
                             //                            let cmd = Command::new(command).args(args).spawn();
                             //                            match cmd {
                             //                                Ok(val) => {
