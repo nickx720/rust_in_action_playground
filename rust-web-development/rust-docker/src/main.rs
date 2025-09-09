@@ -1,3 +1,35 @@
+//
+//### 2. Mount Namespace Isolation
+//
+//• You use CLONE_NEWNS in clone.
+//• This means the child process is in a new mount namespace.
+//• However, you should also remount / as private (mount(NULL, "/", NULL, MS_REC|MS_PRIVATE, NULL))
+//to prevent mount propagation to the host.
+//• You do not currently mount /proc in the new namespace, which is required for ps to work as
+//expected.
+//
+//### 3. Mounting /proc
+//
+//• Missing:
+//You do not call mount("proc", "/proc", "proc", 0, NULL) in the child.
+// • Without this, /proc in the container will be the host’s /proc, or may not be mounted at all
+// (depending on chroot).
+// • You must mount /proc after entering the new mount namespace and after chrooting (if you chroot).
+//
+//
+//### 4. Unmounting /proc on Exit
+//
+//• Missing:
+//You do not unmount /proc on container exit.
+// • This is important for cleanup.
+//
+//
+//### 5. Validation
+//
+//• If you add the missing /proc mount, running ps in the container will show only container
+//processes, with your command as PID 1.
+//• On the host, the container’s /proc will not be visible in mount | grep proc if you use a new
+//mount namespace and remount / as private.
 use std::{
     ffi::CString,
     io::{self, Write},
@@ -48,6 +80,7 @@ fn main() {
                 // https://docs.rs/nix/latest/nix/mount/fn.mount.html
                 // TODO setup new process using CLONE_NEWPID
                 // https://lwn.net/Articles/531419/
+
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
@@ -59,6 +92,7 @@ fn main() {
                     }
                 };
                 println!("Child host name {}", h);
+                // mounting a new mount namespace
                 if let Some(arguments) = &args.run {
                     match arguments {
                         Commands::Run { command, args } => {
@@ -73,6 +107,7 @@ fn main() {
                             } else {
                                 arguments = vec![shell.clone()];
                             }
+                            println!("The pid before execvp {}", nix::unistd::getpid());
                             execvp(&shell, &arguments.to_owned()).expect("execvp failed");
                             //                            let cmd = Command::new(command).args(args).spawn();
                             //                            match cmd {
