@@ -33,14 +33,16 @@
 use std::{
     ffi::CString,
     io::{self, Write},
+    path::Path,
     process::Command,
 };
 
 use clap::{Parser, Subcommand};
+use nix::mount::{self, MsFlags, mount};
 use nix::unistd::{Pid, chroot, gethostname, sethostname};
 use nix::{libc::SIGCHLD, unistd::chdir};
 use nix::{
-    sched::{CloneFlags, clone},
+    sched::{CloneFlags, clone, unshare},
     unistd::getcwd,
 };
 use nix::{
@@ -96,6 +98,14 @@ fn main() {
                 if let Some(arguments) = &args.run {
                     match arguments {
                         Commands::Run { command, args } => {
+                            mount(
+                                None::<&str>,
+                                Path::new("/play"),
+                                None::<&str>,
+                                MsFlags::MS_SLAVE,
+                                None::<&str>,
+                            )
+                            .unwrap();
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             dbg!(getcwd().unwrap().display());
