@@ -98,14 +98,15 @@ fn main() {
                 if let Some(arguments) = &args.run {
                     match arguments {
                         Commands::Run { command, args } => {
+                            #[cfg(target_os = "linux")]
                             mount(
-                                None::<&str>,
+                                Some(Path::new("/play")),
                                 Path::new("/play"),
                                 None::<&str>,
-                                MsFlags::MS_SLAVE,
+                                MsFlags::MS_BIND | MsFlags::MS_REC,
                                 None::<&str>,
                             )
-                            .unwrap();
+                            .expect("Unable to run");
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             dbg!(getcwd().unwrap().display());
