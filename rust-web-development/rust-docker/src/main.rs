@@ -1,35 +1,3 @@
-//
-//### 2. Mount Namespace Isolation
-//
-//• You use CLONE_NEWNS in clone.
-//• This means the child process is in a new mount namespace.
-//• However, you should also remount / as private (mount(NULL, "/", NULL, MS_REC|MS_PRIVATE, NULL))
-//to prevent mount propagation to the host.
-//• You do not currently mount /proc in the new namespace, which is required for ps to work as
-//expected.
-//
-//### 3. Mounting /proc
-//
-//• Missing:
-//You do not call mount("proc", "/proc", "proc", 0, NULL) in the child.
-// • Without this, /proc in the container will be the host’s /proc, or may not be mounted at all
-// (depending on chroot).
-// • You must mount /proc after entering the new mount namespace and after chrooting (if you chroot).
-//
-//
-//### 4. Unmounting /proc on Exit
-//
-//• Missing:
-//You do not unmount /proc on container exit.
-// • This is important for cleanup.
-//
-//
-//### 5. Validation
-//
-//• If you add the missing /proc mount, running ps in the container will show only container
-//processes, with your command as PID 1.
-//• On the host, the container’s /proc will not be visible in mount | grep proc if you use a new
-//mount namespace and remount / as private.
 use std::{
     ffi::CString,
     io::{self, Write},
@@ -78,10 +46,35 @@ fn main() {
     let child_pid: Pid = unsafe {
         clone(
             Box::new(|| {
-                // --- child process ---
-                // https://docs.rs/nix/latest/nix/mount/fn.mount.html
-                // TODO setup new process using CLONE_NEWPID
-                // https://lwn.net/Articles/531419/
+                // You’re *very* close. The behavior in your screenshot (seeing the host’s processes) almost always means one thing:
+
+                //**`ps` is still reading the host’s `/proc`, not a `/proc` that’s tied to the new PID namespace.**
+                //
+                //A few focused hints to get you to the “three-PIDs only” view without giving away the full patch:
+                //
+                //* **Mount the `proc` FS *inside the child after it’s in the new PID namespace*.**
+                //  With `CLONE_NEWPID`, the child becomes PID 1 *in that namespace*, but `/proc` keeps pointing at whatever was mounted in the parent (the initial PID ns). Unless you remount `proc` from inside the child, `ps` will show host PIDs.
+                //
+                //* **Do it after you’ve isolated mounts.**
+                //  You’re creating a new mount namespace (`CLONE_NEWNS`) and you’re setting `/` to `MS_PRIVATE|MS_REC` (good—prevents propagation back to host). Now ensure you mount `proc` *in that private mount tree*, not the shared one inherited from the host.
+                //
+                //* **Mount point exists where `ps` expects it.**
+                //  After your `chroot("/play")` + `chdir("/")`, make sure `"/proc"` exists under that root and mount `proc` there. If you mount before the `chroot`, you’ll miss the new root; if you mount after but the directory is missing, `ps` will fall back or fail.
+                //
+                //* **Unmount on exit.**
+                //  When PID 1 inside the new PID namespace is exiting, lazily unmount `/proc` (e.g., a `MNT_DETACH` variant) so you don’t leave a dangling mount. This also ensures `mount | grep proc` on the host doesn’t show the container’s `/proc`.
+                //
+                //* **Order matters.**
+                //  The sequence should be: enter new UTS/Mount/PID namespaces → make mounts private → `chroot` (or `pivot_root` if you later go that route) → **mount `proc`** within that root → `exec` your command. If you mount `proc` too early or in the wrong namespace/root, you’ll keep seeing host processes.
+                //
+                //* **Sanity check the PID ns.**
+                //  Inside the child, `getpid()` should print `1` right before you `exec`. If it doesn’t, you’re not actually in the new PID namespace.
+                //
+                //* **Capabilities/permissions.**
+                //  `sethostname` and mounts require the right caps (`CAP_SYS_ADMIN`) in the *current* namespace. If you’re running as non-root or without caps, some calls will “succeed” in confusing ways (or log errors you’re already printing).
+                //
+                //If you fix just the **“mount `/proc` in the child after the `chroot`, within the new (private) mount namespace”** detail, your `ps` should collapse to the expected three entries.
+                //
 
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
@@ -98,6 +91,15 @@ fn main() {
                 if let Some(arguments) = &args.run {
                     match arguments {
                         Commands::Run { command, args } => {
+                            #[cfg(target_os = "linux")]
+                            mount(
+                                None::<&str>,
+                                Path::new("/"),
+                                None::<&str>,
+                                MsFlags::MS_REC | MsFlags::MS_PRIVATE,
+                                None::<&str>,
+                            )
+                            .expect("Unable to run");
                             #[cfg(target_os = "linux")]
                             mount(
                                 Some(Path::new("/play")),
@@ -120,15 +122,6 @@ fn main() {
                             }
                             println!("The pid before execvp {}", nix::unistd::getpid());
                             execvp(&shell, &arguments.to_owned()).expect("execvp failed");
-                            //                            let cmd = Command::new(command).args(args).spawn();
-                            //                            match cmd {
-                            //                                Ok(val) => {
-                            //                                    println!("Works");
-                            //                                }
-                            //                                Err(e) => {
-                            //                                    eprintln!("Something went wrong {}", e)
-                            //                                }
-                            //                            }
                         }
                     }
                 }
