@@ -18,6 +18,11 @@ impl<'a> IntoIterator for &'a TicketStore {
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Ord, Eq)]
 pub struct TicketId(u64);
+impl TicketId {
+    pub fn get(self) -> u64 {
+        self.0
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ticket {
