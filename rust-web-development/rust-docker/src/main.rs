@@ -6,7 +6,7 @@ use std::{
 };
 
 use clap::{Parser, Subcommand};
-use nix::mount::{self, MsFlags, mount};
+use nix::mount::{self, MntFlags, MsFlags, mount, umount2};
 use nix::unistd::{Pid, chroot, gethostname, sethostname};
 use nix::{libc::SIGCHLD, unistd::chdir};
 use nix::{
@@ -111,6 +111,14 @@ fn main() {
                             .expect("Unable to run");
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
+                            #[cfg(target_os = "linux")]
+                            mount(
+                                Some(Path::new("proc")),
+                                Path::new("/proc"),
+                                Some(Path::new("proc")),
+                                MsFlags::empty(),
+                                None,
+                            );
                             dbg!(getcwd().unwrap().display());
                             let shell = CString::new(command.to_string()).unwrap();
                             let mut arguments: Vec<CString>;
@@ -122,6 +130,8 @@ fn main() {
                             }
                             println!("The pid before execvp {}", nix::unistd::getpid());
                             execvp(&shell, &arguments.to_owned()).expect("execvp failed");
+                            #[cfg(target_os = "linux")]
+                            umount2("/proc", MntFlags::MNT_DETACH).expect("Coudn't unmount");
                         }
                     }
                 }
