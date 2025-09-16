@@ -112,12 +112,12 @@ fn main() {
                             let result = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             #[cfg(target_os = "linux")]
-                            mount(
+                            let _ = mount(
                                 Some(Path::new("proc")),
                                 Path::new("/proc"),
                                 Some(Path::new("proc")),
                                 MsFlags::empty(),
-                                None,
+                                None::<&str>,
                             );
                             dbg!(getcwd().unwrap().display());
                             let shell = CString::new(command.to_string()).unwrap();
