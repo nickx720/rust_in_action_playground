@@ -34,6 +34,8 @@ enum Commands {
     },
 }
 
+// Figure out how to isolate process running inside container from host
+// https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
     let args = Args::parse();
     let mut stack = vec![0u8; 512 * 1024];
@@ -46,36 +48,6 @@ fn main() {
     let child_pid: Pid = unsafe {
         clone(
             Box::new(|| {
-                // You’re *very* close. The behavior in your screenshot (seeing the host’s processes) almost always means one thing:
-
-                //**`ps` is still reading the host’s `/proc`, not a `/proc` that’s tied to the new PID namespace.**
-                //
-                //A few focused hints to get you to the “three-PIDs only” view without giving away the full patch:
-                //
-                //* **Mount the `proc` FS *inside the child after it’s in the new PID namespace*.**
-                //  With `CLONE_NEWPID`, the child becomes PID 1 *in that namespace*, but `/proc` keeps pointing at whatever was mounted in the parent (the initial PID ns). Unless you remount `proc` from inside the child, `ps` will show host PIDs.
-                //
-                //* **Do it after you’ve isolated mounts.**
-                //  You’re creating a new mount namespace (`CLONE_NEWNS`) and you’re setting `/` to `MS_PRIVATE|MS_REC` (good—prevents propagation back to host). Now ensure you mount `proc` *in that private mount tree*, not the shared one inherited from the host.
-                //
-                //* **Mount point exists where `ps` expects it.**
-                //  After your `chroot("/play")` + `chdir("/")`, make sure `"/proc"` exists under that root and mount `proc` there. If you mount before the `chroot`, you’ll miss the new root; if you mount after but the directory is missing, `ps` will fall back or fail.
-                //
-                //* **Unmount on exit.**
-                //  When PID 1 inside the new PID namespace is exiting, lazily unmount `/proc` (e.g., a `MNT_DETACH` variant) so you don’t leave a dangling mount. This also ensures `mount | grep proc` on the host doesn’t show the container’s `/proc`.
-                //
-                //* **Order matters.**
-                //  The sequence should be: enter new UTS/Mount/PID namespaces → make mounts private → `chroot` (or `pivot_root` if you later go that route) → **mount `proc`** within that root → `exec` your command. If you mount `proc` too early or in the wrong namespace/root, you’ll keep seeing host processes.
-                //
-                //* **Sanity check the PID ns.**
-                //  Inside the child, `getpid()` should print `1` right before you `exec`. If it doesn’t, you’re not actually in the new PID namespace.
-                //
-                //* **Capabilities/permissions.**
-                //  `sethostname` and mounts require the right caps (`CAP_SYS_ADMIN`) in the *current* namespace. If you’re running as non-root or without caps, some calls will “succeed” in confusing ways (or log errors you’re already printing).
-                //
-                //If you fix just the **“mount `/proc` in the child after the `chroot`, within the new (private) mount namespace”** detail, your `ps` should collapse to the expected three entries.
-                //
-
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
