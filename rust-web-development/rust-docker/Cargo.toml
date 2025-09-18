@@ -7,4 +7,4 @@ edition = "2024"
 clap = { version = "4.5.43", features = ["derive"] }
 clap_derive = "4.5.41"
 nix = { version = "0.30.1", features = ["hostname", "process",
-  "sched","fs","mount"] }
+  "sched","fs","mount","user"] }

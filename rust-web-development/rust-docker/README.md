@@ -102,7 +102,7 @@ dev             lib             opt             run             sys             
 
 We see the file ALPINE_FS_ROOT we created earlier, showing we’re in Alpine filesystem. When we try to cd out of the root of the filesystem we can’t.
 
-Step 4
+# Step 4 - DOne
 
 In this step your goal is to isolate the processes within your container from the host processes, this stops the processes within the container being able to see or interact with the host processes.
 
