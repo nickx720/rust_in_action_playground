@@ -110,7 +110,10 @@ fn main() {
                 0 // child's exit status
             }),
             &mut stack,
-            CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWPID,
+            CloneFlags::CLONE_NEWUTS
+                | CloneFlags::CLONE_NEWNS
+                | CloneFlags::CLONE_NEWPID
+                | CloneFlags::CLONE_NEWUSER,
             Some(SIGCHLD),
         )
         .unwrap()
