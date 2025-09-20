@@ -1733,6 +1733,7 @@ dependencies = [
  "serde_json",
  "ticket_fields",
  "tokio",
+ "url",
 ]
 
 [[package]]

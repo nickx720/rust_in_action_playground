@@ -13,10 +13,12 @@ use hyper::body::HttpBody;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use ticket_fields::{TicketDescription, TicketTitle};
+use url::form_urlencoded;
 
 use crate::ticket::{Ticket, TicketDraft, TicketId, TicketStore};
 mod ticket;
@@ -61,7 +63,30 @@ async fn create(
         }
     }
 }
-async fn read(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
+async fn read(
+    req: Request<Body>,
+    ticket: Arc<Mutex<TicketStore>>,
+) -> Result<Response<Body>, Infallible> {
+    if let Some(q) = req.uri().query() {
+        let params: HashMap<String, String> =
+            form_urlencoded::parse(q.as_bytes()).into_owned().collect();
+        if params.is_empty() {
+            let mut not_found = Response::new(Body::from("Not Found"));
+            *not_found.status_mut() = StatusCode::BAD_REQUEST;
+            return Ok(not_found);
+        }
+        let mut ticket = ticket.lock().unwrap();
+        let question_id = params.get("question").unwrap();
+        let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
+        let ticket = ticket.get(ticket_id).unwrap();
+        // TODO setup newtype wrapper to impelemnt
+        let created = serde_json::to_string(ticket).unwrap();
+        let mut created = Response::new(Body::from(created));
+    } else {
+        let mut not_found = Response::new(Body::from("Not Found"));
+        *not_found.status_mut() = StatusCode::BAD_REQUEST;
+        return Ok(not_found);
+    }
     Ok(Response::new(Body::from("Read stub")))
 }
 async fn patch(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
@@ -73,7 +98,7 @@ async fn router(
 ) -> Result<Response<Body>, Infallible> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/create") => create(req, ticket.clone()).await,
-        (&Method::GET, "/read") => read(req).await,
+        (&Method::GET, "/read") => read(req, ticket.clone()).await,
         (&Method::PATCH, "/update") => patch(req).await,
         _ => {
             let mut not_found = Response::new(Body::from("Not Found"));

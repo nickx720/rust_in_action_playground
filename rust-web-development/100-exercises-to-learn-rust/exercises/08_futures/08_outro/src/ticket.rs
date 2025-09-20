@@ -22,6 +22,9 @@ impl TicketId {
     pub fn get(self) -> u64 {
         self.0
     }
+    pub fn set(value: u64) -> TicketId {
+        TicketId(value)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
