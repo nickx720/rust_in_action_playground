@@ -13,6 +13,7 @@ use hyper::body::HttpBody;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
@@ -75,13 +76,15 @@ async fn read(
             *not_found.status_mut() = StatusCode::BAD_REQUEST;
             return Ok(not_found);
         }
-        let mut ticket = ticket.lock().unwrap();
+        // TODO posion err fix
+        let ticket = ticket.lock().unwrap();
         let question_id = params.get("question").unwrap();
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
         let ticket = ticket.get(ticket_id).unwrap();
-        // TODO setup newtype wrapper to impelemnt
         let created = serde_json::to_string(ticket).unwrap();
-        let mut created = Response::new(Body::from(created));
+        let mut read = Response::new(Body::from(created));
+        *read.status_mut() = StatusCode::OK;
+        return Ok(read);
     } else {
         let mut not_found = Response::new(Body::from("Not Found"));
         *not_found.status_mut() = StatusCode::BAD_REQUEST;
