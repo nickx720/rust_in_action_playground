@@ -1,21 +1,20 @@
 use std::{
     ffi::CString,
-    io::{self, Write},
+    io::{self, Read, Write},
     path::Path,
     process::Command,
 };
 
 use clap::{Parser, Subcommand};
-use nix::mount::{self, MntFlags, MsFlags, mount, umount2};
-use nix::unistd::{Pid, chroot, gethostname, sethostname};
-use nix::{libc::SIGCHLD, unistd::chdir};
-use nix::{
-    sched::{CloneFlags, clone, unshare},
-    unistd::getcwd,
+use nix::sched::{CloneFlags, clone};
+use nix::sys::wait::{WaitStatus, waitpid};
+use nix::unistd::{
+    Pid, chdir, chroot, close, execvp, getcwd, getgid, gethostname, getuid, pipe, read,
+    sethostname, write,
 };
 use nix::{
-    sys::wait::{WaitStatus, waitpid},
-    unistd::execvp,
+    libc::SIGCHLD,
+    mount::{self, MntFlags, MsFlags, mount, umount2},
 };
 
 #[derive(Parser, Debug)]
@@ -38,6 +37,7 @@ enum Commands {
 // https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
     let args = Args::parse();
+    let (sync_r, sync_w) = pipe().unwrap();
     let mut stack = vec![0u8; 512 * 1024];
 
     // Show parent hostname
@@ -47,7 +47,10 @@ fn main() {
     // Create child in a NEW UTS namespace
     let child_pid: Pid = unsafe {
         clone(
-            Box::new(|| {
+            Box::new(move || {
+                let mut buf = [0u8; 1];
+                let _ = read(sync_r, &mut buf);
+                let _ = close(sync_r);
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
@@ -81,7 +84,7 @@ fn main() {
                                 None::<&str>,
                             )
                             .expect("Unable to run");
-                            let result = chroot("/play").expect("Chroot failed");
+                            let _ = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             #[cfg(target_os = "linux")]
                             let _ = mount(
@@ -93,7 +96,7 @@ fn main() {
                             );
                             dbg!(getcwd().unwrap().display());
                             let shell = CString::new(command.to_string()).unwrap();
-                            let mut arguments: Vec<CString>;
+                            let arguments: Vec<CString>;
                             if !args.is_empty() {
                                 let args = CString::new(args.join(" ").to_string()).unwrap();
                                 arguments = vec![shell.clone(), args.clone()];
@@ -118,7 +121,8 @@ fn main() {
         )
         .unwrap()
     };
-
+    let ruid = getuid().as_raw();
+    let rgid = getgid().as_raw();
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),
