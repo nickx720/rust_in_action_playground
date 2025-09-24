@@ -1,6 +1,7 @@
 use std::{
     ffi::CString,
     io::{self, Read, Write},
+    os::fd::AsFd,
     path::Path,
     process::Command,
 };
@@ -121,6 +122,8 @@ fn main() {
         )
         .unwrap()
     };
+    let _ = write(sync_w.as_fd(), &[1u8]);
+    let _ = close(sync_w);
     let ruid = getuid().as_raw();
     let rgid = getgid().as_raw();
     // Wait for child and report status
