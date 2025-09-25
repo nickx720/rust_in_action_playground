@@ -50,8 +50,7 @@ fn main() {
         clone(
             Box::new(move || {
                 let mut buf = [0u8; 1];
-                let _ = read(sync_r, &mut buf);
-                let _ = close(sync_r);
+                let _ = read(&sync_r, &mut buf);
                 if let Err(e) = sethostname("container") {
                     eprintln!("[child] sethostname failed: {e} (need CAP_SYS_ADMIN in this ns)");
                 }
