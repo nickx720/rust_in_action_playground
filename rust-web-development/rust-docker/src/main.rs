@@ -6,6 +6,7 @@ use std::{
     process::Command,
 };
 
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
@@ -32,6 +33,10 @@ enum Commands {
         #[arg(short, long,num_args=1..)]
         args: Vec<String>,
     },
+}
+
+fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result<()> {
+    todo!()
 }
 
 // Figure out how to isolate process running inside container from host
@@ -124,7 +129,8 @@ fn main() {
     let _ = write(sync_w.as_fd(), &[1u8]);
     let _ = close(sync_w);
     let ruid = getuid().as_raw();
-    let rgid = getgid().as_raw();
+    let guid = getgid().as_raw();
+    install_uid_gid_map_for_child(child_pid, ruid, guid);
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),
