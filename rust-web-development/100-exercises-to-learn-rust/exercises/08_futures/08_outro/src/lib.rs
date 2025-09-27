@@ -21,13 +21,26 @@ use std::sync::{Arc, Mutex};
 use ticket_fields::{TicketDescription, TicketTitle};
 use url::form_urlencoded;
 
-use crate::ticket::{Ticket, TicketDraft, TicketId, TicketStore};
+use crate::ticket::{Status, Ticket, TicketDraft, TicketId, TicketStore};
 mod ticket;
 
 #[derive(Deserialize, Debug)]
-struct ParseBody {
+struct CommonFields {
     title: String,
     description: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct ParseBody {
+    #[serde(flatten)]
+    common: CommonFields,
+}
+
+#[derive(Deserialize, Debug)]
+struct TicketPatch {
+    #[serde(flatten)]
+    common: CommonFields,
+    extra_field: Status,
 }
 
 #[derive(Serialize, Debug)]
@@ -42,8 +55,8 @@ async fn create(
     let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
     let body: ParseBody =
         serde_json::from_slice::<ParseBody>(&body).expect("Parsing failed, validate");
-    let title = TicketTitle::try_from(body.title);
-    let description = TicketDescription::try_from(body.description);
+    let title = TicketTitle::try_from(body.common.title);
+    let description = TicketDescription::try_from(body.common.description);
     match (title, description) {
         (Ok(title), Ok(description)) => {
             let ticket_new = TicketDraft { title, description };
@@ -76,7 +89,6 @@ async fn read(
             *not_found.status_mut() = StatusCode::BAD_REQUEST;
             return Ok(not_found);
         }
-        // TODO posion err fix
         let ticket = ticket.lock().unwrap();
         let question_id = params.get("question").unwrap();
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
@@ -86,13 +98,15 @@ async fn read(
         *read.status_mut() = StatusCode::OK;
         return Ok(read);
     } else {
-        let mut not_found = Response::new(Body::from("Not Found"));
-        *not_found.status_mut() = StatusCode::BAD_REQUEST;
-        return Ok(not_found);
+        let mut bad_request = Response::new(Body::from("Not Found"));
+        *bad_request.status_mut() = StatusCode::BAD_REQUEST;
+        return Ok(bad_request);
     }
-    Ok(Response::new(Body::from("Read stub")))
 }
-async fn patch(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
+async fn patch(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
+    let body: TicketPatch =
+        serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
     Ok(Response::new(Body::from("Patch stub")))
 }
 async fn router(
