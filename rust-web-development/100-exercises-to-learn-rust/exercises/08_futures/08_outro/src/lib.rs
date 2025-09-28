@@ -39,8 +39,8 @@ struct ParseBody {
 #[derive(Deserialize, Debug)]
 struct TicketPatch {
     #[serde(flatten)]
-    common: CommonFields,
-    extra_field: Status,
+    common: Option<CommonFields>,
+    extra_field: Option<Status>,
 }
 
 #[derive(Serialize, Debug)]
