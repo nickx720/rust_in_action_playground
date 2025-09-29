@@ -1,12 +1,14 @@
 use std::{
     ffi::CString,
+    fmt::format,
+    fs::OpenOptions,
     io::{self, Read, Write},
     os::fd::AsFd,
     path::Path,
     process::Command,
 };
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
@@ -35,8 +37,22 @@ enum Commands {
     },
 }
 
+fn write_file(path: &str, data: &str) -> std::io::Result<()> {
+    let mut f = OpenOptions::new().write(true).open(path)?;
+    f.write_all(data.as_bytes())
+}
+
 fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result<()> {
-    todo!()
+    let setgroups_path = format!("/proc/{}/setgroups", child_pid);
+    let _ = write_file(&setgroups_path, "deny\n");
+
+    let uid_map_path = format!("/proc/{}/uid_map", child_pid);
+    let gid_map_path = format!("/proc/{}/gid_map", child_pid);
+    write_file(&uid_map_path, &format!("0 {} 1\n", ruid))
+        .with_context(|| format!("writing {}", uid_map_path))?;
+    write_file(&gid_map_path, &format!("0 {} 1\n", guid))
+        .with_context(|| format!("writing {}", guid))?;
+    Ok(())
 }
 
 // Figure out how to isolate process running inside container from host
