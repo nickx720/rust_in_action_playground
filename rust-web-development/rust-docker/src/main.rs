@@ -10,6 +10,7 @@ use std::{
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+#[cfg(target_os = "linux")]
 use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
 use nix::unistd::{
@@ -43,6 +44,7 @@ fn write_file(path: &str, data: &str) -> std::io::Result<()> {
 }
 
 fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result<()> {
+    dbg!(child_pid, ruid, guid);
     let setgroups_path = format!("/proc/{}/setgroups", child_pid);
     let _ = write_file(&setgroups_path, "deny\n");
 
@@ -144,8 +146,8 @@ fn main() {
     };
     let _ = write(sync_w.as_fd(), &[1u8]);
     let _ = close(sync_w);
-    let ruid = getuid().as_raw();
-    let guid = getgid().as_raw();
+    let ruid = 1000u32;
+    let guid = 1000u32;
     install_uid_gid_map_for_child(child_pid, ruid, guid);
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
