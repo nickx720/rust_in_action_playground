@@ -146,8 +146,8 @@ fn main() {
     };
     let _ = write(sync_w.as_fd(), &[1u8]);
     let _ = close(sync_w);
-    let ruid = 1000u32;
-    let guid = 1000u32;
+    let ruid = getuid().as_raw();
+    let guid = getgid().as_raw();
     install_uid_gid_map_for_child(child_pid, ruid, guid);
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
