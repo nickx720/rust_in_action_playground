@@ -121,7 +121,7 @@ root@container:/# ps
 
 Equally on your host system you should not be able to see the /proc mount for the container when you run the command: $ mount | grep proc on the host.
 
-Step 5
+# Step 5 - Done
 
 In this step your goal is to run you container rootless. That is we want the root user within the container to not have root privileges on the host operating system. For example if you run ccrun right now and then run a long running command in the container, i.e.:
 
@@ -140,6 +140,9 @@ To achieve this you will need to create new User namespace and set the mappings 
 Use the same tests to verify your solution works, but make sure the user shown on the host is no longer root.
 
 Step 6
+
+https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
+Organizing Processes and Threads
 
 In this step your goal is to limit the resources the container has available to it. This could be memory, number of processes that can be run, the CPU that is available. To do this you will need to learn about Control groups. Control groups are usually referred to as cgroups and are configured by the cgroup filesystem.
 
