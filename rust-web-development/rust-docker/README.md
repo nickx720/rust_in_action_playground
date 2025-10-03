@@ -142,7 +142,7 @@ Use the same tests to verify your solution works, but make sure the user shown o
 Step 6
 
 https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
-Organizing Processes and Threads
+Guidelines
 
 In this step your goal is to limit the resources the container has available to it. This could be memory, number of processes that can be run, the CPU that is available. To do this you will need to learn about Control groups. Control groups are usually referred to as cgroups and are configured by the cgroup filesystem.
 
