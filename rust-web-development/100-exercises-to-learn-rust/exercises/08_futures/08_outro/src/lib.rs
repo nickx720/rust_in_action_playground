@@ -104,10 +104,26 @@ async fn read(
     }
 }
 async fn patch(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
-    let body: TicketPatch =
-        serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
-    Ok(Response::new(Body::from("Patch stub")))
+    if let Some(q) = req.uri().query() {
+        let params: HashMap<String, String> =
+            form_urlencoded::parse(q.as_bytes()).into_owned().collect();
+        if params.is_empty() {
+            let mut not_found = Response::new(Body::from("Not Found"));
+            *not_found.status_mut() = StatusCode::BAD_REQUEST;
+            return Ok(not_found);
+        }
+        let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
+        let body: TicketPatch =
+            serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
+        // TODO get the id and then update it
+        let mut read = Response::new(Body::from(""));
+        *read.status_mut() = StatusCode::OK;
+        return Ok(read);
+    } else {
+        let mut bad_request = Response::new(Body::from("Not Found"));
+        *bad_request.status_mut() = StatusCode::BAD_REQUEST;
+        return Ok(bad_request);
+    }
 }
 async fn router(
     req: Request<Body>,
@@ -127,7 +143,6 @@ async fn router(
 
 pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    // TODO pass ticket_store to routes
     let mut ticket = Arc::new(Mutex::new(TicketStore::new()));
     let make_svc = make_service_fn(|_conn| {
         let ticket = ticket.clone();
