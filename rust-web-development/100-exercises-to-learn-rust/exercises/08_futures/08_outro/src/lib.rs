@@ -103,7 +103,10 @@ async fn read(
         return Ok(bad_request);
     }
 }
-async fn patch(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+async fn patch(
+    req: Request<Body>,
+    ticket: Arc<Mutex<TicketStore>>,
+) -> Result<Response<Body>, Infallible> {
     if let Some(q) = req.uri().query() {
         let params: HashMap<String, String> =
             form_urlencoded::parse(q.as_bytes()).into_owned().collect();
@@ -116,6 +119,10 @@ async fn patch(req: Request<Body>) -> Result<Response<Body>, Infallible> {
         let body: TicketPatch =
             serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
         // TODO get the id and then update it
+        let question_id = params.get("question").unwrap();
+        let ticket = ticket.lock().unwrap();
+        let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
+        let ticket = ticket.get(ticket_id).unwrap();
         let mut read = Response::new(Body::from(""));
         *read.status_mut() = StatusCode::OK;
         return Ok(read);
@@ -132,7 +139,7 @@ async fn router(
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/create") => create(req, ticket.clone()).await,
         (&Method::GET, "/read") => read(req, ticket.clone()).await,
-        (&Method::PATCH, "/update") => patch(req).await,
+        (&Method::PATCH, "/update") => patch(req, ticket.clone()).await,
         _ => {
             let mut not_found = Response::new(Body::from("Not Found"));
             *not_found.status_mut() = StatusCode::NOT_FOUND;
