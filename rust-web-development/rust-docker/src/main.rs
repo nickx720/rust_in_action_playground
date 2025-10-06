@@ -1,3 +1,17 @@
+// To limit resources (memory/CPU) for the cloned child process in your Rust code using Nix, you can modify
+//cgroup controller files after cloning but before executing the child process. Here's a high-level
+//explanation:
+//
+//1. Set up cgroups: After cloning (around line 72-146), create or join a cgroup for the child PID (e.g.,
+//via /sys/fs/cgroup/memory/ and /sys/fs/cgroup/cpu/). Write limits to files like memory.limit_in_bytes (e.g.,
+//"100M" for 100MB) and cpu.cfs_quota_us (e.g., "50000" for 50% CPU).
+//2. Modify controller files: Use Nix's file I/O functions (e.g., std::fs::write) to set values, ensuring
+//the cgroup exists first. For example, add code to write to /sys/fs/cgroup/memory/mygroup/memory.
+//limit_in_bytes.
+//3. Enable/check controllers: Cgroup controllers must be mounted and enabled system-wide (not in code).
+//Check if mounted with mount | grep cgroup or enable via /proc/cgroups. To enable, run sudo mount -t
+//cgroup2 none /sys/fs/cgroup if using cgroup v2, or configure in /etc/fstab for persistence. Your code
+//can't enable them directly; it assumes they're set up externally.
 use std::{
     ffi::CString,
     fmt::format,
