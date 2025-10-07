@@ -12,6 +12,158 @@
 //Check if mounted with mount | grep cgroup or enable via /proc/cgroups. To enable, run sudo mount -t
 //cgroup2 none /sys/fs/cgroup if using cgroup v2, or configure in /etc/fstab for persistence. Your code
 //can't enable them directly; it assumes they're set up externally.
+//
+//
+//
+//## 🧠 Primer: cgroup v2 Basics
+//
+//In cgroup v2, resource limits (memory, CPU, IO, etc.) are controlled through **unified hierarchy** under `/sys/fs/cgroup/`.
+//
+//Each control file (like `memory.max`, `cpu.max`, etc.) lives inside a cgroup directory, and processes are attached to that cgroup by writing their PIDs into the `cgroup.procs` file.
+//
+//---
+//
+//## 🧩 Example: Limit memory for a child PID
+//
+//Let’s say you want to limit a child process (say, PID `1234`) to **100 MB** of memory.
+//
+//### 1. Confirm cgroup v2 is active
+//
+//```bash
+//mount | grep cgroup2
+//```
+//
+//If you see something like:
+//
+//```
+//cgroup2 on /sys/fs/cgroup type cgroup2 (rw,nosuid,nodev,noexec,relatime)
+//```
+//
+//then you’re good.
+//If not, you can remount:
+//
+//```bash
+//mount -t cgroup2 none /sys/fs/cgroup
+//```
+//
+//---
+//
+//### 2. Create a new cgroup
+//
+//```bash
+//mkdir /sys/fs/cgroup/limited_mem
+//```
+//
+//This directory represents a new cgroup named `limited_mem`.
+//
+//---
+//
+//### 3. Set the memory limit
+//
+//```bash
+//echo 100M > /sys/fs/cgroup/limited_mem/memory.max
+//```
+//
+//You can verify:
+//
+//```bash
+//cat /sys/fs/cgroup/limited_mem/memory.max
+//# Output: 104857600
+//```
+//
+//---
+//
+//### 4. Attach the process (child PID)
+//
+//If your child PID is `1234`:
+//
+//```bash
+//echo 1234 > /sys/fs/cgroup/limited_mem/cgroup.procs
+//```
+//
+//This moves the process (and its threads) into this new memory-limited cgroup.
+//
+//---
+//
+//### 5. Verify it’s applied
+//
+//Check which cgroup the process belongs to:
+//
+//```bash
+//cat /proc/1234/cgroup
+//```
+//
+//You should see something like:
+//
+//```
+//0::/limited_mem
+//```
+//
+//---
+//
+//## 🧪 Optional: Launch a process directly in a cgroup
+//
+//Instead of moving an existing process, you can start one directly:
+//
+//```bash
+//mkdir /sys/fs/cgroup/test_mem
+//echo 200M > /sys/fs/cgroup/test_mem/memory.max
+//
+//# Run a process and add its PID
+//sh -c "echo $$ > /sys/fs/cgroup/test_mem/cgroup.procs; exec stress --vm 1 --vm-bytes 300M --vm-keep"
+//```
+//
+//This will get OOM-killed once it exceeds 200 MB.
+//
+//---
+//
+//## ⚙️ Troubleshooting on Alpine
+//
+//1. Alpine minimal images sometimes **don’t mount cgroup2** automatically.
+//   You can add to `/etc/fstab`:
+//
+//   ```
+//   none /sys/fs/cgroup cgroup2 defaults 0 0
+//   ```
+//
+//2. Make sure the kernel boot line includes:
+//
+//   ```
+//   systemd.unified_cgroup_hierarchy=1
+//   ```
+//
+//   (or `cgroup_no_v1=all` if you want only v2)
+//
+//3. Some older Alpine kernels (<5.10) had incomplete memory controller support in cgroup v2 — verify with:
+//
+//   ```bash
+//   cat /sys/fs/cgroup/cgroup.controllers
+//   ```
+//
+//   You should see:
+//
+//   ```
+//   cpuset cpu io memory pids
+//   ```
+//
+//   If `memory` isn’t there, your kernel is missing that controller.
+//
+//---
+//
+//## 🧰 Summary Cheat Sheet
+//
+//| Action              | File                     | Example Value  |
+//| ------------------- | ------------------------ | -------------- |
+//| Set memory limit    | `memory.max`             | `100M`         |
+//| Set swap limit      | `memory.swap.max`        | `50M`          |
+//| Check current usage | `memory.current`         | *(bytes)*      |
+//| Move process        | `cgroup.procs`           | `echo <pid>`   |
+//| Check child cgroups | `cgroup.subtree_control` | `+memory +cpu` |
+//
+//---
+//
+//Would you like me to show the **Rust or shell script version** that dynamically creates a child process and places it under a cgroup2 memory limit (so you can use it programmatically)?
+//
 use std::{
     ffi::CString,
     fmt::format,
@@ -86,6 +238,7 @@ fn main() {
     let child_pid: Pid = unsafe {
         clone(
             Box::new(move || {
+                //TODO : limit memory
                 let mut buf = [0u8; 1];
                 let _ = read(&sync_r, &mut buf);
                 if let Err(e) = sethostname("container") {
