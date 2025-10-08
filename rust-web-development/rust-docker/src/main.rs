@@ -167,7 +167,7 @@
 use std::{
     ffi::CString,
     fmt::format,
-    fs::OpenOptions,
+    fs::{self, OpenOptions},
     io::{self, Read, Write},
     os::fd::AsFd,
     path::Path,
@@ -210,7 +210,6 @@ fn write_file(path: &str, data: &str) -> std::io::Result<()> {
 }
 
 fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result<()> {
-    dbg!(child_pid, ruid, guid);
     let setgroups_path = format!("/proc/{}/setgroups", child_pid);
     let _ = write_file(&setgroups_path, "deny\n");
 
@@ -223,11 +222,20 @@ fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result
     Ok(())
 }
 
+fn setup_resources() -> Result<()> {
+    let path = "/sys/fs/cgroup/limited_mem";
+    if !fs::metadata(path).is_ok() {
+        fs::create_dir(path).expect("Creation error")
+    }
+    Ok(())
+}
+
 // Figure out how to isolate process running inside container from host
 // https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
     let args = Args::parse();
     let (sync_r, sync_w) = pipe().unwrap();
+    setup_resources();
     let mut stack = vec![0u8; 512 * 1024];
 
     // Show parent hostname
