@@ -167,7 +167,7 @@
 use std::{
     ffi::CString,
     fmt::format,
-    fs::{self, OpenOptions},
+    fs::{self, File, OpenOptions},
     io::{self, Read, Write},
     os::fd::AsFd,
     path::Path,
@@ -227,6 +227,7 @@ fn setup_resources() -> Result<()> {
     if !fs::metadata(path).is_ok() {
         fs::create_dir(path).expect("Creation error")
     }
+    let _file = File::create(format!("{}/limited_mem", path))?;
     Ok(())
 }
 
