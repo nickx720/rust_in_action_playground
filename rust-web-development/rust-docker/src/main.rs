@@ -227,7 +227,7 @@ fn setup_resources() -> Result<()> {
     if !fs::metadata(path).is_ok() {
         fs::create_dir(path).expect("Creation error")
     }
-    let _file = File::create(format!("{}/limited_mem", path))?;
+    let file = File::create(format!("{}/limited_mem", path))?;
     Ok(())
 }
 
