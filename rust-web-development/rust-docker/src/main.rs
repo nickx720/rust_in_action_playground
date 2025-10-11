@@ -228,6 +228,7 @@ fn setup_resources() -> Result<()> {
         fs::create_dir(path).expect("Creation error")
     }
     let file = File::create(format!("{}/limited_mem", path))?;
+    dbg!(file);
     Ok(())
 }
 
