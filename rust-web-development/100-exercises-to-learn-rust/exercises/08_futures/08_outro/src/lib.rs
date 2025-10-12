@@ -120,9 +120,16 @@ async fn patch(
             serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
         // TODO get the id and then update it
         let question_id = params.get("question").unwrap();
-        let ticket = ticket.lock().unwrap();
+        let mut ticket = ticket.lock().unwrap();
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
-        let ticket = ticket.get(ticket_id).unwrap();
+        let ticket = ticket.get_mut(ticket_id).unwrap();
+        if let Some(items) = body.common {
+            ticket.title = TicketTitle::try_from(items.title).unwrap();
+            ticket.description = TicketDescription::try_from(items.description).unwrap();
+        }
+        if let Some(items) = body.extra_field {
+            //            ticket.status = Status::
+        }
         let mut read = Response::new(Body::from(""));
         *read.status_mut() = StatusCode::OK;
         return Ok(read);
