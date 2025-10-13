@@ -96,11 +96,11 @@ async fn read(
         let created = serde_json::to_string(ticket).unwrap();
         let mut read = Response::new(Body::from(created));
         *read.status_mut() = StatusCode::OK;
-        return Ok(read);
+        Ok(read)
     } else {
         let mut bad_request = Response::new(Body::from("Not Found"));
         *bad_request.status_mut() = StatusCode::BAD_REQUEST;
-        return Ok(bad_request);
+        Ok(bad_request)
     }
 }
 async fn patch(
@@ -128,15 +128,16 @@ async fn patch(
             ticket.description = TicketDescription::try_from(items.description).unwrap();
         }
         if let Some(items) = body.extra_field {
-            //            ticket.status = Status::
+            ticket.status = items;
         }
-        let mut read = Response::new(Body::from(""));
+        let body = serde_json::to_string(&ticket).unwrap();
+        let mut read = Response::new(Body::from(body));
         *read.status_mut() = StatusCode::OK;
-        return Ok(read);
+        Ok(read)
     } else {
         let mut bad_request = Response::new(Body::from("Not Found"));
         *bad_request.status_mut() = StatusCode::BAD_REQUEST;
-        return Ok(bad_request);
+        Ok(bad_request)
     }
 }
 async fn router(
