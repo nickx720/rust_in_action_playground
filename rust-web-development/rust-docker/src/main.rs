@@ -222,13 +222,15 @@ fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result
     Ok(())
 }
 
-fn setup_resources() -> Result<()> {
+fn setup_resources(child_pid: Pid) -> Result<()> {
     let path = "/sys/fs/cgroup/limited_mem";
     if !fs::metadata(path).is_ok() {
         fs::create_dir(path).expect("Creation error")
     }
     let mut file = File::create(format!("{}/limited_mem/memory.max", path))?;
     file.write_all(b"100M");
+    let mut file = File::create(format!("{}/limited_mem/cgroup.procs", path))?;
+    file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
     dbg!(file);
     Ok(())
 }
@@ -238,7 +240,6 @@ fn setup_resources() -> Result<()> {
 fn main() {
     let args = Args::parse();
     let (sync_r, sync_w) = pipe().unwrap();
-    setup_resources();
     let mut stack = vec![0u8; 512 * 1024];
 
     // Show parent hostname
@@ -327,6 +328,7 @@ fn main() {
     let ruid = getuid().as_raw();
     let guid = getgid().as_raw();
     install_uid_gid_map_for_child(child_pid, ruid, guid);
+    setup_resources(child_pid);
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),
