@@ -229,6 +229,7 @@ fn setup_resources(child_pid: Pid) -> Result<()> {
     }
     let mut file = File::create(format!("{}/limited_mem/memory.max", path))?;
     file.write_all(b"100M");
+    dbg!("Created");
     let mut file = File::create(format!("{}/limited_mem/cgroup.procs", path))?;
     file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
     dbg!(file);
@@ -327,8 +328,9 @@ fn main() {
     let _ = close(sync_w);
     let ruid = getuid().as_raw();
     let guid = getgid().as_raw();
-    install_uid_gid_map_for_child(child_pid, ruid, guid);
-    setup_resources(child_pid);
+    let _ =
+        install_uid_gid_map_for_child(child_pid, ruid, guid).expect("Didn't install uid or gid");
+    let _ = setup_resources(child_pid).expect("Unable to set resources");
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),

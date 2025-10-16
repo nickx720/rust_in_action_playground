@@ -2,6 +2,7 @@ https://codingchallenges.fyi/challenges/challenge-docker/
 
 root password: yahoo1234
 
+Ctrl CMD F1/F2 (tab)
 
 Build Your Own Docker
 
