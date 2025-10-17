@@ -227,10 +227,10 @@ fn setup_resources(child_pid: Pid) -> Result<()> {
     if !fs::metadata(path).is_ok() {
         fs::create_dir(path).expect("Creation error")
     }
-    let mut file = File::create(format!("{}/limited_mem/memory.max", path))?;
+    let mut file = File::create(format!("{}/memory.max", path))?;
     file.write_all(b"100M");
     dbg!("Created");
-    let mut file = File::create(format!("{}/limited_mem/cgroup.procs", path))?;
+    let mut file = File::create(format!("{}/cgroup.procs", path))?;
     file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
     dbg!(file);
     Ok(())
