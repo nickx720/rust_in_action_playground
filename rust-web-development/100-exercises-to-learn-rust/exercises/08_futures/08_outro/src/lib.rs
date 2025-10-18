@@ -17,8 +17,9 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use ticket_fields::{TicketDescription, TicketTitle};
+use tokio::sync::Mutex;
 use url::form_urlencoded;
 
 use crate::ticket::{Status, Ticket, TicketDraft, TicketId, TicketStore};
@@ -60,7 +61,7 @@ async fn create(
     match (title, description) {
         (Ok(title), Ok(description)) => {
             let ticket_new = TicketDraft { title, description };
-            let mut ticket = ticket.lock().unwrap();
+            let mut ticket = ticket.lock().await;
             let ticket_id = ticket.add_ticket(ticket_new);
             let output = TicketCreated {
                 id: ticket_id.get(),
@@ -89,7 +90,7 @@ async fn read(
             *not_found.status_mut() = StatusCode::BAD_REQUEST;
             return Ok(not_found);
         }
-        let ticket = ticket.lock().unwrap();
+        let ticket = ticket.lock().await;
         let question_id = params.get("question").unwrap();
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
         let ticket = ticket.get(ticket_id).unwrap();
@@ -118,9 +119,8 @@ async fn patch(
         let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
         let body: TicketPatch =
             serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
-        // TODO get the id and then update it
         let question_id = params.get("question").unwrap();
-        let mut ticket = ticket.lock().unwrap();
+        let mut ticket = ticket.lock().await;
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
         let ticket = ticket.get_mut(ticket_id).unwrap();
         if let Some(items) = body.common {
