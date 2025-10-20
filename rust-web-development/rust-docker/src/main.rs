@@ -169,7 +169,7 @@ use std::{
     fmt::format,
     fs::{self, File, OpenOptions},
     io::{self, Read, Write},
-    os::fd::AsFd,
+    os::{fd::AsFd, linux::fs::MetadataExt},
     path::Path,
     process::Command,
 };
@@ -222,17 +222,26 @@ fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result
     Ok(())
 }
 
-fn setup_resources(child_pid: Pid) -> Result<()> {
+fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     let path = "/sys/fs/cgroup/limited_mem";
     if !fs::metadata(path).is_ok() {
         fs::create_dir(path).expect("Creation error")
     }
-    let mut file = File::create(format!("{}/memory.max", path))?;
-    file.write_all(b"100M");
-    dbg!("Created");
-    let mut file = File::create(format!("{}/cgroup.procs", path))?;
-    file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
-    dbg!(file);
+    if let Ok(metadata) = fs::metadata(path) {
+        let file_uid = metadata.st_uid();
+        let file_gid = metadata.st_gid();
+        if uid == file_uid || gid == file_gid {
+            println!("Process likely has access based on ownership.");
+        } else {
+            println!("Check file permissions for access")
+        }
+    }
+    //    let mut file = File::create(format!("{}/memory.max", path))?;
+    //    file.write_all(b"100M");
+    //    dbg!("Created");
+    //    let mut file = File::create(format!("{}/cgroup.procs", path))?;
+    //    file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
+    //    dbg!(file);
     Ok(())
 }
 
@@ -326,11 +335,10 @@ fn main() {
     };
     let _ = write(sync_w.as_fd(), &[1u8]);
     let _ = close(sync_w);
-    let ruid = getuid().as_raw();
-    let guid = getgid().as_raw();
-    let _ =
-        install_uid_gid_map_for_child(child_pid, ruid, guid).expect("Didn't install uid or gid");
-    let _ = setup_resources(child_pid).expect("Unable to set resources");
+    let uid = getuid().as_raw();
+    let gid = getgid().as_raw();
+    let _ = install_uid_gid_map_for_child(child_pid, uid, gid).expect("Didn't install uid or gid");
+    let _ = setup_resources(child_pid, uid, gid).expect("Unable to set resources");
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),
