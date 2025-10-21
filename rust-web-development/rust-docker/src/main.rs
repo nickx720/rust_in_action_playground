@@ -236,9 +236,9 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
             println!("Check file permissions for access")
         }
     }
-    //    let mut file = File::create(format!("{}/memory.max", path))?;
-    //    file.write_all(b"100M");
-    //    dbg!("Created");
+    let mut file = File::create(format!("{}/memory.max", path))?;
+    file.write_all(b"100M");
+    dbg!("Created");
     //    let mut file = File::create(format!("{}/cgroup.procs", path))?;
     //    file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
     //    dbg!(file);
@@ -338,7 +338,11 @@ fn main() {
     let uid = getuid().as_raw();
     let gid = getgid().as_raw();
     let _ = install_uid_gid_map_for_child(child_pid, uid, gid).expect("Didn't install uid or gid");
-    let _ = setup_resources(child_pid, uid, gid).expect("Unable to set resources");
+    let response = setup_resources(child_pid, uid, gid);
+    if response.is_err() {
+        eprintln!("Unable to run");
+        std::process::exit(1);
+    }
     // Wait for child and report status
     match waitpid(child_pid, None).unwrap() {
         WaitStatus::Exited(pid, code) => println!("[parent] child {pid} exited with {code}"),
