@@ -223,25 +223,41 @@ fn install_uid_gid_map_for_child(child_pid: Pid, ruid: u32, guid: u32) -> Result
 }
 
 fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
+    let cgroup_root = "/sys/fs/cgroup";
+    if !Path::new(cgroup_root).exists() {
+        return Err(anyhow::anyhow!(
+            "Cgroup root {} does not exist. Ensure cgroup v2 is mounted.",
+            cgroup_root
+        ));
+    }
     let path = "/sys/fs/cgroup/limited_mem";
     if !fs::metadata(path).is_ok() {
-        fs::create_dir(path).expect("Creation error")
+        fs::create_dir(path).context("Failed to create cgroup directory")?;
+        println!("Created cgroup directory: {}", path);
+    } else {
+        println!("Cgroup directory already exists: {}", path);
     }
-    if let Ok(metadata) = fs::metadata(path) {
-        let file_uid = metadata.st_uid();
-        let file_gid = metadata.st_gid();
-        if uid == file_uid || gid == file_gid {
-            println!("Process likely has access based on ownership.");
-        } else {
-            println!("Check file permissions for access")
-        }
+    let metadata = fs::metadata(path).context("Failed to get metadata for cgroup directory")?;
+    let file_uid = metadata.st_uid();
+    let file_gid = metadata.st_gid();
+    if uid == file_uid || gid == file_gid {
+        println!("Process has ownership access to cgroup directory.");
+    } else {
+        println!(
+            "Warning: Process may not have ownership access. UID: {}, GID: {}, File UID: {}, File GID: {}",
+            uid, gid, file_uid, file_gid
+        );
     }
-    let mut file = File::create(format!("{}/memory.max", path))?;
-    file.write_all(b"100M");
-    dbg!("Created");
-    //    let mut file = File::create(format!("{}/cgroup.procs", path))?;
-    //    file.write_all(child_pid.as_raw().to_le_bytes().as_slice());
-    //    dbg!(file);
+    let memory_max_path = format!("{}/memory.max", path);
+    let mut file = File::create(&memory_max_path).context("Failed to create memory.max file")?;
+    file.write_all(b"100M")
+        .context("Failed to write to memory.max")?;
+    println!("Set memory limit to 100M in {}", memory_max_path);
+    // Uncomment and adapt if needed for attaching process
+    // let procs_path = format!("{}/cgroup.procs", path);
+    // let mut procs_file = File::create(&procs_path).context("Failed to create cgroup.procs file")?;
+    // procs_file.write_all(child_pid.as_raw().to_le_bytes().as_slice()).context("Failed to write PID to cgroup.procs")?;
+    // println!("Attached child PID {} to cgroup", child_pid);
     Ok(())
 }
 
@@ -338,9 +354,8 @@ fn main() {
     let uid = getuid().as_raw();
     let gid = getgid().as_raw();
     let _ = install_uid_gid_map_for_child(child_pid, uid, gid).expect("Didn't install uid or gid");
-    let response = setup_resources(child_pid, uid, gid);
-    if response.is_err() {
-        eprintln!("Unable to run");
+    if let Err(response) = setup_resources(child_pid, uid, gid) {
+        eprintln!("Unable to run {}", response);
         std::process::exit(1);
     }
     // Wait for child and report status
