@@ -253,11 +253,6 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     file.write_all(b"100M")
         .context("Failed to write to memory.max")?;
     println!("Set memory limit to 100M in {}", memory_max_path);
-    // Uncomment and adapt if needed for attaching process
-    // let procs_path = format!("{}/cgroup.procs", path);
-    // let mut procs_file = File::create(&procs_path).context("Failed to create cgroup.procs file")?;
-    // procs_file.write_all(child_pid.as_raw().to_le_bytes().as_slice()).context("Failed to write PID to cgroup.procs")?;
-    // println!("Attached child PID {} to cgroup", child_pid);
     Ok(())
 }
 
