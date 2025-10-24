@@ -140,7 +140,7 @@ To achieve this you will need to create new User namespace and set the mappings 
 
 Use the same tests to verify your solution works, but make sure the user shown on the host is no longer root.
 
-Step 6
+# Step 6 - Done
 
 https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
 Guidelines
