@@ -8,12 +8,63 @@
 //
 // Use Rust's package registry, crates.io, to find the dependencies you need
 // (if any) to build this system.
+//
+// Service trait + pure functions example:
 
-use hyper::body::HttpBody;
+//pub trait TicketRepo {
+//    fn add(&mut self, draft: TicketDraft) -> TicketId;
+//    fn get(&self, id: TicketId) -> Option<Ticket>;
+//    fn update(&mut self, id: TicketId, patch: TicketPatchData) -> Option<Ticket>;
+//}
+//
+//pub fn create_ticket(repo: &mut impl TicketRepo, draft: TicketDraft) -> TicketId {
+//    repo.add(draft)
+//}
+//pub fn read_ticket(repo: &impl TicketRepo, id: TicketId) -> Option<Ticket> {
+//    repo.get(id)
+//}
+//pub fn patch_ticket(repo: &mut impl TicketRepo, id: TicketId, patch: TicketPatchData) -> Option<Ticket> {
+//    repo.update(id, patch)
+//}
+//
+//HTTP handler wiring example:
+//
+//async fn create_handler(req: Request<Body>, repo: Arc<Mutex<dyn TicketRepo + Send>>) ->
+//Result<Response<Body>, Infallible> {
+//    let body = serde_json::from_slice::<ParseBody>(&hyper::body::to_bytes(req.into_body()).await.unwrap()).
+//unwrap();
+//    let id = create_ticket(&mut *repo.lock().await, TicketDraft { title: body.common.title.into(),
+//description: body.common.description.into() });
+//    let mut resp = Response::new(Body::from(serde_json::to_string(&TicketCreated { id: id.get() }).
+//unwrap()));
+//    *resp.status_mut() = StatusCode::CREATED;
+//    Ok(resp)
+//}
+
+// Service‐level tests example:
+
+#[tokio::test]
+async fn service_create_ticket_works() {
+    let mut repo = InMemoryTicketRepo::default();
+    let draft = TicketDraft {
+        title: TicketTitle::try_from("T".into()).unwrap(),
+        description: TicketDescription::try_from("D".into()).unwrap(),
+    };
+    let id = create_ticket(&mut repo, draft.clone());
+    assert_eq!(
+        repo.get(id).unwrap(),
+        Ticket {
+            id,
+            title: draft.title,
+            description: draft.description,
+            status: Status::Open
+        }
+    );
+}
+
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
@@ -47,6 +98,12 @@ struct TicketPatch {
 #[derive(Serialize, Debug)]
 struct TicketCreated {
     id: u64,
+}
+
+pub trait TicketRepo {
+    fn add(&mut self, draft: TicketDraft) -> TicketId;
+    fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket>;
+    fn read(&mut self, id: TicketId) -> Option<Ticket>;
 }
 
 async fn create(
