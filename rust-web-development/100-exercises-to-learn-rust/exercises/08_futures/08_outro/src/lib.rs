@@ -89,7 +89,7 @@ struct ParseBody {
 }
 
 #[derive(Deserialize, Debug)]
-struct TicketPatch {
+pub struct TicketPatch {
     #[serde(flatten)]
     common: Option<CommonFields>,
     extra_field: Option<Status>,
@@ -100,10 +100,34 @@ struct TicketCreated {
     id: u64,
 }
 
+pub struct TicketModel {
+    ticket: Arc<Mutex<TicketStore>>,
+}
+
+impl TicketModel {
+    fn new(ticket: Arc<Mutex<TicketStore>>) -> Self {
+        Self { ticket }
+    }
+}
+
 pub trait TicketRepo {
-    fn add(&mut self, draft: TicketDraft) -> TicketId;
+    async fn add(&mut self, draft: TicketDraft) -> TicketId;
     fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket>;
     fn read(&mut self, id: TicketId) -> Option<Ticket>;
+}
+
+impl TicketRepo for TicketModel {
+    async fn add(&mut self, draft: TicketDraft) -> TicketId {
+        let mut ticket = self.ticket.lock().await;
+        let ticket_id = ticket.add_ticket(draft);
+        ticket_id
+    }
+    fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket> {
+        todo!()
+    }
+    fn read(&mut self, id: TicketId) -> Option<Ticket> {
+        todo!()
+    }
 }
 
 async fn create(
@@ -118,8 +142,8 @@ async fn create(
     match (title, description) {
         (Ok(title), Ok(description)) => {
             let ticket_new = TicketDraft { title, description };
-            let mut ticket = ticket.lock().await;
-            let ticket_id = ticket.add_ticket(ticket_new);
+            let mut model = TicketModel::new(ticket);
+            let ticket_id = model.add(ticket_new).await;
             let output = TicketCreated {
                 id: ticket_id.get(),
             };
