@@ -1,3 +1,4 @@
+// https://distribution.github.io/distribution/spec/api/
 use std::{
     ffi::CString,
     fmt::format,
@@ -98,6 +99,10 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     Ok(())
 }
 
+fn dockerize() -> Result<()> {
+    todo!()
+}
+
 // Figure out how to isolate process running inside container from host
 // https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
@@ -108,7 +113,7 @@ fn main() {
     // Show parent hostname
     let parent_hn = gethostname().unwrap().to_string_lossy().into_owned();
     println!("[parent] hostname before clone: {parent_hn}");
-
+    dockerize().expect("It failed");
     // Create child in a NEW UTS namespace
     let child_pid: Pid = unsafe {
         clone(
