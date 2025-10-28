@@ -22,6 +22,7 @@ use nix::{
     libc::SIGCHLD,
     mount::{self, MntFlags, MsFlags, mount, umount2},
 };
+use reqwest::{Client, header::ACCEPT};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -99,7 +100,16 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     Ok(())
 }
 
-fn dockerize() -> Result<()> {
+fn get_docker_manifest() -> Result<()> {
+    let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(resource)
+        .header(
+            ACCEPT,
+            "application/vnd.docker.distribution.manifest.v2+json",
+        )
+        .send()?;
     todo!()
 }
 
@@ -113,7 +123,7 @@ fn main() {
     // Show parent hostname
     let parent_hn = gethostname().unwrap().to_string_lossy().into_owned();
     println!("[parent] hostname before clone: {parent_hn}");
-    dockerize().expect("It failed");
+    get_docker_manifest().expect("It failed");
     // Create child in a NEW UTS namespace
     let child_pid: Pid = unsafe {
         clone(
