@@ -110,6 +110,7 @@ fn get_docker_manifest() -> Result<()> {
             "application/vnd.docker.distribution.manifest.v2+json",
         )
         .send()?;
+    dbg!(resp);
     todo!()
 }
 
