@@ -22,7 +22,10 @@ use nix::{
     libc::SIGCHLD,
     mount::{self, MntFlags, MsFlags, mount, umount2},
 };
-use reqwest::{Client, header::ACCEPT};
+use reqwest::{
+    Client,
+    header::{ACCEPT, CONTENT_TYPE},
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -101,6 +104,14 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
 }
 
 fn get_docker_manifest() -> Result<()> {
+    let client = reqwest::blocking::Client::new();
+    let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/ubuntu:pull";
+    let auth_response = client
+        .get(auth_token)
+        .header(CONTENT_TYPE, "application/json")
+        .send()?
+        .text()?;
+    dbg!(auth_response);
     let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
     let client = reqwest::blocking::Client::new();
     let resp = client
