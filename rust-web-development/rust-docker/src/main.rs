@@ -26,6 +26,7 @@ use reqwest::{
     Client,
     header::{ACCEPT, CONTENT_TYPE},
 };
+use serde::Deserialize;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -103,14 +104,22 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     Ok(())
 }
 
+#[derive(Deserialize, Debug)]
+struct DockerToken {
+    access_token: String,
+    token: String,
+    expires_in: u32,
+    issued_at: String,
+}
+
 fn get_docker_manifest() -> Result<()> {
     let client = reqwest::blocking::Client::new();
     let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/ubuntu:pull";
-    let auth_response = client
+    let auth_response: DockerToken = client
         .get(auth_token)
         .header(CONTENT_TYPE, "application/json")
         .send()?
-        .text()?;
+        .json()?;
     dbg!(auth_response);
     let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
     let client = reqwest::blocking::Client::new();

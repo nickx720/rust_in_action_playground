@@ -883,6 +883,8 @@ dependencies = [
  "clap_derive",
  "nix",
  "reqwest",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
