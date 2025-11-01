@@ -67,6 +67,7 @@ use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use ticket_fields::{TicketDescription, TicketTitle};
@@ -111,7 +112,7 @@ impl TicketModel {
 }
 
 pub trait TicketRepo {
-    async fn add(&mut self, draft: TicketDraft) -> TicketId;
+    fn add<'a>(&'a mut self, draft: TicketDraft) -> impl Future<Output = TicketId> + 'a; // RPITIT: keep trait as `fn`, return `impl Future<Output = ...> + 'a`; implementors return an `async move { ... }` block. `'a` ties the future to the borrow of `&'a mut self`. Callers use `.await`. See: Rust Reference "return-position impl Trait in traits" and `std::future::Future`.
     fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket>;
     fn read(&mut self, id: TicketId) -> Option<Ticket>;
 }
