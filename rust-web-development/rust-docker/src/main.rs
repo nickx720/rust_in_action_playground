@@ -24,7 +24,7 @@ use nix::{
 };
 use reqwest::{
     Client,
-    header::{ACCEPT, CONTENT_TYPE},
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
 };
 use serde::Deserialize;
 
@@ -120,11 +120,14 @@ fn get_docker_manifest() -> Result<()> {
         .header(CONTENT_TYPE, "application/json")
         .send()?
         .json()?;
-    dbg!(auth_response);
     let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
     let client = reqwest::blocking::Client::new();
     let resp = client
         .get(resource)
+        .header(
+            AUTHORIZATION,
+            format!("Bearer {}", auth_response.access_token),
+        )
         .header(
             ACCEPT,
             "application/vnd.docker.distribution.manifest.v2+json",
