@@ -122,7 +122,7 @@ fn get_docker_manifest() -> Result<()> {
         .json()?;
     let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let resp: serde_json::Value = client
         .get(resource)
         .header(
             AUTHORIZATION,
@@ -132,8 +132,12 @@ fn get_docker_manifest() -> Result<()> {
             ACCEPT,
             "application/vnd.docker.distribution.manifest.v2+json",
         )
-        .send()?;
-    dbg!(resp);
+        .send()?
+        .json()?;
+    dbg!(getcwd()?);
+    let mut file = File::create("response.json")?;
+    file.write_all(resp.to_string().as_bytes())?;
+    dbg!("testing");
     todo!()
 }
 
