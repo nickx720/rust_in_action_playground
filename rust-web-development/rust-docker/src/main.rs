@@ -45,7 +45,7 @@ enum Commands {
 }
 
 fn write_file(path: &str, data: &str) -> std::io::Result<()> {
-    let mut f = OpenOptions::new().write(true).open(path)?;
+    let mut f = OpenOptions::new().write(true).create(true).open(path)?;
     f.write_all(data.as_bytes())
 }
 
@@ -114,13 +114,13 @@ struct DockerToken {
 
 fn get_docker_manifest() -> Result<()> {
     let client = reqwest::blocking::Client::new();
-    let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/ubuntu:pull";
+    let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/busybox:pull";
     let auth_response: DockerToken = client
         .get(auth_token)
         .header(CONTENT_TYPE, "application/json")
         .send()?
         .json()?;
-    let resource = "https://registry-1.docker.io/v2/library/ubuntu/manifests/latest";
+    let resource = "https://registry-1.docker.io/v2/library/busybox/manifests/latest";
     let client = reqwest::blocking::Client::new();
     let resp: serde_json::Value = client
         .get(resource)
@@ -135,8 +135,7 @@ fn get_docker_manifest() -> Result<()> {
         .send()?
         .json()?;
     dbg!(getcwd()?);
-    let mut file = File::create("response.json")?;
-    file.write_all(resp.to_string().as_bytes())?;
+    let _ = write_file("respose.json", &resp.to_string()).unwrap();
     dbg!("testing");
     todo!()
 }
