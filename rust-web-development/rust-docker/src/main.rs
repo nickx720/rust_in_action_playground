@@ -134,9 +134,8 @@ fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
-    dbg!(getcwd()?);
     let _ = write_file("respose.json", &resp.to_string()).unwrap();
-    dbg!("testing");
+    dbg!(&resp.get("manifests").unwrap().as_array().unwrap()[7]);
     todo!()
 }
 
