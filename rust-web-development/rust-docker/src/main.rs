@@ -121,7 +121,6 @@ fn get_docker_manifest() -> Result<()> {
         .send()?
         .json()?;
     let resource = "https://registry-1.docker.io/v2/library/busybox/manifests/latest";
-    let client = reqwest::blocking::Client::new();
     let resp: serde_json::Value = client
         .get(resource)
         .header(
@@ -135,7 +134,28 @@ fn get_docker_manifest() -> Result<()> {
         .send()?
         .json()?;
     let _ = write_file("respose.json", &resp.to_string()).unwrap();
-    dbg!(&resp.get("manifests").unwrap().as_array().unwrap()[7]);
+    let arm_64_digest = resp.get("manifests").unwrap().as_array().unwrap()[7]
+        .get("digest")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let resource = format!(
+        "https://registry-1.docker.io/v2/library/busybox/manifests/{}",
+        arm_64_digest.to_string().trim()
+    );
+    let resp: serde_json::Value = client
+        .get(resource)
+        .header(
+            AUTHORIZATION,
+            format!("Bearer {}", auth_response.access_token),
+        )
+        .header(
+            ACCEPT,
+            "application/vnd.docker.distribution.manifest.v2+json",
+        )
+        .send()?
+        .json()?;
+    dbg!(resp);
     todo!()
 }
 
