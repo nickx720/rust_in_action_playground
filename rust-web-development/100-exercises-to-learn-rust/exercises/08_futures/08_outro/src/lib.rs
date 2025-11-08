@@ -1,67 +1,3 @@
-// This is our last exercise. Let's go down a more unstructured path!
-// Try writing an **asynchronous REST API** to expose the functionality
-// of the ticket management system we built throughout the course.
-// It should expose endpoints to:
-//  - Create a ticket
-//  - Retrieve ticket details
-//  - Patch a ticket
-//
-// Use Rust's package registry, crates.io, to find the dependencies you need
-// (if any) to build this system.
-//
-// Service trait + pure functions example:
-
-//pub trait TicketRepo {
-//    fn add(&mut self, draft: TicketDraft) -> TicketId;
-//    fn get(&self, id: TicketId) -> Option<Ticket>;
-//    fn update(&mut self, id: TicketId, patch: TicketPatchData) -> Option<Ticket>;
-//}
-//
-//pub fn create_ticket(repo: &mut impl TicketRepo, draft: TicketDraft) -> TicketId {
-//    repo.add(draft)
-//}
-//pub fn read_ticket(repo: &impl TicketRepo, id: TicketId) -> Option<Ticket> {
-//    repo.get(id)
-//}
-//pub fn patch_ticket(repo: &mut impl TicketRepo, id: TicketId, patch: TicketPatchData) -> Option<Ticket> {
-//    repo.update(id, patch)
-//}
-//
-//HTTP handler wiring example:
-//
-//async fn create_handler(req: Request<Body>, repo: Arc<Mutex<dyn TicketRepo + Send>>) ->
-//Result<Response<Body>, Infallible> {
-//    let body = serde_json::from_slice::<ParseBody>(&hyper::body::to_bytes(req.into_body()).await.unwrap()).
-//unwrap();
-//    let id = create_ticket(&mut *repo.lock().await, TicketDraft { title: body.common.title.into(),
-//description: body.common.description.into() });
-//    let mut resp = Response::new(Body::from(serde_json::to_string(&TicketCreated { id: id.get() }).
-//unwrap()));
-//    *resp.status_mut() = StatusCode::CREATED;
-//    Ok(resp)
-//}
-
-// Service‐level tests example:
-
-//#[tokio::test]
-//async fn service_create_ticket_works() {
-//    let mut repo = InMemoryTicketRepo::default();
-//    let draft = TicketDraft {
-//        title: TicketTitle::try_from("T".into()).unwrap(),
-//        description: TicketDescription::try_from("D".into()).unwrap(),
-//    };
-//    let id = create_ticket(&mut repo, draft.clone());
-//    assert_eq!(
-//        repo.get(id).unwrap(),
-//        Ticket {
-//            id,
-//            title: draft.title,
-//            description: draft.description,
-//            status: Status::Open
-//        }
-//    );
-//}
-
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
@@ -93,7 +29,7 @@ struct ParseBody {
 pub struct TicketPatch {
     #[serde(flatten)]
     common: Option<CommonFields>,
-    extra_field: Option<Status>,
+    status: Option<Status>,
 }
 
 #[derive(Serialize, Debug)]
@@ -113,7 +49,11 @@ impl TicketModel {
 
 pub trait TicketRepo {
     fn add<'a>(&'a mut self, draft: TicketDraft) -> impl Future<Output = TicketId> + 'a; // RPITIT: keep trait as `fn`, return `impl Future<Output = ...> + 'a`; implementors return an `async move { ... }` block. `'a` ties the future to the borrow of `&'a mut self`. Callers use `.await`. See: Rust Reference "return-position impl Trait in traits" and `std::future::Future`.
-    fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket>;
+    fn update<'a>(
+        &'a mut self,
+        id: TicketId,
+        patch: TicketPatch,
+    ) -> impl Future<Output = Option<Ticket>> + 'a;
     fn read<'a>(&'a mut self, id: TicketId) -> impl Future<Output = Ticket> + 'a;
 }
 
@@ -123,8 +63,22 @@ impl TicketRepo for TicketModel {
         let ticket_id = ticket.add_ticket(draft);
         ticket_id
     }
-    fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket> {
-        todo!()
+    async fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket> {
+        let mut ticket_instance = self.ticket.lock().await;
+        let ticket = ticket_instance.get_mut(id).unwrap();
+        if let Some(items) = patch.common {
+            ticket.title = TicketTitle::try_from(items.title).unwrap();
+            ticket.description = TicketDescription::try_from(items.description).unwrap();
+        } else {
+            return None;
+        }
+        if let Some(status) = patch.status {
+            ticket.status = status;
+        } else {
+            return None;
+        }
+        let ticket = ticket.clone();
+        Some(ticket)
     }
     async fn read(&mut self, id: TicketId) -> Ticket {
         let ticket = self.ticket.lock().await;
@@ -200,19 +154,13 @@ async fn patch(
             return Ok(not_found);
         }
         let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
-        let body: TicketPatch =
+        let patch: TicketPatch =
             serde_json::from_slice::<TicketPatch>(&body).expect("Parsing failed, validate");
         let question_id = params.get("question").unwrap();
-        let mut ticket = ticket.lock().await;
+        let mut model = TicketModel::new(ticket);
         let ticket_id = TicketId::set(question_id.parse::<u64>().unwrap());
-        let ticket = ticket.get_mut(ticket_id).unwrap();
-        if let Some(items) = body.common {
-            ticket.title = TicketTitle::try_from(items.title).unwrap();
-            ticket.description = TicketDescription::try_from(items.description).unwrap();
-        }
-        if let Some(items) = body.extra_field {
-            ticket.status = items;
-        }
+        dbg!(&patch);
+        let ticket = model.update(ticket_id, patch).await;
         let body = serde_json::to_string(&ticket).unwrap();
         let mut read = Response::new(Body::from(body));
         *read.status_mut() = StatusCode::OK;
