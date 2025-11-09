@@ -3,15 +3,16 @@ use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::Infallible;
-use std::future::Future;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use ticket_fields::{TicketDescription, TicketTitle};
 use tokio::sync::Mutex;
 use url::form_urlencoded;
 
-use crate::ticket::{Status, Ticket, TicketDraft, TicketId, TicketStore};
+use crate::ticket::{Status, TicketDraft, TicketId, TicketStore};
+use crate::ticket_repo::{TicketModel, TicketRepo};
 mod ticket;
+mod ticket_repo;
 
 #[derive(Deserialize, Debug)]
 struct CommonFields {
@@ -35,55 +36,6 @@ pub struct TicketPatch {
 #[derive(Serialize, Debug)]
 struct TicketCreated {
     id: u64,
-}
-
-pub struct TicketModel {
-    ticket: Arc<Mutex<TicketStore>>,
-}
-
-impl TicketModel {
-    fn new(ticket: Arc<Mutex<TicketStore>>) -> Self {
-        Self { ticket }
-    }
-}
-
-pub trait TicketRepo {
-    fn add<'a>(&'a mut self, draft: TicketDraft) -> impl Future<Output = TicketId> + 'a; // RPITIT: keep trait as `fn`, return `impl Future<Output = ...> + 'a`; implementors return an `async move { ... }` block. `'a` ties the future to the borrow of `&'a mut self`. Callers use `.await`. See: Rust Reference "return-position impl Trait in traits" and `std::future::Future`.
-    fn update<'a>(
-        &'a mut self,
-        id: TicketId,
-        patch: TicketPatch,
-    ) -> impl Future<Output = Option<Ticket>> + 'a;
-    fn read<'a>(&'a mut self, id: TicketId) -> impl Future<Output = Ticket> + 'a;
-}
-
-impl TicketRepo for TicketModel {
-    async fn add(&mut self, draft: TicketDraft) -> TicketId {
-        let mut ticket = self.ticket.lock().await;
-        let ticket_id = ticket.add_ticket(draft);
-        ticket_id
-    }
-    async fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket> {
-        let mut ticket_instance = self.ticket.lock().await;
-        let ticket = ticket_instance.get_mut(id).unwrap();
-        if let Some(items) = patch.common {
-            ticket.title = TicketTitle::try_from(items.title).unwrap();
-            ticket.description = TicketDescription::try_from(items.description).unwrap();
-        } else {
-            return None;
-        }
-        if let Some(status) = patch.status {
-            ticket.status = status;
-        } else {
-            return None;
-        }
-        let ticket = ticket.clone();
-        Some(ticket)
-    }
-    async fn read(&mut self, id: TicketId) -> Ticket {
-        let ticket = self.ticket.lock().await;
-        ticket.get(id).expect("No ticket found").clone()
-    }
 }
 
 async fn create(
@@ -189,7 +141,7 @@ async fn router(
 
 pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    let mut ticket = Arc::new(Mutex::new(TicketStore::new()));
+    let ticket = Arc::new(Mutex::new(TicketStore::new()));
     let make_svc = make_service_fn(|_conn| {
         let ticket = ticket.clone();
         async move { Ok::<_, Infallible>(service_fn(move |req| router(req, ticket.clone()))) }
