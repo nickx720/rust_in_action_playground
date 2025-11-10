@@ -155,7 +155,10 @@ fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
-    dbg!(resp);
+    let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
+    for layer in layers {
+        dbg!(layer);
+    }
     todo!()
 }
 
