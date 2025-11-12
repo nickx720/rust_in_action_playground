@@ -24,7 +24,7 @@ use nix::{
 };
 use reqwest::{
     Client,
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT},
 };
 use serde::Deserialize;
 
@@ -157,7 +157,24 @@ fn get_docker_manifest() -> Result<()> {
         .json()?;
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
     for layer in layers {
-        dbg!(layer);
+        let layer = layer
+            .get("digest")
+            .expect("digest not found")
+            .as_str()
+            .expect("digest to string conv failed");
+        let url = format!(
+            "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
+            layer
+        );
+        let resp = client
+            .get(url)
+            .header(
+                AUTHORIZATION,
+                format!("Bearer {}", auth_response.access_token),
+            )
+            .header(USER_AGENT, "rust-reqwest-blocking/0.1")
+            .send()?;
+        dbg!(resp);
     }
     todo!()
 }
