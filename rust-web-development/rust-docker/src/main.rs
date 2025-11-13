@@ -3,7 +3,7 @@ use std::{
     ffi::CString,
     fmt::format,
     fs::{self, File, OpenOptions},
-    io::{self, Read, Write},
+    io::{self, BufReader, BufWriter, Read, Write},
     os::{fd::AsFd, linux::fs::MetadataExt},
     path::Path,
     process::Command,
@@ -11,6 +11,7 @@ use std::{
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+use flate2::bufread::GzDecoder;
 #[cfg(target_os = "linux")]
 use nix::sched::{CloneFlags, clone};
 use nix::sys::wait::{WaitStatus, waitpid};
@@ -166,7 +167,7 @@ fn get_docker_manifest() -> Result<()> {
             "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
             layer
         );
-        let resp = client
+        let mut resp = client
             .get(url)
             .header(
                 AUTHORIZATION,
@@ -174,7 +175,8 @@ fn get_docker_manifest() -> Result<()> {
             )
             .header(USER_AGENT, "rust-reqwest-blocking/0.1")
             .send()?;
-        dbg!(resp);
+        let mut gz = GzDecoder::new(BufReader::new(resp));
+        dbg!(gz);
     }
     todo!()
 }
