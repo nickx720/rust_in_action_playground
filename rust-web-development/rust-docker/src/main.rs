@@ -28,6 +28,7 @@ use reqwest::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT},
 };
 use serde::Deserialize;
+use tar::Archive;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -175,8 +176,9 @@ fn get_docker_manifest() -> Result<()> {
             )
             .header(USER_AGENT, "rust-reqwest-blocking/0.1")
             .send()?;
-        let mut gz = GzDecoder::new(BufReader::new(resp));
-        dbg!(gz);
+        let gz = GzDecoder::new(BufReader::new(resp));
+        let mut archive = Archive::new(gz);
+        while let Ok(entry) = archive.entries() {}
     }
     todo!()
 }
