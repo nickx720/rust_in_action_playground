@@ -55,3 +55,22 @@ impl TicketRepo for TicketModel {
         ticket.get(id).expect("No ticket found").clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    // TODO rearchitect buisness logic from HTTP handling
+    #[tokio::test]
+    async fn test_create_ticket() {
+        let ticket_store = TicketStore::new();
+        let ticket = Arc::new(Mutex::new(ticket_store));
+        let mut model = TicketModel::new(ticket);
+        let title = TicketTitle::try_from("sample").unwrap();
+        let description = TicketDescription::try_from("sample description").unwrap();
+        let ticket_draft = TicketDraft { title, description };
+        let ticket_id = model.add(ticket_draft).await;
+        assert_eq!(ticket_id.get(), 0);
+    }
+}
