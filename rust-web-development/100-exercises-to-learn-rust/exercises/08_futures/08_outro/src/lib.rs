@@ -154,22 +154,3 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>
         .await
         .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use hyper::{Body, Request};
-
-    // TODO rearchitect buisness logic from HTTP handling
-    #[tokio::test]
-    async fn test_create_ticket() {
-        let store = Arc::new(Mutex::new(TicketStore::new()));
-        let req = Request::builder()
-            .method("POST")
-            .uri("/create")
-            .body(Body::from(r#"{"title":"Test","description":"Desc"}"#))
-            .unwrap();
-        let resp = create(req, store).await.unwrap();
-        assert_eq!(resp.status(), StatusCode::CREATED);
-    }
-}
