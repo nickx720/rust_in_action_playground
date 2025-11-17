@@ -5,7 +5,7 @@ use std::{
     fs::{self, File, OpenOptions},
     io::{self, BufReader, BufWriter, Read, Write},
     os::{fd::AsFd, linux::fs::MetadataExt},
-    path::Path,
+    path::{Component, Path, PathBuf},
     process::Command,
 };
 
@@ -178,11 +178,49 @@ fn get_docker_manifest() -> Result<()> {
             .send()?;
         let gz = GzDecoder::new(BufReader::new(resp));
         let mut archive = Archive::new(gz);
-        while let Ok(entry) = archive.entries() {}
+        for entries in archive.entries().context("Error reading") {
+            for entry in entries {
+                let mut entry = entry.context("reading tar entry")?;
+                let entry_type = entry.header().entry_type();
+                // Resolve and sanitize path inside dest_dir
+                let raw_path = entry.path().context("getting entry path")?;
+                let outpath =
+                    match safe_join(Path::new("/mnt/hgfs/rust-docker/output"), raw_path.as_ref()) {
+                        Some(p) => p,
+                        None => continue, // skip suspicious paths
+                    };
+                // Create parent directories
+                if let Some(parent) = outpath.parent() {
+                    fs::create_dir_all(parent).with_context(|| format!("creating {:?}", parent))?;
+                }
+                // Handle only regular files and directories for safety
+                if entry_type.is_dir() {
+                    fs::create_dir_all(&outpath)?;
+                } else if entry_type.is_file() {
+                    entry
+                        .unpack(&outpath)
+                        .with_context(|| format!("writing {:?}", outpath))?;
+                } else {
+                    // Skip symlinks/hardlinks/devs for safety; handle explicitly if needed
+                    continue;
+                }
+            }
+        }
     }
     todo!()
 }
 
+fn safe_join(base: &Path, entry_path: &Path) -> Option<PathBuf> {
+    let mut out = PathBuf::from(base);
+    for comp in entry_path.components() {
+        match comp {
+            Component::Prefix(_) | Component::RootDir | Component::ParentDir => return None,
+            Component::CurDir => {}
+            Component::Normal(p) => out.push(p),
+        }
+    }
+    Some(out)
+}
 // Figure out how to isolate process running inside container from host
 // https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
