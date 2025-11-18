@@ -1,0 +1,9 @@
+[package]
+name = "rust-tar-extractor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+flate2 = "1.1.5"
+tar = "0.4.44"
