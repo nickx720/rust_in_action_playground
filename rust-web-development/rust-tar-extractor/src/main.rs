@@ -14,8 +14,5 @@ fn main() -> Result<(), anyhow::Error> {
         dbg!(entry.path());
     }
 
-    //    let buf_reader = BufReader::new(file);
-    //    let gz = GzDecoder::new(buf_reader);
-    println!("Hello, world!");
     Ok(())
 }
