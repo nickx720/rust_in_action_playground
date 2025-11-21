@@ -1,7 +1,7 @@
-use std::{fs::File, io::BufReader, path::Path};
+use std::{fs::File, io::BufReader};
 
 use flate2::bufread::GzDecoder;
-use tar::Archive;
+use tar::{Archive, EntryType};
 
 fn main() -> Result<(), anyhow::Error> {
     let file = File::open("test.tar.gz")?;
@@ -11,10 +11,9 @@ fn main() -> Result<(), anyhow::Error> {
     let entries = archive.entries()?;
     for entry in entries {
         let entry = entry?;
-        if let Ok(entry_path) = entry.path() {
-            if Path::new(entry_path.as_os_str()).is_dir() {
-                dbg!("has root", entry_path);
-            }
+        let header = entry.header();
+        if header.entry_type() == EntryType::Directory {
+            dbg!("Hello");
         }
     }
 
