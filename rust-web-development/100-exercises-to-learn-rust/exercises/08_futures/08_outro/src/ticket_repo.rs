@@ -5,7 +5,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ticket::{Ticket, TicketDraft, TicketId, TicketStore},
-    TicketPatch,
+    CommonFields, TicketPatch,
 };
 
 pub struct TicketModel {
@@ -58,19 +58,38 @@ impl TicketRepo for TicketModel {
 
 #[cfg(test)]
 mod tests {
+    use once_cell::sync::Lazy;
 
     use super::*;
+    static GLOBAL_TICKET_STORE: Lazy<Arc<Mutex<TicketStore>>> =
+        Lazy::new(|| Arc::new(Mutex::new(TicketStore::new())));
 
-    // TODO rearchitect buisness logic from HTTP handling
     #[tokio::test]
+    #[serial_test::serial]
     async fn test_create_ticket() {
-        let ticket_store = TicketStore::new();
-        let ticket = Arc::new(Mutex::new(ticket_store));
+        let ticket = GLOBAL_TICKET_STORE.clone();
         let mut model = TicketModel::new(ticket);
         let title = TicketTitle::try_from("sample").unwrap();
         let description = TicketDescription::try_from("sample description").unwrap();
         let ticket_draft = TicketDraft { title, description };
         let ticket_id = model.add(ticket_draft).await;
         assert_eq!(ticket_id.get(), 0);
+    }
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn test_update_ticket() {
+        let ticket = GLOBAL_TICKET_STORE.clone();
+        let mut model = TicketModel::new(ticket);
+        let ticket_id = TicketId::set(0);
+        let ticket_patch = TicketPatch {
+            common: Some(CommonFields {
+                title: "New".to_string(),
+                description: "New Description".to_string(),
+            }),
+            status: None,
+        };
+        let expected = TicketTitle::try_from("New").unwrap();
+        let ticket_id = model.update(ticket_id, ticket_patch).await;
+        assert_eq!(ticket_id.unwrap().title, expected);
     }
 }

@@ -15,7 +15,7 @@ mod ticket;
 mod ticket_repo;
 
 #[derive(Deserialize, Debug)]
-struct CommonFields {
+pub struct CommonFields {
     title: String,
     description: String,
 }
