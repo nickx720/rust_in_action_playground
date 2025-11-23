@@ -5,9 +5,10 @@ use tokio::sync::Mutex;
 
 use crate::{
     ticket::{Ticket, TicketDraft, TicketId, TicketStore},
-    CommonFields, TicketPatch,
+    TicketPatch,
 };
 
+#[derive(Clone)]
 pub struct TicketModel {
     ticket: Arc<Mutex<TicketStore>>,
 }
@@ -30,12 +31,11 @@ pub trait TicketRepo {
 impl TicketRepo for TicketModel {
     async fn add(&mut self, draft: TicketDraft) -> TicketId {
         let mut ticket = self.ticket.lock().await;
-        let ticket_id = ticket.add_ticket(draft);
-        ticket_id
+        ticket.add_ticket(draft)
     }
     async fn update(&mut self, id: TicketId, patch: TicketPatch) -> Option<Ticket> {
         let mut ticket_instance = self.ticket.lock().await;
-        let ticket = ticket_instance.get_mut(id).unwrap();
+        let ticket = ticket_instance.get_mut(id).expect("Invalid Ticket Id");
         if let Some(items) = patch.common {
             ticket.title = TicketTitle::try_from(items.title).unwrap();
             ticket.description = TicketDescription::try_from(items.description).unwrap();
@@ -60,36 +60,38 @@ impl TicketRepo for TicketModel {
 mod tests {
     use once_cell::sync::Lazy;
 
+    use crate::{ticket::Status, CommonFields};
+
     use super::*;
-    static GLOBAL_TICKET_STORE: Lazy<Arc<Mutex<TicketStore>>> =
-        Lazy::new(|| Arc::new(Mutex::new(TicketStore::new())));
+    static GLOBAL_TICKET_STORE: Lazy<TicketModel> =
+        Lazy::new(|| TicketModel::new(Arc::new(Mutex::new(TicketStore::new()))));
 
     #[tokio::test]
-    #[serial_test::serial]
-    async fn test_create_ticket() {
-        let ticket = GLOBAL_TICKET_STORE.clone();
-        let mut model = TicketModel::new(ticket);
+    async fn test_create_ticket_update() {
+        let mut model = GLOBAL_TICKET_STORE.clone();
         let title = TicketTitle::try_from("sample").unwrap();
         let description = TicketDescription::try_from("sample description").unwrap();
         let ticket_draft = TicketDraft { title, description };
         let ticket_id = model.add(ticket_draft).await;
         assert_eq!(ticket_id.get(), 0);
+        test_update_ticket().await;
     }
-    #[tokio::test]
-    #[serial_test::serial]
     async fn test_update_ticket() {
-        let ticket = GLOBAL_TICKET_STORE.clone();
-        let mut model = TicketModel::new(ticket);
+        let mut model = GLOBAL_TICKET_STORE.clone();
         let ticket_id = TicketId::set(0);
         let ticket_patch = TicketPatch {
             common: Some(CommonFields {
                 title: "New".to_string(),
                 description: "New Description".to_string(),
             }),
-            status: None,
+
+            status: Some(Status::InProgress),
         };
         let expected = TicketTitle::try_from("New").unwrap();
-        let ticket_id = model.update(ticket_id, ticket_patch).await;
-        assert_eq!(ticket_id.unwrap().title, expected);
+        let actual = model
+            .update(ticket_id, ticket_patch)
+            .await
+            .expect("Unable to update");
+        assert_eq!(actual.title, expected);
     }
 }
