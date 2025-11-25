@@ -13,7 +13,7 @@ fn main() -> Result<(), anyhow::Error> {
     let gz = GzDecoder::new(buf_reader);
     let mut archive = Archive::new(gz);
     let entries = archive.entries()?;
-    let root = PathBuf::from("output");
+    let root = PathBuf::from("test");
     if !fs::exists(&root)? {
         fs::create_dir(&root)?;
     }
@@ -28,7 +28,7 @@ fn main() -> Result<(), anyhow::Error> {
             }
             continue;
         }
-        entry.unpack(&root)?;
+        entry.unpack_in(&root)?;
     }
 
     Ok(())
