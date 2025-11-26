@@ -201,6 +201,8 @@ fn get_docker_manifest() -> Result<()> {
                         .unpack(&outpath)
                         .with_context(|| format!("writing {:?}", outpath))?;
                 } else {
+                    // why are we skipping bin files
+                    dbg!(&entry.path());
                     // Skip symlinks/hardlinks/devs for safety; handle explicitly if needed
                     continue;
                 }
