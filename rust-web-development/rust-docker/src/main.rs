@@ -157,7 +157,10 @@ fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
+    let output = Path::new("/mnt/hgfs/rust-docker/output");
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
+    let config = resp.get("config").unwrap().as_object().unwrap();
+    dbg!(config.get("mediaType").unwrap());
     for layer in layers {
         let layer = layer
             .get("digest")
@@ -168,6 +171,7 @@ fn get_docker_manifest() -> Result<()> {
             "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
             layer
         );
+        // Get the layer
         let mut resp = client
             .get(url)
             .header(
@@ -184,11 +188,10 @@ fn get_docker_manifest() -> Result<()> {
                 let entry_type = entry.header().entry_type();
                 // Resolve and sanitize path inside dest_dir
                 let raw_path = entry.path().context("getting entry path")?;
-                let outpath =
-                    match safe_join(Path::new("/mnt/hgfs/rust-docker/output"), raw_path.as_ref()) {
-                        Some(p) => p,
-                        None => continue, // skip suspicious paths
-                    };
+                let outpath = match safe_join(output, raw_path.as_ref()) {
+                    Some(p) => p,
+                    None => continue, // skip suspicious paths
+                };
                 // Create parent directories
                 if let Some(parent) = outpath.parent() {
                     fs::create_dir_all(parent).with_context(|| format!("creating {:?}", parent))?;
@@ -202,12 +205,13 @@ fn get_docker_manifest() -> Result<()> {
                         .with_context(|| format!("writing {:?}", outpath))?;
                 } else {
                     // why are we skipping bin files
-                    dbg!(&entry.path());
                     // Skip symlinks/hardlinks/devs for safety; handle explicitly if needed
+                    // doesn't not generate symlinks when running without root access
                     continue;
                 }
             }
         }
+        // Get the config
     }
     todo!()
 }
@@ -232,8 +236,9 @@ fn main() {
 
     // Show parent hostname
     let parent_hn = gethostname().unwrap().to_string_lossy().into_owned();
-    println!("[parent] hostname before clone: {parent_hn}");
     get_docker_manifest().expect("It failed");
+
+    println!("[parent] hostname before clone: {parent_hn}");
     // Create child in a NEW UTS namespace
     let child_pid: Pid = unsafe {
         clone(
@@ -274,6 +279,9 @@ fn main() {
                                 None::<&str>,
                             )
                             .expect("Unable to run");
+                            // TODO
+                            // The following will get the zip files
+                            // get_docker_manifest().expect("It failed");
                             let _ = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             #[cfg(target_os = "linux")]
