@@ -159,8 +159,27 @@ fn get_docker_manifest() -> Result<()> {
         .json()?;
     let output = Path::new("/mnt/hgfs/rust-docker/output");
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
-    let config = resp.get("config").unwrap().as_object().unwrap();
-    dbg!(config.get("mediaType").unwrap());
+    let config = resp
+        .get("config")
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .get("digest")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let url = format!(
+        "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
+        config
+    );
+    let mut resp = client
+        .get(url)
+        .header(
+            AUTHORIZATION,
+            format!("Bearer {}", auth_response.access_token),
+        )
+        .header(USER_AGENT, "rust-reqwest-blocking/0.1")
+        .send()?;
     for layer in layers {
         let layer = layer
             .get("digest")
