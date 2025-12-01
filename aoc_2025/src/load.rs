@@ -6,7 +6,7 @@ use reqwest::blocking;
 pub fn load(day: &str) -> Result<(), anyhow::Error> {
     dotenv::dotenv().ok();
     let session = env::var("AOC_SESSION")?;
-    let url = format!("https://adventofcode.com/2024/day/{}/input", day);
+    let url = format!("https://adventofcode.com/2025/day/{}/input", day);
     let client = blocking::Client::builder()
         .user_agent("github.com/nickx720")
         .build()?;
@@ -16,7 +16,12 @@ pub fn load(day: &str) -> Result<(), anyhow::Error> {
         .send()?
         .error_for_status()?;
     let text = response.text()?;
-    fs::create_dir(format!("./assets/day{}", day))?;
-    fs::write(format!("./assets/day{}/{}.txt", day, day), text)?;
+    let exists = fs::exists(format!("./assets/day{}", day))?;
+    if exists {
+        return Ok(());
+    } else {
+        fs::create_dir(format!("./assets/day{}", day))?;
+        fs::write(format!("./assets/day{}/{}.txt", day, day), text)?;
+    }
     Ok(())
 }
