@@ -1,13 +1,18 @@
-use std::collections::HashMap;
-
 use anyhow::{Context, Result};
 
-fn all_values_equal(count: &HashMap<&str, i32>) -> bool {
-    let mut iter = count.values();
-    let Some(first) = iter.next() else {
-        return true;
+fn invalid_id(s: &str) -> bool {
+    if s.len() % 2 != 0 {
+        return false;
     };
-    iter.all(|v| v == first)
+    let len = s.len() / 2;
+    let (first, second) = (
+        s[0..len].parse::<usize>().unwrap(),
+        s[len..].parse::<usize>().unwrap(),
+    );
+    if first != second {
+        return false;
+    }
+    true
 }
 
 pub fn day2_partone(input: &str) -> Result<usize, anyhow::Error> {
@@ -34,20 +39,22 @@ pub fn day2_partone(input: &str) -> Result<usize, anyhow::Error> {
     for (start, end) in input {
         for item in start..=end {
             let string_item = item.to_string();
-            let mut count = HashMap::new();
-            for item in string_item.split("") {
-                if count.get(item).is_none() {
-                    count.insert(item, 1);
-                } else {
-                    let count_now = count.get(item).unwrap();
-                    count.insert(item, *count_now + 1);
-                }
-            }
-            if all_values_equal(&count) {
-                dbg!(item);
+            if invalid_id(&string_item) {
                 output += item;
             }
         }
     }
     Ok(output)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_invalid() {
+        let item = "222222";
+        let output = invalid_id(item);
+        assert_eq!(true, output);
+    }
 }
