@@ -2,6 +2,7 @@ use std::env;
 
 use aoc_2025::{
     day3::{day3_partone, day3_parttwo},
+    day4::day4_partone,
     load, read,
 };
 
@@ -18,10 +19,10 @@ fn main() -> Result<(), anyhow::Error> {
     } else {
         let path = format!("./sample.txt");
         let input = read::read(&path)?;
-        let output = day3_partone(&input)?;
+        let output = day4_partone(&input)?;
         println!("The output for day one is {}", output);
-        let output = day3_parttwo(&input)?;
-        println!("The output for day two is {}", output);
+        //        let output = day3_parttwo(&input)?;
+        //        println!("The output for day two is {}", output);
     }
     Ok(())
 }
