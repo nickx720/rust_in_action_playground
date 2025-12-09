@@ -42,12 +42,14 @@ pub fn day4_partone(input: &str) -> Result<usize, anyhow::Error> {
                     }
                 }
             }
-            dbg!(count);
-            if count <= 4 {
+            if count <= 3 {
                 output += 1;
             }
         }
     }
-    dbg!(output);
+    Ok(output)
+}
+
+pub fn day4_parttwo(input: &str) -> Result<usize, anyhow::Error> {
     todo!()
 }
