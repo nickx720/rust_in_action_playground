@@ -51,5 +51,40 @@ pub fn day4_partone(input: &str) -> Result<usize, anyhow::Error> {
 }
 
 pub fn day4_parttwo(input: &str) -> Result<usize, anyhow::Error> {
-    todo!()
+    let mut input = parse_input(input);
+    // loop through each item, and check if either side has < 4
+    let mut total_remove = 0;
+    loop {
+        let mut to_remove = Vec::new();
+        let width = input.len() as isize;
+        let height = input[0].len() as isize;
+        for index in 0..width {
+            for second_index in 0..height {
+                if input[index as usize][second_index as usize] == '.'.to_string() {
+                    continue;
+                }
+                let mut count = 0;
+                for (x, y) in DIRS {
+                    let nx = index + x;
+                    let ny = second_index + y;
+                    if nx >= 0 && nx < width && ny >= 0 && ny < height {
+                        if input[nx as usize][ny as usize] == "@".to_string() {
+                            count += 1;
+                        }
+                    }
+                }
+                if count < 4 {
+                    to_remove.push((index as usize, second_index as usize));
+                }
+            }
+        }
+        if to_remove.is_empty() {
+            break;
+        }
+        for (index, second_index) in &to_remove {
+            input[*index][*second_index] = ".";
+        }
+        total_remove += to_remove.len()
+    }
+    Ok(total_remove)
 }
