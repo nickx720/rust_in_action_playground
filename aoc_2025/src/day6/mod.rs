@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use anyhow::{Context, bail};
 
 pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
@@ -45,4 +47,42 @@ pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
         }
     }
     Ok(total)
+}
+
+// TODO(day6 part2)
+// 1) dont split_whitespace, keep spaces (treat input like a grid)
+// 2) pad each line to same width (right pad w/ spaces)
+// 3) scan columns right -> left
+// 4) for each column: read top->bottom (except op row) and glue digits into a string
+// 5) if digit string not empty -> parse -> push into operands
+// 6) if op row at this col is + or * -> fold operands, add to total, clear operands
+// 7) (debug) print vertical slices like "623+" as you scan
+pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
+    let mut input = input
+        .trim()
+        .split("\n")
+        .map(|item| item.to_string())
+        .collect::<Vec<String>>();
+    let width = input
+        .iter()
+        .map(|item| item.len())
+        .max()
+        .with_context(|| format!("Couldn't parse"))?;
+    input.iter_mut().for_each(|item| {
+        let pad = width.saturating_sub(item.len());
+        item.push_str(&" ".repeat(pad));
+    });
+    let input = input
+        .iter()
+        .map(|item| item.as_bytes().to_vec())
+        .collect::<Vec<Vec<u8>>>();
+    let rows = input.len();
+
+    for index in (0..width).rev() {
+        for second_index in 0..rows {
+            dbg!(input[second_index][index] as char);
+        }
+    }
+
+    Ok(1)
 }
