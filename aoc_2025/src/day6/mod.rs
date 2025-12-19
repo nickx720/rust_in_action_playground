@@ -57,6 +57,7 @@ pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
 // 5) if digit string not empty -> parse -> push into operands
 // 6) if op row at this col is + or * -> fold operands, add to total, clear operands
 // 7) (debug) print vertical slices like "623+" as you scan
+// [src/day6/mod.rs:83:13] input[second_index][index] as char = ' '
 pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
     let mut input = input
         .trim()
@@ -77,12 +78,33 @@ pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
         .map(|item| item.as_bytes().to_vec())
         .collect::<Vec<Vec<u8>>>();
     let rows = input.len();
+    let mut total = 0usize;
 
     for index in (0..width).rev() {
+        let mut nums = vec![];
         for second_index in 0..rows {
-            dbg!(input[second_index][index] as char);
+            let item = input[second_index][index];
+            match item {
+                b'+' => {
+                    total += nums
+                        .iter()
+                        .skip(1)
+                        .fold(nums[0], |acc: usize, &x| acc.saturating_add(x))
+                }
+                b'*' => {
+                    total += nums
+                        .iter()
+                        .skip(1)
+                        .fold(nums[0], |acc, &x| acc.saturating_mul(x))
+                }
+                b'0'..=b'9' => {
+                    let n = (item - b'0') as usize;
+                    nums.push(n);
+                }
+                _ => continue,
+            }
         }
     }
 
-    Ok(1)
+    Ok(total)
 }
