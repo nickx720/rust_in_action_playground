@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use anyhow::{Context, bail};
 
 pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
@@ -49,15 +47,6 @@ pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
     Ok(total)
 }
 
-// TODO(day6 part2)
-// 1) dont split_whitespace, keep spaces (treat input like a grid)
-// 2) pad each line to same width (right pad w/ spaces)
-// 3) scan columns right -> left
-// 4) for each column: read top->bottom (except op row) and glue digits into a string
-// 5) if digit string not empty -> parse -> push into operands
-// 6) if op row at this col is + or * -> fold operands, add to total, clear operands
-// 7) (debug) print vertical slices like "623+" as you scan // breaking
-// [src/day6/mod.rs:83:13] input[second_index][index] as char = ' '
 pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
     let mut input = input
         .trim()
@@ -78,31 +67,47 @@ pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
         .map(|item| item.as_bytes().to_vec())
         .collect::<Vec<Vec<u8>>>();
     let rows = input.len();
+    if rows == 0 {
+        return Ok(0);
+    }
+    let op_row = rows - 1;
     let mut total = 0usize;
 
+    let mut operands: Vec<usize> = vec![];
     for index in (0..width).rev() {
-        let mut nums = vec![];
-        for second_index in 0..rows {
-            let item = input[second_index][index];
-            match item {
-                b'+' => {
-                    total += nums
-                        .iter()
-                        .skip(1)
-                        .fold(nums[0], |acc: usize, &x| acc.saturating_add(x))
-                }
-                b'*' => {
-                    total += nums
-                        .iter()
-                        .skip(1)
-                        .fold(nums[0], |acc, &x| acc.saturating_mul(x))
-                }
-                b'0'..=b'9' => {
-                    let n = (item - b'0') as usize;
-                    nums.push(n);
-                }
-                _ => continue,
+        let mut digits: Vec<usize> = vec![];
+        for row in 0..op_row {
+            let item = input[row][index];
+            if (b'0'..=b'9').contains(&item) {
+                digits.push((item - b'0') as usize);
             }
+        }
+
+        if !digits.is_empty() {
+            let combined = digits.iter().fold(0, |acc, &num| acc * 10 + num);
+            operands.push(combined);
+        }
+
+        match input[op_row][index] {
+            b'+' => {
+                if !operands.is_empty() {
+                    total += operands
+                        .iter()
+                        .skip(1)
+                        .fold(operands[0], |acc, &x| acc.saturating_add(x));
+                }
+                operands.clear();
+            }
+            b'*' => {
+                if !operands.is_empty() {
+                    total += operands
+                        .iter()
+                        .skip(1)
+                        .fold(operands[0], |acc, &x| acc.saturating_mul(x));
+                }
+                operands.clear();
+            }
+            _ => {}
         }
     }
 
