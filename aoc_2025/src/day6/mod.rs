@@ -56,7 +56,7 @@ pub fn day6_partone(input: &str) -> Result<usize, anyhow::Error> {
 // 4) for each column: read top->bottom (except op row) and glue digits into a string
 // 5) if digit string not empty -> parse -> push into operands
 // 6) if op row at this col is + or * -> fold operands, add to total, clear operands
-// 7) (debug) print vertical slices like "623+" as you scan
+// 7) (debug) print vertical slices like "623+" as you scan // breaking
 // [src/day6/mod.rs:83:13] input[second_index][index] as char = ' '
 pub fn day6_parttwo(input: &str) -> Result<usize, anyhow::Error> {
     let mut input = input
