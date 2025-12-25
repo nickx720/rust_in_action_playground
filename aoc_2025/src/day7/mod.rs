@@ -11,7 +11,7 @@ pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
     if let Some(idx) = input[0].iter().position(|&x| x == b'S') {
         set.insert(idx);
     } else {
-        anyhow::bail!("Couldn't find starting beam");
+        anyhow::bail!("Couldn't find starting beam ");
     }
     let mut split_count = 0usize;
     Ok(split_count)
