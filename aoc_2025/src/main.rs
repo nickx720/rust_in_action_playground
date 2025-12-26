@@ -13,12 +13,12 @@ fn main() -> Result<(), anyhow::Error> {
         let path = format!("./assets/day{}/{}.txt", day, day);
         let input = read::read(&path)?;
         let start = Instant::now();
-        let output_one = day6_partone(&input)?;
-        let output_two = day6_parttwo(&input)?;
+        let output_one = day7_partone(&input)?;
+        //        let output_two = day6_parttwo(&input)?;
         let elapsed = start.elapsed();
 
         println!("The output for day one is {}", output_one);
-        println!("The output for day two is {}", output_two);
+        //      println!("The output for day two is {}", output_two);
         println!("Runtime: {}µs", elapsed.as_micros());
     } else {
         let path = format!("./sample.txt");

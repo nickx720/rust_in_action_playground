@@ -14,5 +14,29 @@ pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
         anyhow::bail!("Couldn't find starting beam ");
     }
     let mut split_count = 0usize;
+    for row in 0..rows - 1 {
+        let mut next_active = HashSet::new();
+        for &col in set.iter() {
+            if col >= cols {
+                continue;
+            }
+            let item = input[row + 1][col];
+            if item == b'.' {
+                next_active.insert(col);
+            } else if item == b'^' {
+                split_count += 1;
+                if col > 0 {
+                    next_active.insert(col - 1);
+                }
+                if col + 1 < cols {
+                    next_active.insert(col + 1);
+                }
+            }
+        }
+        set = next_active;
+        if set.is_empty() {
+            break;
+        }
+    }
     Ok(split_count)
 }
