@@ -1,10 +1,14 @@
 use std::collections::HashSet;
 
-pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
-    let input = input
+fn parse_input(input: &str) -> Result<Vec<Vec<u8>>, anyhow::Error> {
+    Ok(input
         .split_whitespace()
         .map(|item| item.as_bytes().to_vec())
-        .collect::<Vec<Vec<u8>>>();
+        .collect::<Vec<Vec<u8>>>())
+}
+
+pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
+    let input = parse_input(input)?;
     let rows = input.len();
     let cols = input[0].len();
     let mut set = HashSet::new();
@@ -39,4 +43,9 @@ pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
         }
     }
     Ok(split_count)
+}
+
+pub fn day7_parttwo(input: &str) -> Result<usize, anyhow::Error> {
+    let input = parse_input(input)?;
+    todo!()
 }

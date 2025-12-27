@@ -1,8 +1,7 @@
 use std::{env, time::Instant};
 
 use aoc_2025::{
-    day6::{day6_partone, day6_parttwo},
-    day7::day7_partone,
+    day7::{day7_partone, day7_parttwo},
     load, read,
 };
 
@@ -25,8 +24,8 @@ fn main() -> Result<(), anyhow::Error> {
         let input = read::read(&path)?;
         let output = day7_partone(&input)?;
         println!("The output for day one is {}", output);
-        //        let output = day6_parttwo(&input)?;
-        //        println!("The output for day two is {}", output);
+        let output = day7_parttwo(&input)?;
+        println!("The output for day two is {}", output);
     }
     Ok(())
 }
