@@ -47,5 +47,48 @@ pub fn day7_partone(input: &str) -> Result<usize, anyhow::Error> {
 
 pub fn day7_parttwo(input: &str) -> Result<usize, anyhow::Error> {
     let input = parse_input(input)?;
-    todo!()
+    let rows = input.len();
+    let cols = input[0].len();
+    let mut start_pos: Option<(usize, usize)> = None;
+    for (r, row) in input.iter().enumerate() {
+        if let Some(c) = row.iter().position(|&x| x == b'S') {
+            start_pos = Some((r, c));
+            break;
+        }
+    }
+    let (start_r, start_c) =
+        start_pos.ok_or_else(|| anyhow::anyhow!("Couldn't find starting beam"))?;
+
+    let mut timelines_at_col = vec![0usize; cols];
+    timelines_at_col[start_c] = 1;
+
+    for r in start_r..rows.saturating_sub(1) {
+        let mut next = vec![0usize; cols];
+
+        for c in 0..cols {
+            let k = timelines_at_col[c];
+            if k == 0 {
+                continue;
+            }
+
+            let cell = input[r + 1][c];
+            if cell == b'.' {
+                next[c] += k;
+            } else if cell == b'^' {
+                if c > 0 {
+                    next[c - 1] += k;
+                }
+                if c + 1 < cols {
+                    next[c + 1] += k;
+                }
+            }
+        }
+
+        timelines_at_col = next;
+        if timelines_at_col.iter().sum::<usize>() == 0 {
+            break;
+        }
+    }
+
+    Ok(timelines_at_col.iter().sum())
 }
