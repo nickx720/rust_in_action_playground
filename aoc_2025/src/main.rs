@@ -1,6 +1,9 @@
 use std::{env, time::Instant};
 
-use aoc_2025::{day7::day7_parttwo, day8::day8_partone, load, read};
+use aoc_2025::{
+    day8::{day8_partone, day8_partwo},
+    load, read,
+};
 
 fn main() -> Result<(), anyhow::Error> {
     let args: Vec<String> = env::args().collect();
@@ -10,18 +13,18 @@ fn main() -> Result<(), anyhow::Error> {
         let input = read::read(&path)?;
         let start = Instant::now();
         let output_one = day8_partone(&input, 1000)?;
-        //        let output_two = day7_parttwo(&input)?;
+        let output_two = day8_partwo(&input)?;
         let elapsed = start.elapsed();
 
         println!("The output for day one is {}", output_one);
-        //       println!("The output for day two is {}", output_two);
+        println!("The output for day two is {}", output_two);
         println!("Runtime: {}µs", elapsed.as_micros());
     } else {
         let path = format!("./sample.txt");
         let input = read::read(&path)?;
         let output = day8_partone(&input, 10)?;
         println!("The output for day one is {}", output);
-        let output = day7_parttwo(&input)?;
+        let output = day8_partwo(&input)?;
         println!("The output for day two is {}", output);
     }
     Ok(())
