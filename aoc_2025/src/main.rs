@@ -1,6 +1,6 @@
 use std::{env, time::Instant};
 
-use aoc_2025::{day8::day8_partone, load, read};
+use aoc_2025::{day7::day7_parttwo, day8::day8_partone, load, read};
 
 fn main() -> Result<(), anyhow::Error> {
     let args: Vec<String> = env::args().collect();
@@ -21,8 +21,8 @@ fn main() -> Result<(), anyhow::Error> {
         let input = read::read(&path)?;
         let output = day8_partone(&input, 10)?;
         println!("The output for day one is {}", output);
-        //        let output = day7_parttwo(&input)?;
-        //        println!("The output for day two is {}", output);
+        let output = day7_parttwo(&input)?;
+        println!("The output for day two is {}", output);
     }
     Ok(())
 }
