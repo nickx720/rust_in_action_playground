@@ -10,3 +10,4 @@ pub mod day8;
 pub mod day9;
 pub mod load;
 pub mod read;
+pub mod simplex;
