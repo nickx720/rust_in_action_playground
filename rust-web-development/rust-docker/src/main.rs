@@ -180,6 +180,9 @@ fn get_docker_manifest() -> Result<()> {
         )
         .header(USER_AGENT, "rust-reqwest-blocking/0.1")
         .send()?;
+    let mut body = Vec::new();
+    resp.read_to_end(&mut body)?;
+    println!("config body: {}", String::from_utf8_lossy(&body));
     for layer in layers {
         let layer = layer
             .get("digest")
