@@ -157,7 +157,7 @@ fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
-    let output = Path::new("/mnt/hgfs/rust-docker/output");
+    let output = Path::new("/mnt/hgfs/rust-docker/dist/output");
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
     let config = resp
         .get("config")
@@ -180,9 +180,11 @@ fn get_docker_manifest() -> Result<()> {
         )
         .header(USER_AGENT, "rust-reqwest-blocking/0.1")
         .send()?;
-    let mut body = Vec::new();
-    resp.read_to_end(&mut body)?;
-    println!("config body: {}", String::from_utf8_lossy(&body));
+    // storing config body into a file
+    let file = File::create("/mnt/hgfs/rust-docker/dist/config.json")?;
+    let writer = BufWriter::new(file);
+    let json: serde_json::Value = resp.json()?;
+    serde_json::to_writer_pretty(writer, &json)?;
     for layer in layers {
         let layer = layer
             .get("digest")
