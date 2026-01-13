@@ -101,17 +101,6 @@ fn setup_resources(child_pid: Pid, uid: u32, gid: u32) -> Result<()> {
     Ok(())
 }
 
-fn safe_join(base: &Path, entry_path: &Path) -> Option<PathBuf> {
-    let mut out = PathBuf::from(base);
-    for comp in entry_path.components() {
-        match comp {
-            Component::Prefix(_) | Component::RootDir | Component::ParentDir => return None,
-            Component::CurDir => {}
-            Component::Normal(p) => out.push(p),
-        }
-    }
-    Some(out)
-}
 // Figure out how to isolate process running inside container from host
 // https://www.man7.org/linux/man-pages/man7/user_namespaces.7.html
 fn main() {
