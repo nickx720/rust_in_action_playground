@@ -151,7 +151,7 @@ You can explore the cgroup filesystem in the folder: /sys/fs/cgroup/ on the host
 
 To control these you will need to write the cgroup filesystem, the limits for memory are place in the memory subdirectory and the CPU limits in the cpu subdirectory.
 
-Step 7
+Step 7 Done
 
 We’ve covered many of the elements required to run a container, so now we’re going to turn our attention to pulling and running a container image. So, in this step your goal is to pull an image from Docker Hub and unpack it.
 

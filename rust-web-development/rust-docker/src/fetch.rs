@@ -8,7 +8,7 @@ use anyhow::{Context, Result};
 use flate2::bufread::GzDecoder;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
 use serde::Deserialize;
-use tar::Archive;
+use tar::{Archive, EntryType};
 
 use crate::write_file;
 
@@ -31,6 +31,7 @@ fn safe_join(base: &Path, entry_path: &Path) -> Option<PathBuf> {
     }
     Some(out)
 }
+
 pub fn get_docker_manifest() -> Result<()> {
     let client = reqwest::blocking::Client::new();
     let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/busybox:pull";
@@ -39,6 +40,7 @@ pub fn get_docker_manifest() -> Result<()> {
         .header(CONTENT_TYPE, "application/json")
         .send()?
         .json()?;
+
     let resource = "https://registry-1.docker.io/v2/library/busybox/manifests/latest";
     let resp: serde_json::Value = client
         .get(resource)
@@ -52,12 +54,14 @@ pub fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
+
     let _ = write_file("respose.json", &resp.to_string()).unwrap();
     let arm_64_digest = resp.get("manifests").unwrap().as_array().unwrap()[7]
         .get("digest")
         .unwrap()
         .as_str()
         .unwrap();
+
     let resource = format!(
         "https://registry-1.docker.io/v2/library/busybox/manifests/{}",
         arm_64_digest.to_string().trim()
@@ -74,6 +78,7 @@ pub fn get_docker_manifest() -> Result<()> {
         )
         .send()?
         .json()?;
+
     let output = Path::new("/mnt/hgfs/rust-docker/dist/output");
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
     let config = resp
@@ -85,11 +90,12 @@ pub fn get_docker_manifest() -> Result<()> {
         .unwrap()
         .as_str()
         .unwrap();
+
     let url = format!(
         "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
         config
     );
-    let mut resp = client
+    let resp = client
         .get(url)
         .header(
             AUTHORIZATION,
@@ -97,11 +103,13 @@ pub fn get_docker_manifest() -> Result<()> {
         )
         .header(USER_AGENT, "rust-reqwest-blocking/0.1")
         .send()?;
+
     // storing config body into a file
     let file = File::create("/mnt/hgfs/rust-docker/dist/config.json")?;
     let writer = BufWriter::new(file);
     let json: serde_json::Value = resp.json()?;
     serde_json::to_writer_pretty(writer, &json)?;
+
     for layer in layers {
         let layer = layer
             .get("digest")
@@ -112,8 +120,7 @@ pub fn get_docker_manifest() -> Result<()> {
             "https://registry-1.docker.io/v2/library/busybox/blobs/{}",
             layer
         );
-        // Get the layer
-        let mut resp = client
+        let resp = client
             .get(url)
             .header(
                 AUTHORIZATION,
@@ -121,38 +128,55 @@ pub fn get_docker_manifest() -> Result<()> {
             )
             .header(USER_AGENT, "rust-reqwest-blocking/0.1")
             .send()?;
+
         let gz = GzDecoder::new(BufReader::new(resp));
         let mut archive = Archive::new(gz);
+
         for entries in archive.entries().context("Error reading") {
             for entry in entries {
                 let mut entry = entry.context("reading tar entry")?;
                 let entry_type = entry.header().entry_type();
+
                 // Resolve and sanitize path inside dest_dir
                 let raw_path = entry.path().context("getting entry path")?;
                 let outpath = match safe_join(output, raw_path.as_ref()) {
                     Some(p) => p,
                     None => continue, // skip suspicious paths
                 };
+
                 // Create parent directories
                 if let Some(parent) = outpath.parent() {
                     fs::create_dir_all(parent).with_context(|| format!("creating {:?}", parent))?;
                 }
-                // Handle only regular files and directories for safety
+
                 if entry_type.is_dir() {
                     fs::create_dir_all(&outpath)?;
                 } else if entry_type.is_file() {
                     entry
                         .unpack(&outpath)
                         .with_context(|| format!("writing {:?}", outpath))?;
+                } else if entry_type == EntryType::Symlink {
+                    // BusyBox relies on symlinks for applets like `/bin/sh`.
+                    #[cfg(unix)]
+                    {
+                        use std::os::unix::fs as unix_fs;
+                        if let Some(target) = entry.link_name()? {
+                            let _ = unix_fs::symlink(&*target, &outpath);
+                        }
+                    }
+                } else if entry_type == EntryType::Link {
+                    // BusyBox sometimes uses hardlinks too.
+                    if let Some(target) = entry.link_name()? {
+                        if let Some(target_out) = safe_join(output, target.as_ref()) {
+                            let _ = fs::hard_link(&target_out, &outpath);
+                        }
+                    }
                 } else {
-                    // why are we skipping bin files
-                    // Skip symlinks/hardlinks/devs for safety; handle explicitly if needed
-                    // doesn't not generate symlinks when running without root access
                     continue;
                 }
             }
         }
-        // Get the config
     }
+
     Ok(())
 }
