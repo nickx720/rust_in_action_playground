@@ -132,6 +132,7 @@ pub fn get_docker_manifest() -> Result<()> {
         let gz = GzDecoder::new(BufReader::new(resp));
         let mut archive = Archive::new(gz);
 
+        let mut pending_hardlinks: Vec<(PathBuf, PathBuf)> = Vec::new();
         for entries in archive.entries().context("Error reading") {
             for entry in entries {
                 let mut entry = entry.context("reading tar entry")?;
@@ -165,15 +166,29 @@ pub fn get_docker_manifest() -> Result<()> {
                         }
                     }
                 } else if entry_type == EntryType::Link {
-                    // BusyBox sometimes uses hardlinks too.
+                    // BusyBox uses hardlinks heavily; the target may appear later in the tar,
+                    // and shared folders may not support hardlinks. Defer and retry after
+                    // unpacking this layer, falling back to copying.
                     if let Some(target) = entry.link_name()? {
                         if let Some(target_out) = safe_join(output, target.as_ref()) {
-                            let _ = fs::hard_link(&target_out, &outpath);
+                            pending_hardlinks.push((outpath, target_out));
                         }
                     }
                 } else {
                     continue;
                 }
+            }
+        }
+
+        for (link_path, target_path) in pending_hardlinks {
+            if let Some(parent) = link_path.parent() {
+                let _ = fs::create_dir_all(parent);
+            }
+            if !target_path.exists() {
+                continue;
+            }
+            if fs::hard_link(&target_path, &link_path).is_err() {
+                let _ = fs::copy(&target_path, &link_path);
             }
         }
     }
