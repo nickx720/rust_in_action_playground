@@ -110,7 +110,8 @@ fn main() {
 
     // Show parent hostname
     let parent_hn = gethostname().unwrap().to_string_lossy().into_owned();
-    get_docker_manifest().expect("It failed");
+    let src_path = Path::new("/mnt/hgfs/rust-docker/dist/output");
+    get_docker_manifest(&src_path).expect("It failed");
 
     println!("[parent] hostname before clone: {parent_hn}");
     // Create child in a NEW UTS namespace
@@ -164,6 +165,15 @@ fn main() {
                                 Path::new("/proc"),
                                 Some(Path::new("proc")),
                                 MsFlags::empty(),
+                                None::<&str>,
+                            );
+                            let target = Path::new("/play");
+                            #[cfg(target_os = "linux")]
+                            let _ = mount(
+                                Some(src_path),
+                                target,
+                                Some(Path::new("proc")),
+                                MsFlags::MS_BIND | MsFlags::MS_REC,
                                 None::<&str>,
                             );
                             dbg!(getcwd().unwrap().display());

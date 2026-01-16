@@ -32,7 +32,7 @@ fn safe_join(base: &Path, entry_path: &Path) -> Option<PathBuf> {
     Some(out)
 }
 
-pub fn get_docker_manifest() -> Result<()> {
+pub fn get_docker_manifest(output: &Path) -> Result<()> {
     let client = reqwest::blocking::Client::new();
     let auth_token = "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/busybox:pull";
     let auth_response: DockerToken = client
@@ -79,7 +79,6 @@ pub fn get_docker_manifest() -> Result<()> {
         .send()?
         .json()?;
 
-    let output = Path::new("/mnt/hgfs/rust-docker/dist/output");
     let layers: &Vec<serde_json::Value> = resp.get("layers").unwrap().as_array().unwrap();
     let config = resp
         .get("config")
