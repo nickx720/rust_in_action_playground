@@ -9,6 +9,34 @@ pub enum BloomFilter {
 pub struct Bloom {
     number_of_items: usize,
     false_positive_rate: f64,
+    bit_array: Vec<u8>,
+}
+
+// Bit array mental model (packed into bytes):
+//
+// global bit indexes:
+// byte0: 0 1 2 3 4 5 6 7
+// byte1: 8 9 10 11 12 13 14 15
+// byte2: 16 ...
+//
+// Mapping a global bit index:
+// byte_index = bit_index / 8
+// bit_in_byte = bit_index % 8
+//
+// Mask creation for set/get:
+// 1u8      = 0b0000_0001
+// 1u8 << 2 = 0b0000_0100
+// The mask is OR'ed to set a bit and AND'ed to test a bit.
+fn set_bit(bit_array: &mut Vec<u8>, idx: usize) {
+    let byte = idx / 8;
+    let bit = idx % 8;
+    let mask = 1u8 << bit;
+    // or -in the mask for updating the position
+    bit_array[byte] |= mask;
+}
+
+fn get_bit(bit_array: Vec<u8>, idx: usize) {
+    todo!()
 }
 
 impl Bloom {
