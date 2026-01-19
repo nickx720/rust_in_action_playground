@@ -156,7 +156,16 @@ fn main() {
                             .expect("Unable to run");
                             // TODO
                             // The following will get the zip files
-                            // get_docker_manifest().expect("It failed");
+                            // get_docker_manifest(src_path).expect("It failed");
+                            let target = Path::new("/play");
+                            #[cfg(target_os = "linux")]
+                            let mounted = mount(
+                                Some(src_path),
+                                target,
+                                None::<&str>,
+                                MsFlags::MS_BIND | MsFlags::MS_REC,
+                                None::<&str>,
+                            );
                             let _ = chroot("/play").expect("Chroot failed");
                             chdir("/").expect("Unable to set directory");
                             #[cfg(target_os = "linux")]
@@ -165,15 +174,6 @@ fn main() {
                                 Path::new("/proc"),
                                 Some(Path::new("proc")),
                                 MsFlags::empty(),
-                                None::<&str>,
-                            );
-                            let target = Path::new("/play");
-                            #[cfg(target_os = "linux")]
-                            let _ = mount(
-                                Some(src_path),
-                                target,
-                                Some(Path::new("proc")),
-                                MsFlags::MS_BIND | MsFlags::MS_REC,
                                 None::<&str>,
                             );
                             dbg!(getcwd().unwrap().display());
