@@ -176,15 +176,17 @@ fn main() {
                                 MsFlags::empty(),
                                 None::<&str>,
                             );
-                            dbg!(getcwd().unwrap().display());
                             let shell = CString::new(command.to_string()).unwrap();
-                            let arguments: Vec<CString>;
-                            if !args.is_empty() {
-                                let args = CString::new(args.join(" ").to_string()).unwrap();
-                                arguments = vec![shell.clone(), args.clone()];
-                            } else {
-                                arguments = vec![shell.clone()];
+                            let mut arguments: Vec<CString> = Vec::with_capacity(1 + args.len());
+                            arguments.push(shell.clone());
+                            for arg in args.iter() {
+                                arguments.push(CString::new(arg.as_str()).unwrap());
                             }
+                            let argv_debug: Vec<&str> = arguments
+                                .iter()
+                                .map(|arg| arg.to_str().unwrap_or("<non-utf8>"))
+                                .collect();
+                            println!("[child] execvp argv: {:?}", argv_debug);
                             println!("The pid before execvp {}", nix::unistd::getpid());
                             execvp(&shell, &arguments.to_owned()).expect("execvp failed");
                             #[cfg(target_os = "linux")]
