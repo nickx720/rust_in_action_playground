@@ -111,7 +111,6 @@ fn main() {
     // Show parent hostname
     let parent_hn = gethostname().unwrap().to_string_lossy().into_owned();
     let src_path = Path::new("/mnt/hgfs/rust-docker/dist/output");
-    get_docker_manifest(&src_path).expect("It failed");
 
     println!("[parent] hostname before clone: {parent_hn}");
     // Create child in a NEW UTS namespace
@@ -156,7 +155,21 @@ fn main() {
                             .expect("Unable to run");
                             // TODO
                             // The following will get the zip files
-                            // get_docker_manifest(src_path).expect("It failed");
+                            get_docker_manifest(src_path).expect("It failed");
+                            let config = Path::new("/mnt/hgfs/rust-docker/dist/config.json");
+                            let contents = std::fs::read_to_string(config).expect("Unable to read");
+                            let env: serde_json::Value =
+                                serde_json::from_str(&contents).expect("Unable to parse");
+                            let environment =
+                                env["config"]["Env"].as_array().unwrap().first().unwrap();
+                            let path_to_set =
+                                environment.to_string().split("=").collect::<Vec<&str>>();
+                            //    spawns later):
+                            //    std::env::set_var("KEY", "value");
+                            //    std::env::remove_var("KEY");
+                            //  - For a command you’re spawning via Command:
+                            //    Command::new("...").env("KEY", "value").envs([...])
+                            dbg!(path_to_set);
                             let target = Path::new("/play");
                             #[cfg(target_os = "linux")]
                             let mounted = mount(
