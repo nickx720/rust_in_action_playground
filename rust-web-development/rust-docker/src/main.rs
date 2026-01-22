@@ -162,7 +162,7 @@ fn main() {
                                 serde_json::from_str(&contents).expect("Unable to parse");
                             let environment =
                                 env["config"]["Env"].as_array().unwrap().first().unwrap();
-                            let path_to_set =
+                            let env_to_set =
                                 environment.to_string().split("=").collect::<Vec<&str>>();
                             //    spawns later):
                             //    std::env::set_var("KEY", "value");
