@@ -169,7 +169,7 @@ fn main() {
                             //    std::env::remove_var("KEY");
                             //  - For a command you’re spawning via Command:
                             //    Command::new("...").env("KEY", "value").envs([...])
-                            dbg!(path_to_set);
+                            dbg!(env_to_set);
                             let target = Path::new("/play");
                             #[cfg(target_os = "linux")]
                             let mounted = mount(
