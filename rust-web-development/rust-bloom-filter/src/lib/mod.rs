@@ -35,8 +35,12 @@ fn set_bit(bit_array: &mut Vec<u8>, idx: usize) {
     bit_array[byte] |= mask;
 }
 
-fn get_bit(bit_array: Vec<u8>, idx: usize) {
-    todo!()
+fn get_bit(bit_array: Vec<u8>, idx: usize) -> bool {
+    let byte = idx / 8;
+    let bit = idx % 8;
+    let mask = 1u8 << bit;
+    // and to check if it exists
+    (bit_array[byte] & mask) != 0
 }
 
 impl Bloom {
