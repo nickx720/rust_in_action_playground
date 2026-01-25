@@ -7,9 +7,9 @@ pub enum BloomFilter {
 }
 
 pub struct Bloom {
-    number_of_items: usize,
-    false_positive_rate: f64,
+    hash_count: f64,
     bit_array: Vec<u8>,
+    bit_size_per_item: usize,
 }
 
 // Bit array mental model (packed into bytes):
@@ -35,7 +35,7 @@ fn set_bit(bit_array: &mut Vec<u8>, idx: usize) {
     bit_array[byte] |= mask;
 }
 
-fn get_bit(bit_array: Vec<u8>, idx: usize) -> bool {
+fn get_bit(bit_array: &[u8], idx: usize) -> bool {
     let byte = idx / 8;
     let bit = idx % 8;
     let mask = 1u8 << bit;
@@ -46,10 +46,21 @@ fn get_bit(bit_array: Vec<u8>, idx: usize) -> bool {
 impl Bloom {
     pub fn new(number_of_items: usize, false_positive_rate: f64) -> Self {
         let false_positive_rate = false_positive_rate.clamp(0.0f64, 1.0);
+        // bit_size_array is the total number of bits in the filter, derived from
+        // expected items and target false-positive rate; it drives storage size
+        // and is later used to map hashes into valid bit positions.
+        // Formula reference: https://en.wikipedia.org/wiki/Bloom_filter#Optimal_number_of_hash_functions
         let bit_size_array =
-            -(number_of_items as f64 * false_positive_rate.ln()) / (2f64.ln()).powi(2).ceil();
-        let hash_function = (bit_size_array / number_of_items as f64) * 2f64.ln().round();
-        todo!()
+            (-(number_of_items as f64 * false_positive_rate.ln()) / (2f64.ln()).powi(2)).ceil();
+        let hash_count = ((bit_size_array / number_of_items as f64) * 2f64.ln()).round();
+        // bit_size_array is a count of bits, but Vec<u8> stores bytes.
+        // Round up so we allocate enough bytes to hold all bits.
+        let bit_array_length = (bit_size_array as usize + 7) / 8;
+        Self {
+            hash_count,
+            bit_array: vec![0u8; bit_array_length],
+            bit_size_per_item: bit_size_array as usize,
+        }
     }
     pub fn insert(&self, _item: &str) -> Self {
         todo!()
