@@ -165,7 +165,7 @@ Unzip the layers on top of each other to re-create the filesystem. Remember that
 Fetch the config data and store it ready for Step 8.
 Be sure to specify the correct library and repository that you wish to authenticate and pull from in each API call.
 
-Step 8
+# Step 8 Done
 
 In this step your goal is to run the container image you’ve pulled down. To do that you’ll what to chroot to the root of the image you’ve pulled. Optionally allow this to be specified on the command line, like so:
 

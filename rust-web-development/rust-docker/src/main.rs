@@ -160,16 +160,22 @@ fn main() {
                             let contents = std::fs::read_to_string(config).expect("Unable to read");
                             let env: serde_json::Value =
                                 serde_json::from_str(&contents).expect("Unable to parse");
-                            let environment =
-                                env["config"]["Env"].as_array().unwrap().first().unwrap();
-                            let env_to_set =
-                                environment.to_string().split("=").collect::<Vec<&str>>();
-                            //    spawns later):
+                            let environment = env["config"]["Env"]
+                                .as_array()
+                                .unwrap()
+                                .first()
+                                .unwrap()
+                                .as_str()
+                                .unwrap();
+                            let env_to_set = environment.splitn(2, "=").collect::<Vec<&str>>();
+                            for item in env_to_set.chunks(2) {
+                                std::env::set_var(item[0], item[1]);
+                            }
+                            //    spawns laer):
                             //    std::env::set_var("KEY", "value");
                             //    std::env::remove_var("KEY");
                             //  - For a command you’re spawning via Command:
                             //    Command::new("...").env("KEY", "value").envs([...])
-                            dbg!(env_to_set);
                             let target = Path::new("/play");
                             #[cfg(target_os = "linux")]
                             let mounted = mount(
