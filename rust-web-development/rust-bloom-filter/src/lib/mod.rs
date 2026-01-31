@@ -1,4 +1,5 @@
 use std::fs;
+mod hash;
 
 #[derive(Debug)]
 pub enum BloomFilter {
@@ -9,7 +10,7 @@ pub enum BloomFilter {
 pub struct Bloom {
     hash_count: f64,
     bit_array: Vec<u8>,
-    bit_size_per_item: usize,
+    bit_count: usize,
 }
 
 // Bit array mental model (packed into bytes):
@@ -50,16 +51,16 @@ impl Bloom {
         // expected items and target false-positive rate; it drives storage size
         // and is later used to map hashes into valid bit positions.
         // Formula reference: https://en.wikipedia.org/wiki/Bloom_filter#Optimal_number_of_hash_functions
-        let bit_size_array =
+        let bit_count =
             (-(number_of_items as f64 * false_positive_rate.ln()) / (2f64.ln()).powi(2)).ceil();
-        let hash_count = ((bit_size_array / number_of_items as f64) * 2f64.ln()).round();
+        let hash_count = ((bit_count / number_of_items as f64) * 2f64.ln()).round();
         // bit_size_array is a count of bits, but Vec<u8> stores bytes.
         // Round up so we allocate enough bytes to hold all bits.
-        let bit_array_length = (bit_size_array as usize + 7) / 8;
+        let bit_array_length = (bit_count as usize + 7) / 8;
         Self {
             hash_count,
             bit_array: vec![0u8; bit_array_length],
-            bit_size_per_item: bit_size_array as usize,
+            bit_count: bit_count as usize,
         }
     }
     pub fn insert(&self, _item: &str) -> Self {
