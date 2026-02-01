@@ -10,19 +10,19 @@
 //
 // So "k different hashes for one item" just means you need k different bit
 // positions derived from that single item.
-pub fn hash_function_sum(item: &str) -> u32 {
+pub fn hash_function_sum(item: &str) -> usize {
     let mut total: u32 = 0;
     for indiviual_item in item.bytes() {
         total += indiviual_item as u32;
     }
-    total
+    total as usize
 }
-pub fn hash_function_sum_variation(item: &str) -> u32 {
+pub fn hash_function_sum_variation(item: &str) -> usize {
     let mut total: u32 = 0;
     for indiviual_item in item.bytes() {
         total += indiviual_item as u32;
     }
-    total * 3 + 1
+    (total * 3 + 1) as usize
 }
 
 #[cfg(test)]

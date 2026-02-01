@@ -1,4 +1,6 @@
 use std::fs;
+
+use crate::lib::hash::{hash_function_sum, hash_function_sum_variation};
 mod hash;
 
 #[derive(Debug)]
@@ -8,7 +10,7 @@ pub enum BloomFilter {
 }
 
 pub struct Bloom {
-    hash_count: f64,
+    hash_count: usize,
     bit_array: Vec<u8>,
     bit_count: usize,
 }
@@ -53,7 +55,7 @@ impl Bloom {
         // Formula reference: https://en.wikipedia.org/wiki/Bloom_filter#Optimal_number_of_hash_functions
         let bit_count =
             (-(number_of_items as f64 * false_positive_rate.ln()) / (2f64.ln()).powi(2)).ceil();
-        let hash_count = ((bit_count / number_of_items as f64) * 2f64.ln()).round();
+        let hash_count = ((bit_count / number_of_items as f64) * 2f64.ln()).round() as usize;
         // bit_size_array is a count of bits, but Vec<u8> stores bytes.
         // Round up so we allocate enough bytes to hold all bits.
         let bit_array_length = (bit_count as usize + 7) / 8;
@@ -63,16 +65,27 @@ impl Bloom {
             bit_count: bit_count as usize,
         }
     }
-    pub fn insert(&self, _item: &str) -> Self {
-        todo!()
+    pub fn insert(&mut self, item: &str) {
+        for i in 0..self.hash_count {
+            let index = (hash_function_sum(item) + i * hash_function_sum_variation(item))
+                % self.bit_count as usize;
+            set_bit(&mut self.bit_array, index);
+        }
     }
     pub fn exists(&self, item: &str) -> BloomFilter {
-        todo!()
+        for i in 0..self.hash_count {
+            let index = (hash_function_sum(item) + i * hash_function_sum_variation(item))
+                % self.bit_count as usize;
+            if !get_bit(&self.bit_array, index) {
+                return BloomFilter::NotPresent;
+            }
+        }
+        BloomFilter::MaybePresent
     }
 }
 
 pub fn make_bloom_with_100() -> Bloom {
-    let bloom = Bloom::new(100, 0.01);
+    let mut bloom = Bloom::new(100, 0.01);
     let file = fs::read_to_string("./dict.txt").expect("Reading file failed");
     for item in file.split("\n") {
         if item.is_empty() {
@@ -96,7 +109,7 @@ mod tests {
     }
     #[test]
     fn test_one_item() {
-        let bloom = make_bloom_with_100();
+        let mut bloom = make_bloom_with_100();
         let item = "test".to_string();
         bloom.insert(&item);
         let response = bloom.exists(&item);
@@ -104,7 +117,7 @@ mod tests {
     }
     #[test]
     fn test_one_many() {
-        let bloom = make_bloom_with_100();
+        let mut bloom = make_bloom_with_100();
         let item = "test".to_string();
         bloom.insert(&item);
         bloom.insert(&item);
