@@ -1,4 +1,6 @@
 use std::io::{self, Read};
+mod lib;
+mod naive;
 
 // Here’s the basic way to decode a UStar header (the first 512 bytes):
 
@@ -40,8 +42,21 @@ use std::io::{self, Read};
 //                   char pad[255];
 //           };
 //
-mod lib;
-mod naive;
+// - next_header_offset = current_header_offset + 512 + round_up(size, 512)
+//  - round_up(size, 512) = ((size + 511) / 512) * 512
+//
+//  Where size is the file’s byte length parsed from the header (ASCII octal). That’s why “512 offset” only works
+//  for the first header.
+//  Octal ASCII means the number is stored as text characters that represent an octal (base‑8) number.
+
+//  Example:
+//
+//  - Bytes: b"0000000644\0" are the ASCII characters 0 0 0 0 0 0 0 6 4 4
+//  - Interpreted as octal: 0644
+//  - Converted to decimal: 420
+//
+//  So for tar headers, you read the field as a string (trim spaces and NULs), then parse it using base‑8. In Rust
+//  that’s u64::from_str_radix(s, 8).
 fn main() -> Result<(), anyhow::Error> {
     let mut input: Vec<u8> = vec![0u8; 512];
     let mut block_offset = 0usize;
