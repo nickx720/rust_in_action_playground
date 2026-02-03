@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct TarHeader {
     name: [u8; 100],
     mode: [u8; 8],
@@ -25,5 +26,15 @@ impl TarHeader {
             linkname: [0u8; 100],
             pad: [0u8; 255],
         }
+    }
+}
+
+impl TryFrom<&[u8]> for TarHeader {
+    type Error = anyhow::Error;
+    fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
+        if buf.len() < 512 {
+            anyhow::bail!("Buffer length too small");
+        }
+        todo!()
     }
 }
