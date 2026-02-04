@@ -13,19 +13,45 @@ pub struct TarHeader {
 }
 
 impl TarHeader {
-    pub fn new() -> Self {
-        Self {
-            name: [0u8; 100],
-            mode: [0u8; 8],
-            uid: [0u8; 8],
-            gid: [0u8; 8],
-            size: [0u8; 12],
-            mtime: [0u8; 12],
-            checksum: [0u8; 8],
-            linkflag: [0u8; 1],
-            linkname: [0u8; 100],
-            pad: [0u8; 255],
-        }
+    pub fn new(buf: &[u8]) -> Result<Self, anyhow::Error> {
+        //  - 0..99 (100 bytes): name (null‑terminated string)
+        //  - 100..107 (8): mode (octal ASCII)
+        //  - 108..115 (8): uid (octal ASCII)
+        //  - 116..123 (8): gid (octal ASCII)
+        //  - 124..135 (12): size (octal ASCII, bytes)
+        //  - 136..147 (12): mtime (octal ASCII, Unix time)
+        //  - 148..155 (8): checksum (octal ASCII, space/NUL padded)
+        //  - 156 (1): typeflag (ASCII char, e.g. '0' regular file)
+        //  - 157..256 (100): linkname (string)
+        //  - 257..262 (6): magic = "ustar\0"
+        //  - 263..264 (2): version = "00"
+        //  - 265..296 (32): uname
+        //  - 297..328 (32): gname
+        //  - 329..336 (8): devmajor (octal)
+        //  - 337..344 (8): devminor (octal)
+        //  - 345..499 (155): prefix (path prefix for long names)
+        let name: [u8; 100] = buf.get(0..=99).unwrap().try_into()?;
+        let mode: [u8; 8] = buf.get(100..=107).unwrap().try_into()?;
+        let uid: [u8; 8] = buf.get(108..=115).unwrap().try_into()?;
+        let gid: [u8; 8] = buf.get(116..=123).unwrap().try_into()?;
+        let size: [u8; 12] = buf.get(124..=135).unwrap().try_into()?;
+        let mtime: [u8; 12] = buf.get(136..=147).unwrap().try_into()?;
+        let checksum: [u8; 8] = buf.get(148..=155).unwrap().try_into()?;
+        let linkflag: [u8; 1] = buf.get(156..=156).unwrap().try_into()?;
+        let linkname: [u8; 100] = buf.get(157..=256).unwrap().try_into()?;
+        let pad: [u8; 255] = buf.get(257..=511).unwrap().try_into()?;
+        Ok(Self {
+            name,
+            mode,
+            uid,
+            gid,
+            size,
+            mtime,
+            checksum,
+            linkflag,
+            linkname,
+            pad,
+        })
     }
 }
 
@@ -35,6 +61,6 @@ impl TryFrom<&[u8]> for TarHeader {
         if buf.len() < 512 {
             anyhow::bail!("Buffer length too small");
         }
-        todo!()
+        Ok(Self::new(buf)?)
     }
 }
