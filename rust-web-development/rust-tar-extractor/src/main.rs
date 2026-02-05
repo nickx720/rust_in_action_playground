@@ -54,7 +54,12 @@ fn main() -> Result<(), anyhow::Error> {
         // Read up to 512 bytes, then format for display: 16 bytes per line, grouped as 2-byte chunks with offsets; any line/grouping is just for readability, not a file "line".
         let chunk = &input[..n];
         let header = TarHeader::try_from(chunk)?;
-        dbg!(header);
+        let bits: Vec<String> = header
+            .name
+            .iter()
+            .map(|item| format!("{:08b}", item))
+            .collect();
+        dbg!(bits);
         break;
         //        for (index, line) in chunk.chunks(16).enumerate() {
         //            let offset = block_offset * 512 + index * 16;

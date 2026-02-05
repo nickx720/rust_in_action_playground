@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub struct TarHeader {
-    name: [u8; 100],
+    pub name: [u8; 100],
     mode: [u8; 8],
     uid: [u8; 8],
     gid: [u8; 8],
