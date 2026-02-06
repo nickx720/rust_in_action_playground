@@ -4,7 +4,7 @@ pub struct TarHeader {
     mode: [u8; 8],
     uid: [u8; 8],
     gid: [u8; 8],
-    size: [u8; 12],
+    pub size: [u8; 12],
     mtime: [u8; 12],
     checksum: [u8; 8],
     linkflag: [u8; 1],
