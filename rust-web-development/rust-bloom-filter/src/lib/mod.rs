@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let bloom = make_bloom_with_100();
+        let bloom = Bloom::new(100, 0.01);
         let item = "test".to_string();
         let response = bloom.exists(&item);
         assert!(matches!(response, BloomFilter::NotPresent));
