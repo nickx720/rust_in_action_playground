@@ -11,7 +11,7 @@ If you are on a Unix-like OS you should be able to generate one by running the c
 
 % cat /usr/share/dict/words >> dict.txt
 
-Step 1
+# Step 1 Done
 
 In this step your goal is to use test driven development (TDD) to develop the Bloom filter data structure. OK you don’t have to use TDD, but I’d suggest writing some tests either before or after writing the Bloom filter, both to test that it works correctly and to help you understand how it works.
 
