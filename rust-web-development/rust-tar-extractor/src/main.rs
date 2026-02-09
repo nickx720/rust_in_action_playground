@@ -54,18 +54,7 @@ fn main() -> Result<(), anyhow::Error> {
         // Read up to 512 bytes, then format for display: 16 bytes per line, grouped as 2-byte chunks with offsets; any line/grouping is just for readability, not a file "line".
         let chunk = &input[..n];
         let header = TarHeader::try_from(chunk)?;
-        // Numeric fields are ASCII octal strings: trim NUL/space on the bytes, then parse base-8.
-        // Example: b"0000000101\0" -> "0000000101" -> from_str_radix(_, 8) == 65.
-        // NUL is not printable: if you print as a string you won't see it.
-        // To see the raw bytes (including 00), try:
-        //   println!("{:?}", &header.size);
-        //   println!("{:02x?}", &header.size);
-        // Or show escapes:
-        //   let s = String::from_utf8_lossy(&header.size);
-        //   println!("{:?}", s); // shows "\u{0}" for NUL
-        let size = std::str::from_utf8(&header.size).unwrap();
-        let size = u64::from_str_radix(size.trim(), 8).unwrap();
-        dbg!(name, size);
+        dbg!(header.name());
         break;
         //        for (index, line) in chunk.chunks(16).enumerate() {
         //            let offset = block_offset * 512 + index * 16;
