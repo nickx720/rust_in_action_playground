@@ -43,19 +43,31 @@ mod naive;
 //
 //  So for tar headers, you read the field as a string (trim spaces and NULs), then parse it using base‑8. In Rust
 //  that’s u64::from_str_radix(s, 8).
+fn round_up(size: usize) -> usize {
+    let output = ((size + 511) / 512) * 512;
+    output
+}
 fn main() -> Result<(), anyhow::Error> {
     let mut input: Vec<u8> = vec![0u8; 512];
     let mut block_offset = 0usize;
+    let mut next_header: usize = 0usize;
     loop {
         let n = io::stdin().read(&mut input)?;
         if n == 0 {
             break;
         }
+        let offset = block_offset * 512;
         // Read up to 512 bytes, then format for display: 16 bytes per line, grouped as 2-byte chunks with offsets; any line/grouping is just for readability, not a file "line".
         let chunk = &input[..n];
-        let header = TarHeader::try_from(chunk)?;
-        dbg!(header.name());
-        break;
+        dbg!(offset, next_header);
+        if next_header == block_offset {
+            let header = TarHeader::try_from(chunk)?;
+            let size = header.size()?;
+            next_header = offset + 512 + round_up(size);
+            dbg!(next_header);
+            dbg!(header.name());
+        }
+        block_offset += 1;
         //        for (index, line) in chunk.chunks(16).enumerate() {
         //            let offset = block_offset * 512 + index * 16;
         //            print!("{:08x}\t", offset);

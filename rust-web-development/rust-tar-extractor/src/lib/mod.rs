@@ -53,7 +53,7 @@ impl TarHeader {
             pad,
         })
     }
-    pub fn size(&self) -> Result<u64, anyhow::Error> {
+    pub fn size(&self) -> Result<usize, anyhow::Error> {
         let size = String::from_utf8(self.size.to_vec())?;
         // Numeric fields are ASCII octal strings: trim NUL/space on the bytes, then parse base-8.
         // Example: b"0000000101\0" -> "0000000101" -> from_str_radix(_, 8) == 65.
@@ -62,7 +62,7 @@ impl TarHeader {
         //   println!("{:?}", &header.size);
         //   println!("{:02x?}", &header.size);
         // since it has nul terminator i am eliminating with trim
-        let size = u64::from_str_radix(size.trim(), 8)?;
+        let size = usize::from_str_radix(size.trim(), 8)?;
         Ok(size)
     }
     pub fn name(&self) -> Result<String, anyhow::Error> {
