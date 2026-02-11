@@ -60,7 +60,7 @@ fn main() -> Result<(), anyhow::Error> {
         // Read up to 512 bytes, then format for display: 16 bytes per line, grouped as 2-byte chunks with offsets; any line/grouping is just for readability, not a file "line".
         let chunk = &input[..n];
         dbg!(offset, next_header);
-        if next_header == block_offset {
+        if next_header == offset {
             let header = TarHeader::try_from(chunk)?;
             let size = header.size()?;
             next_header = offset + 512 + round_up(size);
