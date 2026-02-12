@@ -54,7 +54,10 @@ impl TarHeader {
         })
     }
     pub fn size(&self) -> Result<usize, anyhow::Error> {
-        let size = String::from_utf8(self.size.to_vec())?;
+        let size = std::str::from_utf8(&self.size)?.trim_matches('\0').trim();
+        if size.is_empty() {
+            return Ok(0);
+        }
         // Numeric fields are ASCII octal strings: trim NUL/space on the bytes, then parse base-8.
         // Example: b"0000000101\0" -> "0000000101" -> from_str_radix(_, 8) == 65.
         // NUL is not printable: if you print as a string you won't see it.
@@ -66,8 +69,12 @@ impl TarHeader {
         Ok(size)
     }
     pub fn name(&self) -> Result<String, anyhow::Error> {
-        let name = String::from_utf8(self.name.to_vec())?;
+        let name = std::str::from_utf8(&self.name)?;
         let name = name.trim_end_matches('\0');
+        if name.is_empty() {
+            let name = "Nothing set";
+            return Ok(name.to_owned());
+        }
         Ok(name.to_owned())
     }
 }
