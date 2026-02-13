@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+
 #[derive(Debug)]
 pub struct TarHeader {
     name: [u8; 100],
@@ -73,7 +75,7 @@ impl TarHeader {
         let name = name.trim_end_matches('\0');
         if name.is_empty() {
             let name = "Nothing set";
-            return Ok(name.to_owned());
+            return Err(anyhow!(name));
         }
         Ok(name.to_owned())
     }

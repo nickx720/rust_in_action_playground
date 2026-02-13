@@ -64,7 +64,7 @@ fn main() -> Result<(), anyhow::Error> {
             let size = header.size()?;
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
-                dbg!(name);
+                println!("{}", name);
             }
         }
         block_offset += 1;
