@@ -18,5 +18,6 @@ fn main() {
             }
             bloom.insert(item);
         }
+        fs::write("words.bf", bloom);
     }
 }
