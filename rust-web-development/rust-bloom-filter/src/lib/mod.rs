@@ -98,7 +98,7 @@ pub fn make_bloom_with_100() -> Bloom {
 
 impl AsRef<[u8]> for Bloom {
     fn as_ref(&self) -> &[u8] {
-        todo!()
+        &self.bit_array
     }
 }
 
