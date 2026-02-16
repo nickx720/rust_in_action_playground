@@ -82,6 +82,46 @@ impl Bloom {
         }
         BloomFilter::MaybePresent
     }
+    pub fn save_to_disk() {
+        // Goal: write *enough metadata + bytes* so `read_to_disk` can rebuild `Bloom`.
+        //
+        // Suggested file format (fixed-size header + payload):
+        // [magic: 4 bytes] [version: u8] [hash_count: u64 LE] [bit_count: u64 LE]
+        // [bit_array_len: u64 LE] [bit_array raw bytes...]
+        //
+        // Why include each field:
+        // - magic/version: reject wrong/old file formats early.
+        // - hash_count/bit_count: these are required to restore behavior.
+        // - bit_array_len: lets the reader validate payload size before reading.
+        //
+        // Implementation sketch:
+        // 1) Create a `Vec<u8>` buffer.
+        // 2) `extend_from_slice` each header field in the exact same order.
+        // 3) Append `self.bit_array` bytes.
+        // 4) `fs::write(path, buffer)`.
+        //
+        // Keep endianness explicit (`to_le_bytes`) so encode/decode always match.
+        todo!()
+    }
+    pub fn read_to_disk() {
+        // Goal: read bytes and reconstruct `Bloom` safely.
+        //
+        // Implementation sketch:
+        // 1) `let bytes = fs::read(path)?;`
+        // 2) Parse fields in the same order used by `save_to_disk`.
+        //    Use a running cursor index (e.g. `let mut i = 0`).
+        // 3) Validate before constructing:
+        //    - magic/version match expected values
+        //    - buffer has enough bytes for each header field
+        //    - `bit_array_len` exactly matches remaining payload length
+        //    - optional: `bit_array_len == (bit_count + 7) / 8`
+        // 4) Build and return `Bloom { hash_count, bit_count, bit_array }`.
+        //
+        // Parsing tip:
+        // - For each u64: copy 8 bytes into `[u8; 8]`, then `u64::from_le_bytes`.
+        // - Convert to `usize` with `try_into()` and handle overflow explicitly.
+        todo!()
+    }
 }
 
 pub fn make_bloom_with_100() -> Bloom {
@@ -94,12 +134,6 @@ pub fn make_bloom_with_100() -> Bloom {
         bloom.insert(item);
     }
     bloom
-}
-
-impl AsRef<[u8]> for Bloom {
-    fn as_ref(&self) -> &[u8] {
-        &self.bit_array
-    }
 }
 
 #[cfg(test)]
