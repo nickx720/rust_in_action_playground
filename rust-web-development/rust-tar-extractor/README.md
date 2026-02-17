@@ -6,7 +6,7 @@ The functional requirements for tar are concisely described by it’s man page -
 
 man tar
 
-Step Zero
+# Step Zero
 
 Like all good arrays we’re zero indexed! In this step you’re going to set your environment up ready to begin developing and testing your solution.
 
@@ -22,7 +22,7 @@ tar -cf files.tar file1.txt file2.txt file3.txt
 If you’re on Windows you could use WSL or run a Linux container.
 
 After running these commands you should have a tarball we can use for testing called files.tar.
-Step 1
+# Step 1
 
 In this step your goal is to list the files in an archive. If we use tar that looks something like this when reading from standard in:
 

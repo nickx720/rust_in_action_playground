@@ -64,22 +64,10 @@ fn main() -> Result<(), anyhow::Error> {
             let size = header.size()?;
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
-                println!("{}", name);
+                println!("{} {}", name, header.size().unwrap());
             }
         }
         block_offset += 1;
-        //        for (index, line) in chunk.chunks(16).enumerate() {
-        //            let offset = block_offset * 512 + index * 16;
-        //            print!("{:08x}\t", offset);
-        //            for group in line.chunks(2) {
-        //                for item in group {
-        //                    print!("{:02x}", item);
-        //                }
-        //                print!(" ")
-        //            }
-        //            println!()
-        //        }
-        //        block_offset += 1;
     }
     Ok(())
 }
