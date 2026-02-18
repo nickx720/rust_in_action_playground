@@ -51,8 +51,9 @@ fn main() -> Result<(), anyhow::Error> {
     let mut input: Vec<u8> = vec![0u8; 512];
     let mut block_offset = 0usize;
     let mut next_header: usize = 0usize;
+    let mut reader = io::stdin().lock();
     loop {
-        let n = io::stdin().read(&mut input)?;
+        let n = reader.read(&mut input)?;
         if n == 0 {
             break;
         }
