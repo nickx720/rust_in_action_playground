@@ -66,6 +66,9 @@ fn main() -> Result<(), anyhow::Error> {
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
                 println!("{} {}", name, header.size().unwrap());
+                // TODO call the offset with size?
+                let n = reader.read(&mut input)?;
+                dbg!(n);
             }
         }
         block_offset += 1;
