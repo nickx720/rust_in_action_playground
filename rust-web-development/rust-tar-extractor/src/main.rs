@@ -4,8 +4,6 @@ use crate::lib::TarHeader;
 mod lib;
 mod naive;
 
-// Here’s the basic way to decode a UStar header (the first 512 bytes):
-
 //  Key fields (byte offsets, length, encoding):
 //
 //
