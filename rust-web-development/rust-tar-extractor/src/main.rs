@@ -6,7 +6,6 @@ mod naive;
 
 //  Key fields (byte offsets, length, encoding):
 //
-//
 //  Decoding rules:
 //
 //  - Strings are null‑terminated within their fixed field.
