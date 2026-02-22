@@ -82,7 +82,7 @@ impl Bloom {
         }
         BloomFilter::MaybePresent
     }
-    pub fn save_to_disk() {
+    pub fn save_to_disk(&self) -> Vec<u8> {
         // Goal: write *enough metadata + bytes* so `read_to_disk` can rebuild `Bloom`.
         //
         // Suggested file format (fixed-size header + payload):
@@ -101,6 +101,8 @@ impl Bloom {
         // 4) `fs::write(path, buffer)`.
         //
         // Keep endianness explicit (`to_le_bytes`) so encode/decode always match.
+        let magic: &[u8; 4] = b"BLMF";
+        let version: &[u8; 1] = 1;
         todo!()
     }
     pub fn read_to_disk() {

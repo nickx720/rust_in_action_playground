@@ -28,6 +28,7 @@ To implement a Bloom filter:
 To determine the how many hash functions you should use and the interaction between the number of bits, the number of items and the number of hash functions there are a set of formulas which you’ll find documented on the Bloom filter Wikipedia page.
 
 You can use hash functions from your programming languages standard library, implement your own or implement an existing one yourself. For the latter I suggest you check out the Fowler–Noll–Vo hash function and implement a couple of the versions of it. It’s a quick and easy hash function to implement if you’ve never written one before.
+
 Step 2
 
 In this step your goal is to read the dictionary file and insert the words into the Bloom filter.
