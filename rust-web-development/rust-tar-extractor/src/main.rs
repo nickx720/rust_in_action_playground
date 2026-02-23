@@ -49,6 +49,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut block_offset = 0usize;
     let mut next_header: usize = 0usize;
     let mut reader = io::stdin().lock();
+    let mut size_global: usize = 0usize;
     loop {
         let n = reader.read(&mut input)?;
         if n == 0 {
@@ -63,10 +64,12 @@ fn main() -> Result<(), anyhow::Error> {
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
                 println!("{} {}", name, header.size().unwrap());
-                // TODO call the offset with size?
-                let n = reader.read(&mut input)?;
-                dbg!(n);
+                size_global = size;
             }
+        } else {
+            let content = &chunk[0..size_global];
+            // TODO print the following
+            dbg!(content);
         }
         block_offset += 1;
     }
