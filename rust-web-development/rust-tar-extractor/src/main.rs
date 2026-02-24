@@ -63,13 +63,13 @@ fn main() -> Result<(), anyhow::Error> {
             let size = header.size()?;
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
-                println!("{} {}", name, header.size().unwrap());
+                println!("{}", name);
                 size_global = size;
             }
         } else {
             let content = &chunk[0..size_global];
-            // TODO print the following
-            dbg!(content);
+            let content = String::from_utf8(content.to_vec())?;
+            println!("{}", content.trim());
         }
         block_offset += 1;
     }
