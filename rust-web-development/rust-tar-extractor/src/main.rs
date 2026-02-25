@@ -1,4 +1,7 @@
-use std::io::{self, Read};
+use std::{
+    fs::File,
+    io::{self, Read, Write},
+};
 
 use crate::lib::TarHeader;
 mod lib;
@@ -50,6 +53,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut next_header: usize = 0usize;
     let mut reader = io::stdin().lock();
     let mut size_global: usize = 0usize;
+    let mut file_name = String::new();
     loop {
         let n = reader.read(&mut input)?;
         if n == 0 {
@@ -64,12 +68,15 @@ fn main() -> Result<(), anyhow::Error> {
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
                 println!("{}", name);
+                file_name = name;
                 size_global = size;
             }
         } else {
             let content = &chunk[0..size_global];
-            let content = String::from_utf8(content.to_vec())?;
-            println!("{}", content.trim());
+            let mut file = File::create(&file_name)?;
+            file.write_all(content)?;
+            //            let content = String::from_utf8(content.to_vec())?;
+            //            println!("{}", content.trim());
         }
         block_offset += 1;
     }
