@@ -87,13 +87,14 @@ file1.txt
 file2.txt
 file3.txt
 
-Step 2
+# Step 2 Done
 
 In this step your goal is to extract the files from an archive, creating the equivalent of the tar command:
 
 % tar -xf files.tar
 
 Be sure to check that you’re writing just the content of the original file to the extracted file. You can check by ensuring that the original file and the extracted ones are the same size and/or using diff.
+
 Step 3
 
 In this step your goal is to create a tarball. In other words write the code to do the equivalent of the command we ran earlier:

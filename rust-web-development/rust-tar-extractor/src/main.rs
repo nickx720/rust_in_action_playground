@@ -3,9 +3,10 @@ use std::{
     io::{self, Read, Write},
 };
 
+use anyhow::anyhow;
+
 use crate::lib::TarHeader;
 mod lib;
-mod naive;
 
 //  Key fields (byte offsets, length, encoding):
 //
@@ -47,7 +48,7 @@ fn round_up(size: usize) -> usize {
     let output = ((size + 511) / 512) * 512;
     output
 }
-fn main() -> Result<(), anyhow::Error> {
+fn extract_file() -> Result<(), anyhow::Error> {
     let mut input: Vec<u8> = vec![0u8; 512];
     let mut block_offset = 0usize;
     let mut next_header: usize = 0usize;
@@ -80,5 +81,19 @@ fn main() -> Result<(), anyhow::Error> {
         }
         block_offset += 1;
     }
+    Ok(())
+}
+fn main() -> Result<(), anyhow::Error> {
+    let mut arguements = std::env::args().skip(1);
+    if let Some(action) = arguements.nth(0) {
+        match action.as_str() {
+            "cf" => panic!("todo"),
+            "xf" => extract_file()?,
+            _ => panic!("Not supported"),
+        }
+    } else {
+        let _ = extract_file()?;
+    }
+
     Ok(())
 }
