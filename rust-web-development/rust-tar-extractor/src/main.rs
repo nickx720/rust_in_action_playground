@@ -3,8 +3,6 @@ use std::{
     io::{self, Read, Write},
 };
 
-use anyhow::anyhow;
-
 use crate::lib::TarHeader;
 mod lib;
 
@@ -83,11 +81,15 @@ fn extract_file() -> Result<(), anyhow::Error> {
     }
     Ok(())
 }
+
+fn create_tar(args: impl Iterator) -> Result<(), anyhow::Error> {
+    todo!()
+}
 fn main() -> Result<(), anyhow::Error> {
     let mut arguements = std::env::args().skip(1);
     if let Some(action) = arguements.nth(0) {
         match action.as_str() {
-            "cf" => panic!("todo"),
+            "cf" => create_tar(arguements)?,
             "xf" => extract_file()?,
             _ => panic!("Not supported"),
         }
