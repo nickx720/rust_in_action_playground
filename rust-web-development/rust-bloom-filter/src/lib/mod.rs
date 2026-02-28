@@ -102,8 +102,18 @@ impl Bloom {
         //
         // Keep endianness explicit (`to_le_bytes`) so encode/decode always match.
         let magic: &[u8; 4] = b"BLMF";
-        let version: &[u8; 1] = 1;
-        todo!()
+        let version: &[u8; 1] = b"1";
+        let hash_count = self.hash_count.to_le_bytes();
+        let bit_count = self.bit_count.to_le_bytes();
+        let bit_array_len = self.bit_array.len().to_le_bytes();
+        let mut output: Vec<u8> = Vec::new();
+        output.extend_from_slice(magic);
+        output.extend_from_slice(version);
+        output.extend_from_slice(&hash_count);
+        output.extend_from_slice(&bit_count);
+        output.extend_from_slice(&bit_array_len);
+        output.extend_from_slice(&self.bit_array);
+        output
     }
     pub fn read_to_disk() {
         // Goal: read bytes and reconstruct `Bloom` safely.

@@ -18,6 +18,6 @@ fn main() {
             }
             bloom.insert(item);
         }
-        fs::write("words.bf", bloom);
+        fs::write("words.bf", bloom.save_to_disk());
     }
 }
