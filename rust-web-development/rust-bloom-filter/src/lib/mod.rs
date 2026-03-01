@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::lib::hash::{hash_function_sum, hash_function_sum_variation};
+use self::hash::{hash_function_sum, hash_function_sum_variation};
 mod hash;
 
 #[derive(Debug)]
@@ -102,7 +102,7 @@ impl Bloom {
         //
         // Keep endianness explicit (`to_le_bytes`) so encode/decode always match.
         let magic: &[u8; 4] = b"BLMF";
-        let version: &[u8; 1] = b"1";
+        let version: &[u8; 1] = &[1u8];
         let hash_count = self.hash_count.to_le_bytes();
         let bit_count = self.bit_count.to_le_bytes();
         let bit_array_len = self.bit_array.len().to_le_bytes();
@@ -115,7 +115,7 @@ impl Bloom {
         output.extend_from_slice(&self.bit_array);
         output
     }
-    pub fn read_to_disk() {
+    pub fn read_from_disk(input: Vec<u8>) -> BloomFilter {
         // Goal: read bytes and reconstruct `Bloom` safely.
         //
         // Implementation sketch:
@@ -132,6 +132,9 @@ impl Bloom {
         // Parsing tip:
         // - For each u64: copy 8 bytes into `[u8; 8]`, then `u64::from_le_bytes`.
         // - Convert to `usize` with `try_into()` and handle overflow explicitly.
+        let magic = &input[0..4];
+        let version = &input[4..5];
+        dbg!(String::from_utf8(version.to_vec()));
         todo!()
     }
 }
