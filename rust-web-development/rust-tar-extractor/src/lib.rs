@@ -16,7 +16,7 @@ pub struct TarHeader {
 
 impl TarHeader {
     pub fn new(buf: &[u8]) -> Result<Self, anyhow::Error> {
-        //  - 0..99 (100 bytes): name (null‑terminated string)
+        //  - 0..99 (100 bytes): name (null-terminated string)
         //  - 100..107 (8): mode (octal ASCII)
         //  - 108..115 (8): uid (octal ASCII)
         //  - 116..123 (8): gid (octal ASCII)
@@ -55,6 +55,7 @@ impl TarHeader {
             pad,
         })
     }
+
     pub fn size(&self) -> Result<usize, anyhow::Error> {
         let size = std::str::from_utf8(&self.size)?.trim_matches('\0').trim();
         if size.is_empty() {
@@ -70,6 +71,7 @@ impl TarHeader {
         let size = usize::from_str_radix(size.trim(), 8)?;
         Ok(size)
     }
+
     pub fn name(&self) -> Result<String, anyhow::Error> {
         let name = std::str::from_utf8(&self.name)?;
         let name = name.trim_end_matches('\0');
@@ -83,6 +85,7 @@ impl TarHeader {
 
 impl TryFrom<&[u8]> for TarHeader {
     type Error = anyhow::Error;
+
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
         if buf.len() < 512 {
             anyhow::bail!("Buffer length too small");

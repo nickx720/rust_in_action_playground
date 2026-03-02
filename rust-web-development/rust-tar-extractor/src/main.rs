@@ -1,10 +1,10 @@
 use std::{
+    fmt::Debug,
     fs::File,
     io::{self, Read, Write},
 };
 
-use crate::lib::TarHeader;
-mod lib;
+use rust_tar_extractor::TarHeader;
 
 //  Key fields (byte offsets, length, encoding):
 //
@@ -82,7 +82,9 @@ fn extract_file() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn create_tar(args: impl Iterator) -> Result<(), anyhow::Error> {
+fn create_tar(args: impl Iterator + Debug) -> Result<(), anyhow::Error> {
+    let item = args.nth(1);
+    dbg!(&item);
     todo!()
 }
 fn main() -> Result<(), anyhow::Error> {
