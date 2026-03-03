@@ -82,10 +82,11 @@ fn extract_file() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn create_tar(args: impl Iterator + Debug) -> Result<(), anyhow::Error> {
-    let item = args.nth(1);
-    dbg!(&item);
-    todo!()
+fn create_tar(args: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
+    for item in args {
+        dbg!(item);
+    }
+    Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
     let mut arguements = std::env::args().skip(1);
