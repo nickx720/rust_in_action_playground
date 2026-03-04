@@ -82,9 +82,9 @@ fn extract_file() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn create_tar(args: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
-    for item in args {
-        dbg!(item);
+fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
+    if let Some(file_name) = args.next() {
+        println!("{}", file_name);
     }
     Ok(())
 }
@@ -92,7 +92,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut arguements = std::env::args().skip(1);
     if let Some(action) = arguements.nth(0) {
         match action.as_str() {
-            "cf" => create_tar(arguements)?,
+            "cf" => create_tar(&mut arguements)?,
             "xf" => extract_file()?,
             _ => panic!("Not supported"),
         }
