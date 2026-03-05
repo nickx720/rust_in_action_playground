@@ -84,7 +84,11 @@ fn extract_file() -> Result<(), anyhow::Error> {
 
 fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     if let Some(file_name) = args.next() {
+        let open_files: Vec<String> = args.collect();
         println!("{}", file_name);
+        for file in open_files {
+            println!("{}", file);
+        }
     }
     Ok(())
 }
