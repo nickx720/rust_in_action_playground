@@ -15,7 +15,21 @@ pub struct TarHeader {
 }
 
 impl TarHeader {
-    pub fn new(buf: &[u8]) -> Result<Self, anyhow::Error> {
+    pub fn new(&self) -> Result<Self, anyhow::Error> {
+        Ok(Self {
+            name: [0u8; 100],
+            mode: [0u8; 8],
+            uid: [0u8; 8],
+            gid: [0u8; 8],
+            size: [0u8; 12],
+            mtime: [0u8; 12],
+            checksum: [0u8; 8],
+            linkflag: [0u8; 1],
+            linkname: [0u8; 100],
+            pad: [0u8; 255],
+        })
+    }
+    pub fn extract(buf: &[u8]) -> Result<Self, anyhow::Error> {
         //  - 0..99 (100 bytes): name (null-terminated string)
         //  - 100..107 (8): mode (octal ASCII)
         //  - 108..115 (8): uid (octal ASCII)
@@ -90,6 +104,6 @@ impl TryFrom<&[u8]> for TarHeader {
         if buf.len() < 512 {
             anyhow::bail!("Buffer length too small");
         }
-        Ok(Self::new(buf)?)
+        Ok(Self::extract(buf)?)
     }
 }

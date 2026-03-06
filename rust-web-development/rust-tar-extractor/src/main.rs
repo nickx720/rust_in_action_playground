@@ -1,5 +1,4 @@
 use std::{
-    fmt::Debug,
     fs::File,
     io::{self, Read, Write},
 };
@@ -85,6 +84,9 @@ fn extract_file() -> Result<(), anyhow::Error> {
 fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     if let Some(file_name) = args.next() {
         let open_files: Vec<String> = args.collect();
+        // TODO create tar header
+        //A tarball consists of a series of file objects. Each object is made up of a 512-byte header, followed by as many 512-byte blocks as are needed to contain the file contents, rounded up to the nearest full block. After the final file object there is at least two consecutive 512-bytes blocks of zero-filled records. Full details can be found in Wikipedia.
+
         println!("{}", file_name);
         for file in open_files {
             println!("{}", file);
