@@ -134,7 +134,8 @@ impl Bloom {
         // - Convert to `usize` with `try_into()` and handle overflow explicitly.
         let magic = &input[0..4];
         let version = &input[4..5];
-        dbg!(String::from_utf8(version.to_vec()));
+        let hash_count = &input[5..13];
+        let bit_count = &input[13..21];
         todo!()
     }
 }
