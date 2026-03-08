@@ -134,8 +134,23 @@ impl Bloom {
         // - Convert to `usize` with `try_into()` and handle overflow explicitly.
         let magic = &input[0..4];
         let version = &input[4..5];
-        let hash_count = &input[5..13];
-        let bit_count = &input[13..21];
+        let hash_count = usize::from_le_bytes(input[5..13].try_into().expect("invalid hash"));
+        let bit_count = usize::from_le_bytes(input[13..21].try_into().expect("invalid bit count"));
+        let bit_array_length =
+            usize::from_le_bytes(input[21..29].try_into().expect("invalid array length"));
+        //        let bit_array = usize::from_le_bytes(
+        //            input[29..bit_array_length]
+        //                .try_into()
+        //                .expect("invalid bit array"),
+        //        );
+        dbg!(
+            magic,
+            version,
+            hash_count,
+            bit_count,
+            bit_array_length,
+            //            bit_array
+        );
         todo!()
     }
 }
