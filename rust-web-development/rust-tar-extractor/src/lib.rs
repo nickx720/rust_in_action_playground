@@ -1,3 +1,5 @@
+use std::{fs, os::unix::fs::MetadataExt, path::Path};
+
 use anyhow::anyhow;
 
 #[derive(Debug)]
@@ -15,7 +17,7 @@ pub struct TarHeader {
 }
 
 impl TarHeader {
-    pub fn new(&self) -> Result<Self, anyhow::Error> {
+    pub fn new() -> Result<Self, anyhow::Error> {
         Ok(Self {
             name: [0u8; 100],
             mode: [0u8; 8],
@@ -94,6 +96,18 @@ impl TarHeader {
             return Err(anyhow!(name));
         }
         Ok(name.to_owned())
+    }
+    pub fn create_tar_header(
+        path: &Path,
+    ) -> Result<([u8; 8], [u8; 8], [u8; 8], [u8; 8], [u8; 12], [u8; 12]), anyhow::Error> {
+        let md = fs::symlink_metadata(&path)?;
+        let mut out = [0u8; 8];
+        // drops file bits using mask
+        let mode = (md.mode() & 0o7777) as u64;
+        let s_mode = format!("{:07o}", mode);
+        out[..7].copy_from_slice(s_mode.as_bytes());
+
+        todo!()
     }
 }
 
