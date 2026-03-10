@@ -101,13 +101,22 @@ impl TarHeader {
         path: &Path,
     ) -> Result<([u8; 8], [u8; 8], [u8; 8], [u8; 8], [u8; 12], [u8; 12]), anyhow::Error> {
         let md = fs::symlink_metadata(&path)?;
-        let mut out = [0u8; 8];
+        let mut mode_out = [0u8; 8];
         // drops file bits using mask
         let mode = (md.mode() & 0o7777) as u64;
         let s_mode = format!("{:07o}", mode);
-        out[..7].copy_from_slice(s_mode.as_bytes());
+        mode_out[..7].copy_from_slice(s_mode.as_bytes());
 
-        todo!()
+        let mut uid_out = [0u8; 8];
+        let uid = md.uid() as u64;
+        let s_uid = format!("{:07o}", uid);
+        uid_out[..7].copy_from_slice(s_uid.as_bytes());
+
+        let mut gid_out = [0u8; 8];
+        let gid = md.gid() as u64;
+        let s_gid = format!("{:07o}", gid);
+        gid_out[..7].copy_from_slice(s_gid.as_bytes());
+        Ok((mode_out, gid_out, gid_out, [0u8; 8], [0u8; 12], [0u8; 12]))
     }
 }
 

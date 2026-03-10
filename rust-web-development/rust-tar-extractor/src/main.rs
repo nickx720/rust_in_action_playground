@@ -1,6 +1,7 @@
 use std::{
-    fs::File,
+    fs::{self, File},
     io::{self, Read, Write},
+    path::Path,
 };
 
 use rust_tar_extractor::TarHeader;
@@ -89,7 +90,9 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
 
         println!("{}", file_name);
         for file in open_files {
-            println!("{}", file);
+            let file = fs::canonicalize(file)?;
+            let output = TarHeader::create_tar_header(&file)?;
+            dbg!(output);
         }
     }
     Ok(())
