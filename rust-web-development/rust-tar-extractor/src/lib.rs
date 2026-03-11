@@ -116,7 +116,12 @@ impl TarHeader {
         let gid = md.gid() as u64;
         let s_gid = format!("{:07o}", gid);
         gid_out[..7].copy_from_slice(s_gid.as_bytes());
-        Ok((mode_out, gid_out, gid_out, [0u8; 8], [0u8; 12], [0u8; 12]))
+
+        let mut size_out = [0u8; 8];
+        let size = md.size() as u64;
+        let s_size = format!("{:07o}", size);
+        size_out[0..7].copy_from_slice(s_size.as_bytes());
+        Ok((mode_out, gid_out, gid_out, size_out, [0u8; 12], [0u8; 12]))
     }
 }
 
