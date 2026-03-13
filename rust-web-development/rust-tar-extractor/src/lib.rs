@@ -99,7 +99,7 @@ impl TarHeader {
     }
     pub fn create_tar_header(
         path: &Path,
-    ) -> Result<([u8; 8], [u8; 8], [u8; 8], [u8; 8], [u8; 12], [u8; 12]), anyhow::Error> {
+    ) -> Result<([u8; 8], [u8; 8], [u8; 8], [u8; 12], [u8; 12], [u8; 1]), anyhow::Error> {
         let md = fs::symlink_metadata(&path)?;
         let mut mode_out = [0u8; 8];
         // drops file bits using mask
@@ -117,16 +117,39 @@ impl TarHeader {
         let s_gid = format!("{:07o}", gid);
         gid_out[..7].copy_from_slice(s_gid.as_bytes());
 
-        let mut size_out = [0u8; 8];
+        let mut size_out = [0u8; 12];
         let size = md.size() as u64;
-        let s_size = format!("{:07o}", size);
-        size_out[0..7].copy_from_slice(s_size.as_bytes());
+        let s_size = format!("{:011o}", size);
+        size_out[0..11].copy_from_slice(s_size.as_bytes());
 
         let mut mtime_out = [0u8; 12];
-        let mtime = md.size() as u64;
+        let mtime = md.mtime() as u64;
         let s_mtime = format!("{:011o}", mtime);
         mtime_out[0..11].copy_from_slice(s_mtime.as_bytes());
-        Ok((mode_out, gid_out, gid_out, size_out, mtime_out, [0u8; 12]))
+
+        let mut mlinkflag_out = [0u8; 1];
+        let mlinkflag = md.file_type();
+        let mlinkflag = if mlinkflag.is_symlink() {
+            b'2'
+        } else if mlinkflag.is_dir() {
+            b'5'
+        } else if mlinkflag.is_file() {
+            b'0'
+        } else {
+            b'0'
+        };
+        let s_mlinkflag = format!("{:01o}", mlinkflag);
+        mlinkflag_out[0..1].copy_from_slice(s_mlinkflag.as_bytes());
+
+        // linkname from read_link as_os_str.asencodedbytes
+        Ok((
+            mode_out,
+            gid_out,
+            gid_out,
+            size_out,
+            mtime_out,
+            mlinkflag_out,
+        ))
     }
 }
 
