@@ -22,6 +22,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         fs::write("words.bf", bloom.save_to_disk())?;
         let file = fs::read("words.bf")?;
         let bloom = Bloom::read_from_disk(file);
+        let file = fs::read_to_string(path).expect("Reading file failed");
+        for item in file.split("\n") {
+            if item.is_empty() {
+                continue;
+            }
+            let output = bloom.exists(item);
+            dbg!(output);
+        }
     }
     Ok(())
 }

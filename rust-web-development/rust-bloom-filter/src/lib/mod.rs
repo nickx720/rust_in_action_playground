@@ -115,7 +115,7 @@ impl Bloom {
         output.extend_from_slice(&self.bit_array);
         output
     }
-    pub fn read_from_disk(input: Vec<u8>) -> BloomFilter {
+    pub fn read_from_disk(input: Vec<u8>) -> Bloom {
         // Goal: read bytes and reconstruct `Bloom` safely.
         //
         // Implementation sketch:
@@ -138,20 +138,12 @@ impl Bloom {
         let bit_count = usize::from_le_bytes(input[13..21].try_into().expect("invalid bit count"));
         let bit_array_length =
             usize::from_le_bytes(input[21..29].try_into().expect("invalid array length"));
-        //        let bit_array = usize::from_le_bytes(
-        //            input[29..bit_array_length]
-        //                .try_into()
-        //                .expect("invalid bit array"),
-        //        );
-        dbg!(
-            magic,
-            version,
+        let bit_array: Vec<u8> = input[29..29 + bit_array_length].to_vec();
+        Bloom {
             hash_count,
+            bit_array,
             bit_count,
-            bit_array_length,
-            //            bit_array
-        );
-        todo!()
+        }
     }
 }
 

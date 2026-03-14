@@ -29,7 +29,7 @@ To determine the how many hash functions you should use and the interaction betw
 
 You can use hash functions from your programming languages standard library, implement your own or implement an existing one yourself. For the latter I suggest you check out the Fowler–Noll–Vo hash function and implement a couple of the versions of it. It’s a quick and easy hash function to implement if you’ve never written one before.
 
-Step 2
+# Step 2 Done
 
 In this step your goal is to read the dictionary file and insert the words into the Bloom filter.
 
@@ -38,7 +38,7 @@ That might look like this:
 % ccspellcheck -build dict.txt
 
 And result in a file being saved that contains the dictionary. I called mine words.bf.
-Step 3
+# Step 3 Done
 
 In this step your goal is to save the Bloom filter to disk. As the Bloom filter is binary we might like to add a simple header:
 
@@ -68,7 +68,7 @@ Do note how small the saved Bloom filter file is compared to the input dictionar
 2.4M    dict.txt
 492K    words.bf
 
-Step 4
+# Step 4 Done
 
 In this step your goal is to load the Bloom filter from disk. You’ll need to read the header - you should validate the file is of the type and version expected.
 Step 5
