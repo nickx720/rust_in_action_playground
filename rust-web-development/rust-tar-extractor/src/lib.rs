@@ -99,7 +99,18 @@ impl TarHeader {
     }
     pub fn create_tar_header(
         path: &Path,
-    ) -> Result<([u8; 8], [u8; 8], [u8; 8], [u8; 12], [u8; 12], [u8; 1]), anyhow::Error> {
+    ) -> Result<
+        (
+            [u8; 8],
+            [u8; 8],
+            [u8; 8],
+            [u8; 12],
+            [u8; 12],
+            [u8; 1],
+            [u8; 100],
+        ),
+        anyhow::Error,
+    > {
         let md = fs::symlink_metadata(&path)?;
         let mut mode_out = [0u8; 8];
         // drops file bits using mask
@@ -142,6 +153,9 @@ impl TarHeader {
         mlinkflag_out[0..1].copy_from_slice(s_mlinkflag.as_bytes());
 
         // linkname from read_link as_os_str.asencodedbytes
+        let mut m_linkname_out = [0u8; 100];
+        let linkname = fs::read_link(path)?;
+        m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
         Ok((
             mode_out,
             gid_out,
@@ -149,6 +163,7 @@ impl TarHeader {
             size_out,
             mtime_out,
             mlinkflag_out,
+            m_linkname_out,
         ))
     }
 }
