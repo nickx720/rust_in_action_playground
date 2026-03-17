@@ -108,6 +108,7 @@ impl TarHeader {
             [u8; 12],
             [u8; 1],
             [u8; 100],
+            [u8; 255],
         ),
         anyhow::Error,
     > {
@@ -149,8 +150,7 @@ impl TarHeader {
         } else {
             b'0'
         };
-        let s_mlinkflag = format!("{:01o}", mlinkflag);
-        mlinkflag_out[0..1].copy_from_slice(s_mlinkflag.as_bytes());
+        mlinkflag_out[0..1].copy_from_slice(&[mlinkflag]);
 
         // linkname from read_link as_os_str.asencodedbytes
         let mut m_linkname_out = [0u8; 100];
@@ -164,6 +164,7 @@ impl TarHeader {
             mtime_out,
             mlinkflag_out,
             m_linkname_out,
+            [0u8; 255],
         ))
     }
 }
