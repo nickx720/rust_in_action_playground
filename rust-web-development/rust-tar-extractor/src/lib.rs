@@ -101,6 +101,7 @@ impl TarHeader {
         path: &Path,
     ) -> Result<
         (
+            [u8; 100],
             [u8; 8],
             [u8; 8],
             [u8; 8],
@@ -112,6 +113,12 @@ impl TarHeader {
         ),
         anyhow::Error,
     > {
+        let mut name = [0u8; 100];
+        if let Some(name_val) = path.file_name() {
+            let bytes = name_val.as_encoded_bytes();
+            let len = bytes.len().min(100);
+            name[..len].copy_from_slice(&bytes[..len]);
+        }
         let md = fs::symlink_metadata(&path)?;
         let mut mode_out = [0u8; 8];
         // drops file bits using mask
@@ -157,6 +164,7 @@ impl TarHeader {
         let linkname = fs::read_link(path)?;
         m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
         Ok((
+            name,
             mode_out,
             gid_out,
             gid_out,
