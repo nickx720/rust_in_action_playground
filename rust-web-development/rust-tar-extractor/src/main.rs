@@ -83,6 +83,10 @@ fn extract_file() -> Result<(), anyhow::Error> {
 }
 
 fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
+    let mut output = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open("output.tar")?;
     if let Some(file_name) = args.next() {
         let open_files: Vec<String> = args.collect();
         // TODO build the archive as a raw byte stream written to one output file.
@@ -105,8 +109,9 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
         for file in open_files {
             let file = fs::canonicalize(file)?;
 
-            let output = TarHeader::create_tar_header(&file)?;
-            dbg!(output);
+            let header = TarHeader::create(&file)?;
+            output.write(&header);
+            dbg!(header);
             // read the contents of the file and create a struct with contents?
         }
     }

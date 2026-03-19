@@ -97,22 +97,7 @@ impl TarHeader {
         }
         Ok(name.to_owned())
     }
-    pub fn create_tar_header(
-        path: &Path,
-    ) -> Result<
-        (
-            [u8; 100],
-            [u8; 8],
-            [u8; 8],
-            [u8; 8],
-            [u8; 12],
-            [u8; 12],
-            [u8; 1],
-            [u8; 100],
-            [u8; 255],
-        ),
-        anyhow::Error,
-    > {
+    pub fn create_tar_header(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
         let mut name = [0u8; 100];
         if let Some(name_val) = path.file_name() {
             let bytes = name_val.as_encoded_bytes();
@@ -163,17 +148,26 @@ impl TarHeader {
         let mut m_linkname_out = [0u8; 100];
         let linkname = fs::read_link(path)?;
         m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
-        Ok((
-            name,
-            mode_out,
-            gid_out,
-            gid_out,
-            size_out,
-            mtime_out,
-            mlinkflag_out,
-            m_linkname_out,
-            [0u8; 255],
-        ))
+
+        let mut output = Vec::new();
+        output.extend_from_slice(&name);
+        output.extend_from_slice(&mode_out);
+        output.extend_from_slice(&uid_out);
+        output.extend_from_slice(&gid_out);
+        output.extend_from_slice(&size_out);
+        output.extend_from_slice(&mtime_out);
+        output.extend_from_slice(&mlinkflag_out);
+        output.extend_from_slice(&m_linkname_out);
+        output.extend_from_slice(&[0u8; 255]);
+        Ok(output)
+    }
+    pub fn create_body(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
+        todo!()
+    }
+    pub fn create(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
+        let header = TarHeader::create_tar_header(path)?;
+        let body = TarHeader::create_body(path)?;
+        Ok(header)
     }
 }
 
