@@ -162,6 +162,7 @@ impl TarHeader {
         Ok(output)
     }
     pub fn create_body(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
+        let contents = fs::read(path)?;
         todo!()
     }
     pub fn create(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
