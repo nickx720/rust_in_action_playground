@@ -7,6 +7,7 @@ use crate::bloom::{Bloom, BloomFilter};
 
 fn build_word_bf(path: String) -> Result<(), Box<dyn std::error::Error>> {
     let mut bloom = Bloom::new(100, 0.01);
+    let path = fs::canonicalize(path)?;
     let file = fs::read_to_string(path).expect("Reading file failed");
     for item in file.split("\n") {
         if item.is_empty() {
@@ -20,19 +21,20 @@ fn build_word_bf(path: String) -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
-    let output = match args.as_slice() {
-        [] => Err("Needs a source of words to build".into()),
-        [build, path] if *build == "build".to_string() => build_word_bf(path.clone()),
+    match args.as_slice() {
+        [_] => Err("Needs a source of words to build".into()),
+        [_, build, path] if *build == "build" => build_word_bf(path.clone()),
         items => {
-            if items.len() == 0 {
+            if items.is_empty() {
                 return Err("Need words".into());
             }
             let file = fs::read("words.bf")?;
             let bloom = Bloom::read_from_disk(file);
             let mut print_output = Vec::new();
             for item in items {
+                dbg!(item, bloom.exists(item));
                 match bloom.exists(item) {
-                    BloomFilter::NotPresent => {
+                    BloomFilter::MaybePresent => {
                         print_output.push(item);
                     }
                     _ => continue,
@@ -46,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("These words are spelt wrong {}", output);
             Ok(())
         }
-    };
+    }
     //    if args.len() < 1 {
     //        return;
     //    }
@@ -61,5 +63,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //            let output = bloom.exists(item);
     //        }
     //    }
-    output
 }

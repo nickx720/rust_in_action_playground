@@ -1,5 +1,3 @@
-use std::fs;
-
 use self::hash::{hash_function_sum, hash_function_sum_variation};
 mod hash;
 
@@ -134,6 +132,10 @@ impl Bloom {
         // - Convert to `usize` with `try_into()` and handle overflow explicitly.
         let magic = &input[0..4];
         let version = &input[4..5];
+        if magic != b"BLMF" || version[0] != 1u8 {
+            panic!("Invalid file")
+        }
+
         let hash_count = usize::from_le_bytes(input[5..13].try_into().expect("invalid hash"));
         let bit_count = usize::from_le_bytes(input[13..21].try_into().expect("invalid bit count"));
         let bit_array_length =
@@ -147,22 +149,21 @@ impl Bloom {
     }
 }
 
-pub fn make_bloom_with_100() -> Bloom {
-    let mut bloom = Bloom::new(100, 0.01);
-    let file = fs::read_to_string("./dict.txt").expect("Reading file failed");
-    for item in file.split("\n") {
-        if item.is_empty() {
-            continue;
-        }
-        bloom.insert(item);
-    }
-    bloom
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    pub fn make_bloom_with_100() -> Bloom {
+        let mut bloom = Bloom::new(100, 0.01);
+        let file = fs::read_to_string("./dict.txt").expect("Reading file failed");
+        for item in file.split("\n") {
+            if item.is_empty() {
+                continue;
+            }
+            bloom.insert(item);
+        }
+        bloom
+    }
     #[test]
     fn test_empty() {
         let bloom = Bloom::new(100, 0.01);
