@@ -109,7 +109,7 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
             let file = fs::canonicalize(file)?;
 
             let header = TarHeader::create(&file)?;
-            output.write(&header);
+            let _ = output.write(&header);
             dbg!(header);
             // read the contents of the file and create a struct with contents?
         }
@@ -118,14 +118,14 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
 }
 fn main() -> Result<(), anyhow::Error> {
     let mut arguements = std::env::args().skip(1);
-    if let Some(action) = arguements.nth(0) {
+    if let Some(action) = arguements.next() {
         match action.as_str() {
             "cf" => create_tar(&mut arguements)?,
             "xf" => extract_file()?,
             _ => panic!("Not supported"),
         }
     } else {
-        let _ = extract_file()?;
+        extract_file()?
     }
 
     Ok(())
