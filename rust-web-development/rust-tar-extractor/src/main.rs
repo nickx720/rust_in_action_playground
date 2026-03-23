@@ -1,7 +1,6 @@
 use std::{
     fs::{self, File},
     io::{self, Read, Write},
-    path::Path,
 };
 
 use rust_tar_extractor::TarHeader;
