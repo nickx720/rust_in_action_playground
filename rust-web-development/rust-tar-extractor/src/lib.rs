@@ -163,6 +163,12 @@ impl TarHeader {
     }
     pub fn create_body(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
         let contents = fs::read(path)?;
+        if contents.len().is_multiple_of(512) {
+            return Ok(contents);
+        } else {
+            // TODO figure out how to add offset
+            let offset = contents.len() % 512;
+        }
         todo!()
     }
     pub fn create(path: &Path) -> Result<Vec<u8>, anyhow::Error> {

@@ -108,9 +108,9 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
         for file in open_files {
             let file = fs::canonicalize(file)?;
 
-            let header = TarHeader::create(&file)?;
-            let _ = output.write(&header);
-            dbg!(header);
+            let contents = TarHeader::create(&file)?;
+            let _ = output.write(&contents);
+            dbg!(contents);
             // read the contents of the file and create a struct with contents?
         }
     }
