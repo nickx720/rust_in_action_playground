@@ -168,6 +168,9 @@ impl TarHeader {
         } else {
             // TODO figure out how to add offset
             let offset = contents.len() % 512;
+            let padding = 512 - offset;
+            let mut block = vec![0u8; 512];
+            block[..contents.len()].copy_from_slice(&contents);
         }
         todo!()
     }
