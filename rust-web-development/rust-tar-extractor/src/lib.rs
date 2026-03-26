@@ -166,7 +166,15 @@ impl TarHeader {
         if contents.len().is_multiple_of(512) {
             return Ok(contents);
         } else {
-            // TODO figure out how to add offset
+            // TODO: `offset = len % 512` is the right way to compute how much padding
+            // the final partial tar block needs, but the mistake below is allocating
+            // a brand new 512-byte `block` and trying to copy the whole file into it.
+            // A tar body should keep all original file bytes and then append only the
+            // trailing zero padding needed to reach the next 512-byte boundary.
+            //
+            // This `block[..contents.len()]` shape only works for files up to 512 bytes.
+            // For files larger than that, like 700 or 1024 bytes, the body is still one
+            // continuous byte stream of the full contents, not "one extra 512-byte block".
             let offset = contents.len() % 512;
             let padding = 512 - offset;
             let mut block = vec![0u8; 512];
