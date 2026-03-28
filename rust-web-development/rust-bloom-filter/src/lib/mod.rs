@@ -152,6 +152,7 @@ impl Bloom {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
 
     pub fn make_bloom_with_100() -> Bloom {
         let mut bloom = Bloom::new(100, 0.01);

@@ -10,6 +10,17 @@
 //
 // So "k different hashes for one item" just means you need k different bit
 // positions derived from that single item.
+//
+// Next concrete steps for this file:
+// 1) Replace the byte-sum hash with a real string hash that is sensitive to byte order.
+//    Hint: FNV-1/FNV-1a are simple enough to implement by hand for learning purposes.
+// 2) Make `hash_function_sum_variation` genuinely independent from the first hash.
+//    Hint: don't derive it as a trivial linear transform of the same running total.
+// 3) Keep the `insert`/`exists` double-hashing pattern, but feed it two stronger base hashes.
+// 4) Add tests for collisions you expect to separate.
+//    Suggestions: check that `"cat"` and `"tac"` do not hash identically, and compare several
+//    short unrelated words to see whether the produced values are better distributed.
+// 5) After swapping hashes, rebuild `words.bf` from `dict.txt` so you are not querying an old filter.
 pub fn hash_function_sum(item: &str) -> usize {
     let mut total: u32 = 0;
     for indiviual_item in item.bytes() {

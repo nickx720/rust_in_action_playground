@@ -6,7 +6,7 @@ mod bloom;
 use crate::bloom::{Bloom, BloomFilter};
 
 fn build_word_bf(path: String) -> Result<(), Box<dyn std::error::Error>> {
-    let mut bloom = Bloom::new(100, 0.01);
+    let mut bloom = Bloom::new(300000, 0.01);
     let path = fs::canonicalize(path)?;
     let file = fs::read_to_string(path).expect("Reading file failed");
     for item in file.split("\n") {
@@ -21,6 +21,17 @@ fn build_word_bf(path: String) -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
+    // TODO: tighten the query path so CLI behavior matches Bloom filter semantics.
+    // Next concrete steps:
+    // 1) Separate the executable name from the user-supplied words before querying.
+    //    Hint: `env::args().skip(1)` or slicing `args[1..]` avoids checking the binary path.
+    // 2) Revisit the meaning of `MaybePresent` vs `NotPresent` in the printed output.
+    //    Hint: in a Bloom filter spell-checker, "maybe present" usually means "probably spelled correctly".
+    // 3) Make the printed label match the branch you collect into `print_output`.
+    //    Suggestion: decide whether you want to print probable matches or definite misses, then align both
+    //    the `match` arm and the human-readable message with that choice.
+    // 4) Add one focused CLI test case or temporary debug run that proves the program is checking only the
+    //    words the user typed, not the executable path.
     match args.as_slice() {
         [_] => Err("Needs a source of words to build".into()),
         [_, build, path] if *build == "build" => build_word_bf(path.clone()),
