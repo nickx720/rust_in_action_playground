@@ -1,4 +1,4 @@
-use self::hash::{hash_function_sum, hash_function_sum_variation};
+use self::hash::{hash_function_fnv_1, hash_function_fnv_1a};
 mod hash;
 
 #[derive(Debug)]
@@ -63,16 +63,25 @@ impl Bloom {
             bit_count: bit_count as usize,
         }
     }
+
+    // TODO: educational
+    // The double-hashing shape here is correct for Bloom filters:
+    // index_i = (h1 + i * h2) mod bit_count
+    // But `usize` addition/multiplication can overflow before the modulo.
+    // Rework `insert` and `exists` to:
+    // 1) compute `h1` and `h2` once per item,
+    // 2) combine them with wrapping arithmetic,
+    // 3) then reduce with `% self.bit_count`.
     pub fn insert(&mut self, item: &str) {
         for i in 0..self.hash_count {
-            let index = (hash_function_sum(item) + i * hash_function_sum_variation(item))
+            let index = (hash_function_fnv_1(item) + i * hash_function_fnv_1a(item))
                 % self.bit_count as usize;
             set_bit(&mut self.bit_array, index);
         }
     }
     pub fn exists(&self, item: &str) -> BloomFilter {
         for i in 0..self.hash_count {
-            let index = (hash_function_sum(item) + i * hash_function_sum_variation(item))
+            let index = (hash_function_fnv_1(item) + i * hash_function_fnv_1a(item))
                 % self.bit_count as usize;
             if !get_bit(&self.bit_array, index) {
                 return BloomFilter::NotPresent;
