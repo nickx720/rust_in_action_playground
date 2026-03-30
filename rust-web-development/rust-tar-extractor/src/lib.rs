@@ -175,7 +175,11 @@ impl TarHeader {
     pub fn create(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
         let header = TarHeader::create_tar_header(path)?;
         let body = TarHeader::create_body(path)?;
-        Ok(header)
+        let length = header.len() + body.len();
+        let mut output = Vec::with_capacity(length);
+        output.extend_from_slice(&header);
+        output.extend_from_slice(&body);
+        Ok(output)
     }
 }
 

@@ -85,35 +85,35 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
     let mut output = fs::OpenOptions::new()
         .read(true)
         .write(true)
+        .create(true)
+        .truncate(true)
         .open("output.tar")?;
-    if let Some(file_name) = args.next() {
-        let open_files: Vec<String> = args.collect();
-        // TODO build the archive as a raw byte stream written to one output file.
-        // A tar archive on disk is not text; it is consecutive 512-byte blocks:
-        // - for each input file: 512-byte header
-        // - then the file contents as raw bytes
-        // - then zero padding until the file data ends on a 512-byte boundary
-        // - after the last file: two 512-byte blocks filled with zeros
-        //
-        // Suggested flow for studying/implementing this:
-        // 1. Open the output .tar file once here and keep the writer for the full loop.
-        // 2. For each input file, build/serialize one 512-byte tar header.
-        // 3. Write the header bytes to the archive.
-        // 4. Stream or copy the file contents into the archive.
-        // 5. Write the required zero padding for that file's data section.
-        // 6. After the loop, write the two terminating zero blocks.
-        // 7. Make sure header construction also handles the tar checksum field.
+    let open_files: Vec<String> = args.collect();
+    // TODO build the archive as a raw byte stream written to one output file.
+    // A tar archive on disk is not text; it is consecutive 512-byte blocks:
+    // - for each input file: 512-byte header
+    // - then the file contents as raw bytes
+    // - then zero padding until the file data ends on a 512-byte boundary
+    // - after the last file: two 512-byte blocks filled with zeros
+    //
+    // Suggested flow for studying/implementing this:
+    // 1. Open the output .tar file once here and keep the writer for the full loop.
+    // 2. For each input file, build/serialize one 512-byte tar header.
+    // 3. Write the header bytes to the archive.
+    // 4. Stream or copy the file contents into the archive.
+    // 5. Write the required zero padding for that file's data section.
+    // 6. After the loop, write the two terminating zero blocks.
+    // 7. Make sure header construction also handles the tar checksum field.
 
-        println!("{}", file_name);
-        for file in open_files {
-            let file = fs::canonicalize(file)?;
+    for file in open_files {
+        let file = fs::canonicalize(file)?;
+        dbg!(&file);
 
-            let contents = TarHeader::create(&file)?;
-            let _ = output.write(&contents);
-            dbg!(contents);
-            // read the contents of the file and create a struct with contents?
-        }
+        let contents = TarHeader::create(&file)?;
+        let _ = output.write(&contents);
+        // read the contents of the file and create a struct with contents?
     }
+    output.write_all(&[0u8; 1024])?;
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
