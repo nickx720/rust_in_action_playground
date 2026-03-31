@@ -98,13 +98,19 @@ impl TarHeader {
         Ok(name.to_owned())
     }
     pub fn create_tar_header(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
+        // TODO: Build the full 512-byte header in tar field order, including the 8-byte checksum field.
+        // The checksum is computed after every other header field is populated:
+        // 1. Fill name/mode/uid/gid/size/mtime/typeflag/linkname/padding into the header buffer.
+        // 2. Set the checksum field bytes (148..156) to ASCII spaces (`b' '`) before summing.
+        // 3. Sum all 512 header bytes as unsigned byte values.
+        // 4. Encode that sum as ASCII octal and write it back into the checksum field.
         let mut name = [0u8; 100];
         if let Some(name_val) = path.file_name() {
             let bytes = name_val.as_encoded_bytes();
             let len = bytes.len().min(100);
             name[..len].copy_from_slice(&bytes[..len]);
         }
-        let md = fs::symlink_metadata(&path)?;
+        let md = fs::symlink_metadata(path)?;
         let mut mode_out = [0u8; 8];
         // drops file bits using mask
         let mode = (md.mode() & 0o7777) as u64;
@@ -122,7 +128,7 @@ impl TarHeader {
         gid_out[..7].copy_from_slice(s_gid.as_bytes());
 
         let mut size_out = [0u8; 12];
-        let size = md.size() as u64;
+        let size = md.size();
         let s_size = format!("{:011o}", size);
         size_out[0..11].copy_from_slice(s_size.as_bytes());
 
@@ -132,8 +138,12 @@ impl TarHeader {
         mtime_out[0..11].copy_from_slice(s_mtime.as_bytes());
 
         let mut mlinkflag_out = [0u8; 1];
+        let mut m_linkname_out = [0u8; 100];
         let mlinkflag = md.file_type();
         let mlinkflag = if mlinkflag.is_symlink() {
+            // linkname from read_link as_os_str.asencodedbytes
+            let linkname = fs::read_link(path)?;
+            m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
             b'2'
         } else if mlinkflag.is_dir() {
             b'5'
@@ -141,11 +151,6 @@ impl TarHeader {
             b'0'
         };
         mlinkflag_out[0..1].copy_from_slice(&[mlinkflag]);
-
-        // linkname from read_link as_os_str.asencodedbytes
-        let mut m_linkname_out = [0u8; 100];
-        let linkname = fs::read_link(path)?;
-        m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
 
         let mut output = Vec::new();
         output.extend_from_slice(&name);

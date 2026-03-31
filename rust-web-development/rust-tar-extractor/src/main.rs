@@ -107,7 +107,6 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
 
     for file in open_files {
         let file = fs::canonicalize(file)?;
-        dbg!(&file);
 
         let contents = TarHeader::create(&file)?;
         let _ = output.write(&contents);
