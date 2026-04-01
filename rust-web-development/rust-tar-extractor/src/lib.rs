@@ -152,6 +152,18 @@ impl TarHeader {
         };
         mlinkflag_out[0..1].copy_from_slice(&[mlinkflag]);
 
+        let mut header = Vec::new();
+        header.extend_from_slice(&name);
+        header.extend_from_slice(&mode_out);
+        header.extend_from_slice(&uid_out);
+        header.extend_from_slice(&gid_out);
+        header.extend_from_slice(&size_out);
+        header.extend_from_slice(&mtime_out);
+        header.extend_from_slice(&mlinkflag_out);
+        header.extend_from_slice(&m_linkname_out);
+        let mut mcheck_sum = [0u8; 8];
+        // find out what format checksum should be stored in
+
         let mut output = Vec::new();
         output.extend_from_slice(&name);
         output.extend_from_slice(&mode_out);
@@ -159,6 +171,7 @@ impl TarHeader {
         output.extend_from_slice(&gid_out);
         output.extend_from_slice(&size_out);
         output.extend_from_slice(&mtime_out);
+        output.extend_from_slice(&mcheck_sum);
         output.extend_from_slice(&mlinkflag_out);
         output.extend_from_slice(&m_linkname_out);
         output.extend_from_slice(&[0u8; 255]);
