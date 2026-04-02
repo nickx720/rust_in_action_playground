@@ -153,16 +153,19 @@ impl TarHeader {
         mlinkflag_out[0..1].copy_from_slice(&[mlinkflag]);
 
         let mut header = Vec::new();
+        let mut mcheck_sum = [0u8; 8];
         header.extend_from_slice(&name);
         header.extend_from_slice(&mode_out);
         header.extend_from_slice(&uid_out);
         header.extend_from_slice(&gid_out);
         header.extend_from_slice(&size_out);
         header.extend_from_slice(&mtime_out);
+        header.extend_from_slice(&mcheck_sum);
         header.extend_from_slice(&mlinkflag_out);
         header.extend_from_slice(&m_linkname_out);
-        let mut mcheck_sum = [0u8; 8];
         // find out what format checksum should be stored in
+        let checksum_len = format!("{:07o}", header.len());
+        mcheck_sum[0..7].copy_from_slice(checksum_len.as_bytes());
 
         let mut output = Vec::new();
         output.extend_from_slice(&name);
@@ -209,5 +212,25 @@ impl TryFrom<&[u8]> for TarHeader {
             anyhow::bail!("Buffer length too small");
         }
         Ok(Self::extract(buf)?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn create_sample_checksum() {
+        let number = 1234usize;
+        let octal = format!("{:07o}", number);
+        assert_eq!(octal, "0002322");
+    }
+
+    #[test]
+    fn checksum_field_layout_for_1234() {
+        let number = 1234usize;
+        let mut field = [0u8; 8];
+        let octal = format!("{:07o}", number);
+        field[0..7].copy_from_slice(&octal.as_bytes());
+        assert_eq!(field, *b"0002322\0");
     }
 }
