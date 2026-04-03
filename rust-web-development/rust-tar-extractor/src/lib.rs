@@ -3,7 +3,7 @@ use std::{fs, os::unix::fs::MetadataExt, path::Path};
 use anyhow::anyhow;
 
 #[derive(Debug)]
-pub struct TarHeader {
+pub struct TarBuilder {
     name: [u8; 100],
     mode: [u8; 8],
     uid: [u8; 8],
@@ -16,7 +16,7 @@ pub struct TarHeader {
     pad: [u8; 255],
 }
 
-impl TarHeader {
+impl TarBuilder {
     pub fn new() -> Result<Self, anyhow::Error> {
         Ok(Self {
             name: [0u8; 100],
@@ -98,12 +98,8 @@ impl TarHeader {
         Ok(name.to_owned())
     }
     pub fn create_tar_header(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
-        // TODO: Build the full 512-byte header in tar field order, including the 8-byte checksum field.
-        // The checksum is computed after every other header field is populated:
-        // 1. Fill name/mode/uid/gid/size/mtime/typeflag/linkname/padding into the header buffer.
-        // 2. Set the checksum field bytes (148..156) to ASCII spaces (`b' '`) before summing.
-        // 3. Sum all 512 header bytes as unsigned byte values.
-        // 4. Encode that sum as ASCII octal and write it back into the checksum field.
+        // Tar stores a 512-byte header block made of fixed-width fields.
+        // Numeric fields are not stored as binary integers; they are ASCII octal bytes.
         let mut name = [0u8; 100];
         if let Some(name_val) = path.file_name() {
             let bytes = name_val.as_encoded_bytes();
@@ -112,7 +108,7 @@ impl TarHeader {
         }
         let md = fs::symlink_metadata(path)?;
         let mut mode_out = [0u8; 8];
-        // drops file bits using mask
+        // Keep the permission bits and encode them as ASCII octal text.
         let mode = (md.mode() & 0o7777) as u64;
         let s_mode = format!("{:07o}", mode);
         mode_out[..7].copy_from_slice(s_mode.as_bytes());
@@ -141,7 +137,7 @@ impl TarHeader {
         let mut m_linkname_out = [0u8; 100];
         let mlinkflag = md.file_type();
         let mlinkflag = if mlinkflag.is_symlink() {
-            // linkname from read_link as_os_str.asencodedbytes
+            // For symlinks, tar stores the target path in the linkname field.
             let linkname = fs::read_link(path)?;
             m_linkname_out[0..99].copy_from_slice(&linkname.as_os_str().as_encoded_bytes());
             b'2'
@@ -154,6 +150,16 @@ impl TarHeader {
 
         let mut header = Vec::new();
         let mut mcheck_sum = [0u8; 8];
+        // Checksum rule:
+        // 1. Serialize the header fields as bytes in tar field order.
+        // 2. While computing the checksum, treat the 8-byte checksum field as eight ASCII spaces.
+        // 3. Sum the raw byte values, not the parsed numeric meaning of the fields.
+        // 4. Write the resulting sum back as octal ASCII into the checksum field.
+        //
+        // In this layout the trailing 255 bytes are zeros, so summing the prefix built below
+        // gives the same numeric result as summing the final 512-byte buffer. If those bytes
+        // ever become nonzero, the checksum must be computed from the full output buffer instead.
+        mcheck_sum.fill(b' ');
         header.extend_from_slice(&name);
         header.extend_from_slice(&mode_out);
         header.extend_from_slice(&uid_out);
@@ -163,8 +169,9 @@ impl TarHeader {
         header.extend_from_slice(&mcheck_sum);
         header.extend_from_slice(&mlinkflag_out);
         header.extend_from_slice(&m_linkname_out);
-        // find out what format checksum should be stored in
-        let checksum_len = format!("{:07o}", header.len());
+        let checksum: u32 = header.iter().copied().map(u32::from).sum();
+        // The checksum field stores the byte sum encoded as octal ASCII.
+        let checksum_len = format!("{:07o}", checksum);
         mcheck_sum[0..7].copy_from_slice(checksum_len.as_bytes());
 
         let mut output = Vec::new();
@@ -194,8 +201,8 @@ impl TarHeader {
         }
     }
     pub fn create(path: &Path) -> Result<Vec<u8>, anyhow::Error> {
-        let header = TarHeader::create_tar_header(path)?;
-        let body = TarHeader::create_body(path)?;
+        let header = TarBuilder::create_tar_header(path)?;
+        let body = TarBuilder::create_body(path)?;
         let length = header.len() + body.len();
         let mut output = Vec::with_capacity(length);
         output.extend_from_slice(&header);
@@ -204,7 +211,7 @@ impl TarHeader {
     }
 }
 
-impl TryFrom<&[u8]> for TarHeader {
+impl TryFrom<&[u8]> for TarBuilder {
     type Error = anyhow::Error;
 
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {

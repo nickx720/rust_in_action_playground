@@ -3,7 +3,7 @@ use std::{
     io::{self, Read, Write},
 };
 
-use rust_tar_extractor::TarHeader;
+use rust_tar_extractor::TarBuilder;
 
 //  Key fields (byte offsets, length, encoding):
 //
@@ -61,7 +61,7 @@ fn extract_file() -> Result<(), anyhow::Error> {
         // Read up to 512 bytes, then format for display: 16 bytes per line, grouped as 2-byte chunks with offsets; any line/grouping is just for readability, not a file "line".
         let chunk = &input[..n];
         if next_header == offset {
-            let header = TarHeader::try_from(chunk)?;
+            let header = TarBuilder::try_from(chunk)?;
             let size = header.size()?;
             next_header = offset + 512 + round_up(size);
             if let Ok(name) = header.name() {
@@ -89,14 +89,7 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
         .truncate(true)
         .open("output.tar")?;
     let open_files: Vec<String> = args.collect();
-    // TODO build the archive as a raw byte stream written to one output file.
-    // A tar archive on disk is not text; it is consecutive 512-byte blocks:
-    // - for each input file: 512-byte header
-    // - then the file contents as raw bytes
-    // - then zero padding until the file data ends on a 512-byte boundary
-    // - after the last file: two 512-byte blocks filled with zeros
     //
-    // Suggested flow for studying/implementing this:
     // 1. Open the output .tar file once here and keep the writer for the full loop.
     // 2. For each input file, build/serialize one 512-byte tar header.
     // 3. Write the header bytes to the archive.
@@ -107,8 +100,9 @@ fn create_tar(args: &mut impl Iterator<Item = String>) -> Result<(), anyhow::Err
 
     for file in open_files {
         let file = fs::canonicalize(file)?;
+        dbg!(&file);
 
-        let contents = TarHeader::create(&file)?;
+        let contents = TarBuilder::create(&file)?;
         let _ = output.write(&contents);
         // read the contents of the file and create a struct with contents?
     }
