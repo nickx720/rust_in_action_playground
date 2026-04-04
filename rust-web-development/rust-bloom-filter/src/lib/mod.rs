@@ -74,15 +74,17 @@ impl Bloom {
     // 3) then reduce with `% self.bit_count`.
     pub fn insert(&mut self, item: &str) {
         for i in 0..self.hash_count {
-            let index = (hash_function_fnv_1(item) + i * hash_function_fnv_1a(item))
-                % self.bit_count as usize;
+            let index = (hash_function_fnv_1(item)
+                .saturating_add(i.saturating_mul(hash_function_fnv_1a(item))))
+                % self.bit_count;
             set_bit(&mut self.bit_array, index);
         }
     }
     pub fn exists(&self, item: &str) -> BloomFilter {
         for i in 0..self.hash_count {
-            let index = (hash_function_fnv_1(item) + i * hash_function_fnv_1a(item))
-                % self.bit_count as usize;
+            let index = (hash_function_fnv_1(item)
+                .saturating_add(i.saturating_mul(hash_function_fnv_1a(item))))
+                % self.bit_count;
             if !get_bit(&self.bit_array, index) {
                 return BloomFilter::NotPresent;
             }

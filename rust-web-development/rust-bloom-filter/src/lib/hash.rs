@@ -21,14 +21,14 @@ pub fn hash_function_fnv_1(item: &str) -> usize {
     let mut hash = FNV_OFFSET_BASIS;
     for byte in item.bytes() {
         hash = hash.wrapping_mul(FNV_PRIME);
-        hash = hash ^ byte as u64;
+        hash ^= byte as u64;
     }
     hash as usize
 }
 pub fn hash_function_fnv_1a(item: &str) -> usize {
     let mut hash = FNV_OFFSET_BASIS;
     for byte in item.bytes() {
-        hash = hash ^ byte as u64;
+        hash ^= byte as u64;
         hash = hash.wrapping_mul(FNV_PRIME);
     }
     hash as usize
