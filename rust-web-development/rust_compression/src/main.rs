@@ -4,6 +4,7 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
     for arg in items {
         let file = fs::canonicalize(arg)?;
         let contents = fs::read(file)?;
+        dbg!(contents);
     }
     Ok(())
 }
