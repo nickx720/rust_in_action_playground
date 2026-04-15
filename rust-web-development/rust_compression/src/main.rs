@@ -1,15 +1,26 @@
-use std::{env, fs};
+use std::{
+    env,
+    fs::{self, File},
+    io::Read,
+};
 
-fn frequency_counter(contents: Vec<u8>) -> Result<(), anyhow::Error> {
-    dbg!(std::str::from_utf8(&contents));
+fn frequency_counter(data: &[u8]) -> Result<(), anyhow::Error> {
     todo!();
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     for arg in items {
         let file = fs::canonicalize(arg)?;
-        let contents = fs::read(file)?;
-        frequency_counter(contents)?;
+        let mut file = File::open(file)?;
+        let mut buf = [0u8; 1024];
+        loop {
+            let n = file.read(&mut buf)?;
+            if n == 0 {
+                break;
+            }
+            let data = &buf[..n];
+            frequency_counter(data)?;
+        }
     }
     Ok(())
 }
