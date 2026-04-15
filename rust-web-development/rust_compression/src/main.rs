@@ -5,6 +5,8 @@ use std::{
 };
 
 fn frequency_counter(data: &[u8]) -> Result<(), anyhow::Error> {
+    let string_to_count = String::from_utf8_lossy(data);
+    dbg!(string_to_count);
     todo!();
 }
 
