@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     env,
     fs::{self, File},
     io::Read,
@@ -6,6 +7,7 @@ use std::{
 
 fn frequency_counter(data: &[u8]) -> Result<(), anyhow::Error> {
     let string_to_count = String::from_utf8_lossy(data);
+    let map = HashMap::new();
     for word in string_to_count.trim().split("") {
         dbg!(word);
     }
