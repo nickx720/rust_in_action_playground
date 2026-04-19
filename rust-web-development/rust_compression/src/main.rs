@@ -12,7 +12,6 @@ fn frequency_counter(data: &[u8]) -> Result<(), anyhow::Error> {
         map.entry(word)
             .and_modify(|counter| *counter += 1)
             .or_insert(1);
-        dbg!(word);
     }
     todo!();
 }
@@ -37,4 +36,14 @@ fn main() -> Result<(), anyhow::Error> {
     let args = env::args().skip(1);
     valid_file_path(args)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_frequency_counter() {
+        todo!()
+    }
 }
