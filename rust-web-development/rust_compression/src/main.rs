@@ -44,6 +44,7 @@ mod tests {
 
     #[test]
     fn test_frequency_counter() {
+        let string_to_check = "aabbc".to_string();
         todo!()
     }
 }
