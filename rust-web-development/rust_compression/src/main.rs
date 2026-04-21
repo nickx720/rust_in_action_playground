@@ -5,11 +5,9 @@ use std::{
     io::Read,
 };
 
-fn frequency_counter(data: &[u8]) -> Result<(), anyhow::Error> {
-    let string_to_count = String::from_utf8_lossy(data);
-    let mut map = HashMap::new();
-    for word in string_to_count.trim().split("") {
-        map.entry(word)
+fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), anyhow::Error> {
+    for word in data.iter() {
+        map.entry(word.to_owned())
             .and_modify(|counter| *counter += 1)
             .or_insert(1);
     }
@@ -21,13 +19,14 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         let file = fs::canonicalize(arg)?;
         let mut file = File::open(file)?;
         let mut buf = [0u8; 1024];
+        let mut map = HashMap::new();
         loop {
             let n = file.read(&mut buf)?;
             if n == 0 {
                 break;
             }
             let data = &buf[..n];
-            frequency_counter(data)?;
+            frequency_counter(data, &mut map)?;
         }
     }
     Ok(())
@@ -45,6 +44,7 @@ mod tests {
     #[test]
     fn test_frequency_counter() {
         let string_to_check = "aabbc".to_string();
+
         todo!()
     }
 }
