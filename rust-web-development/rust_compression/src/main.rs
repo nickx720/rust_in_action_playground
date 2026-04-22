@@ -42,8 +42,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_frequency_counter() {
-        let string_to_check = "aabbc".to_string();
+    fn test_frequency_counter() -> Result<(), anyhow::Error> {
+        let string_to_check = "aabbc".as_bytes();
+        let mut map = HashMap::new();
+        frequency_counter(string_to_check, &mut map)?;
 
         todo!()
     }
