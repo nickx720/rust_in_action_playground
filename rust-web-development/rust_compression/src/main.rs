@@ -11,7 +11,7 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
             .and_modify(|counter| *counter += 1)
             .or_insert(1);
     }
-    todo!();
+    Ok(())
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
@@ -46,7 +46,8 @@ mod tests {
         let string_to_check = "aabbc".as_bytes();
         let mut map = HashMap::new();
         frequency_counter(string_to_check, &mut map)?;
-
-        todo!()
+        let output = HashMap::from([(b'a', 2usize), (b'b', 2usize), (b'c', 1usize)]);
+        assert_eq!(map, output);
+        Ok(())
     }
 }
