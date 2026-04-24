@@ -28,6 +28,7 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
             let data = &buf[..n];
             frequency_counter(data, &mut map)?;
         }
+        dbg!(&map);
     }
     Ok(())
 }

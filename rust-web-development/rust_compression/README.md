@@ -39,7 +39,7 @@ As usually, I'll leave you to setup your IDE / editor of choice and programming 
 
 After that, please download [Les Misérables, by Victor Hugo](https://www.dropbox.com/s/...) which will be our test data for this challenge.
 
-## Step 1
+## Step 1 Done
 
 In this step your goal is to build your tool to accept a filename as input. It should return an error if the file is not valid, otherwise your program should open it, read the text and determine the frequency of each character occurring within the text.
 
