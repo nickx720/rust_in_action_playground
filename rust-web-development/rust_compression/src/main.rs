@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BinaryHeap, HashMap},
     env,
     fs::{self, File},
     io::Read,
@@ -12,6 +12,10 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
             .or_insert(1);
     }
     Ok(())
+}
+
+struct Huffman {
+    heap: BinaryHeap<u8, usize>,
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
