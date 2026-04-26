@@ -14,11 +14,26 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
     Ok(())
 }
 
+#[derive(Debug)]
 struct Huffman {
-    heap: BinaryHeap<u8, usize>,
+    heap: BinaryHeap<(u8, usize)>,
+}
+
+impl Huffman {
+    pub fn new() -> Self {
+        Self {
+            heap: BinaryHeap::new(),
+        }
+    }
+    pub fn insert(&mut self, map: HashMap<u8, usize>) {
+        for val in map.into_iter() {
+            self.heap.push(val);
+        }
+    }
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
+    let mut huffman = Huffman::new();
     for arg in items {
         let file = fs::canonicalize(arg)?;
         let mut file = File::open(file)?;
@@ -32,8 +47,9 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
             let data = &buf[..n];
             frequency_counter(data, &mut map)?;
         }
-        dbg!(&map);
+        huffman.insert(map);
     }
+    dbg!(&huffman);
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
