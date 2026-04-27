@@ -7,6 +7,7 @@ use std::{
 
 fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), anyhow::Error> {
     for word in data.iter() {
+        let word = word.to_ascii_lowercase();
         map.entry(word.to_owned())
             .and_modify(|counter| *counter += 1)
             .or_insert(1);
@@ -50,6 +51,9 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         huffman.insert(map);
     }
     dbg!(&huffman);
+    for (item, _) in huffman.heap.into_vec() {
+        dbg!(str::from_utf8(&[item]).unwrap());
+    }
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
