@@ -13,10 +13,23 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
     }
     Ok(())
 }
+// An enum models the valid states directly: a Huffman node is either a leaf or an internal node, never both.
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum Node {
+    Leaf {
+        byte: u8,
+        freq: usize,
+    },
+    Internal {
+        freq: usize,
+        left: Box<Node>,
+        right: Box<Node>,
+    },
+}
 
 #[derive(Debug)]
 struct Huffman {
-    heap: BinaryHeap<(u8, usize)>,
+    heap: BinaryHeap<Node>,
 }
 
 // Step 2 TODOs, based on OpenDSA Huffman Coding Trees:
