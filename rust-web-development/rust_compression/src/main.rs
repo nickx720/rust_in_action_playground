@@ -108,8 +108,9 @@ impl Huffman {
         }
     }
     pub fn insert(&mut self, map: HashMap<u8, usize>) {
-        for val in map.into_iter() {
-            self.heap.push(val);
+        for (byte, freq) in map.into_iter() {
+            let node = Node::Leaf { byte, freq };
+            self.heap.push(node);
         }
     }
 }
