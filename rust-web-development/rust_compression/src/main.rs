@@ -1,4 +1,5 @@
 use std::{
+    cmp::Reverse,
     collections::{BinaryHeap, HashMap},
     env,
     fs::{self, File},
@@ -14,7 +15,7 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
     Ok(())
 }
 // An enum models the valid states directly: a Huffman node is either a leaf or an internal node, never both.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq)]
 enum Node {
     Leaf {
         byte: u8,
@@ -27,9 +28,30 @@ enum Node {
     },
 }
 
+impl Node {
+    fn freq(&self) -> usize {
+        match self {
+            Node::Leaf { freq, .. } => *freq,
+            Node::Internal { freq, .. } => *freq,
+        }
+    }
+}
+
+impl Ord for Node {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.freq().cmp(&other.freq())
+    }
+}
+
+impl PartialOrd for Node {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 #[derive(Debug)]
 struct Huffman {
-    heap: BinaryHeap<Node>,
+    heap: BinaryHeap<Reverse<Node>>,
 }
 
 // Step 2 TODOs, based on OpenDSA Huffman Coding Trees:
@@ -110,7 +132,7 @@ impl Huffman {
     pub fn insert(&mut self, map: HashMap<u8, usize>) {
         for (byte, freq) in map.into_iter() {
             let node = Node::Leaf { byte, freq };
-            self.heap.push(node);
+            self.heap.push(Reverse(node));
         }
     }
 }
@@ -132,9 +154,9 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         }
         huffman.insert(map);
     }
-    //    for (item, _) in huffman.heap.into_vec() {
-    //        dbg!(str::from_utf8(&[item]).unwrap());
-    //    }
+    while let Some(Reverse(node)) = huffman.heap.pop() {
+        dbg!(node);
+    }
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
