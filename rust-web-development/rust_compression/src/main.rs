@@ -135,6 +135,9 @@ impl Huffman {
             self.heap.push(Reverse(node));
         }
     }
+    pub fn build_tree(&self) {
+        todo!()
+    }
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
