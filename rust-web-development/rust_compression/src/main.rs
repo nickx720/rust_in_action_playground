@@ -135,7 +135,8 @@ impl Huffman {
             self.heap.push(Reverse(node));
         }
     }
-    pub fn build_tree(&self) {
+    pub fn build_tree(&mut self) {
+        while let Some(smallest) = self.heap.pop() {}
         todo!()
     }
 }
