@@ -135,9 +135,13 @@ impl Huffman {
             self.heap.push(Reverse(node));
         }
     }
-    pub fn build_tree(&mut self) {
-        while let Some(smallest) = self.heap.pop() {}
-        todo!()
+    pub fn build_tree(&mut self) -> Result<(), anyhow::Error> {
+        while self.heap.len() > 1 {
+            let smallest_tree = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
+            let next_smallest_tree = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"));
+            //            let new_node = Node::Internal { freq: smallest_tree.0.freq(), left: (), right: () }
+        }
+        Ok(())
     }
 }
 
