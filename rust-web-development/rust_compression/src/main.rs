@@ -23,8 +23,8 @@ enum Node {
     },
     Internal {
         freq: usize,
-        left: Box<Node>,
-        right: Box<Node>,
+        left: Box<Reverse<Node>>,
+        right: Box<Reverse<Node>>,
     },
 }
 
@@ -137,9 +137,17 @@ impl Huffman {
     }
     pub fn build_tree(&mut self) -> Result<(), anyhow::Error> {
         while self.heap.len() > 1 {
-            let smallest_tree = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
-            let next_smallest_tree = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"));
-            //            let new_node = Node::Internal { freq: smallest_tree.0.freq(), left: (), right: () }
+            let left = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
+            let right = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
+            let left_tree_freq = left.0.freq();
+            let right_tree_freq = right.0.freq();
+            let freq = left_tree_freq + right_tree_freq;
+            let new_node = Node::Internal {
+                freq,
+                left: Box::new(left),
+                right: Box::new(right),
+            };
+            self.heap.push(Reverse(new_node));
         }
         Ok(())
     }
@@ -185,5 +193,17 @@ mod tests {
         let output = HashMap::from([(b'a', 2usize), (b'b', 2usize), (b'c', 1usize)]);
         assert_eq!(map, output);
         Ok(())
+    }
+    #[test]
+    fn validate_huffman_build() -> Result<(), anyhow::Error> {
+        // 6. Sanity-check your result with a tiny example.
+        //    Example input frequencies:
+        //    - a: 5
+        //    - b: 2
+        //    - c: 1
+        //    Expected process:
+        //    - merge c(1) + b(2) -> parent(3)
+        //    - merge parent(3) + a(5) -> root(8)
+        todo!()
     }
 }
