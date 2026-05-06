@@ -170,9 +170,8 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         }
         huffman.insert(map);
     }
-    while let Some(Reverse(node)) = huffman.heap.pop() {
-        dbg!(node);
-    }
+    huffman.build_tree();
+    dbg!(huffman.heap);
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
