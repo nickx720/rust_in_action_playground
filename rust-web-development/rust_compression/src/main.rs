@@ -23,8 +23,8 @@ enum Node {
     },
     Internal {
         freq: usize,
-        left: Box<Reverse<Node>>,
-        right: Box<Reverse<Node>>,
+        left: Box<Node>,
+        right: Box<Node>,
     },
 }
 
@@ -137,10 +137,10 @@ impl Huffman {
     }
     pub fn build_tree(&mut self) -> Result<(), anyhow::Error> {
         while self.heap.len() > 1 {
-            let left = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
-            let right = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?;
-            let left_tree_freq = left.0.freq();
-            let right_tree_freq = right.0.freq();
+            let left = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
+            let right = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
+            let left_tree_freq = left.freq();
+            let right_tree_freq = right.freq();
             let freq = left_tree_freq + right_tree_freq;
             let new_node = Node::Internal {
                 freq,
