@@ -203,6 +203,12 @@ mod tests {
         //    Expected process:
         //    - merge c(1) + b(2) -> parent(3)
         //    - merge parent(3) + a(5) -> root(8)
+        let mut map = HashMap::new();
+        map.insert(b'a', 5);
+        map.insert(b'b', 2);
+        map.insert(b'c', 1);
+        let mut huffman = Huffman::new();
+        huffman.insert(map);
         todo!()
     }
 }
