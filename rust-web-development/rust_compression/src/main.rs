@@ -209,6 +209,8 @@ mod tests {
         map.insert(b'c', 1);
         let mut huffman = Huffman::new();
         huffman.insert(map);
-        todo!()
+        let _ = huffman.build_tree();
+        assert_eq!(8, huffman.heap.pop().unwrap().0.freq());
+        Ok(())
     }
 }
