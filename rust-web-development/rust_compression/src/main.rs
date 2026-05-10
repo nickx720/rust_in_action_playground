@@ -195,22 +195,22 @@ mod tests {
     }
     #[test]
     fn validate_huffman_build() -> Result<(), anyhow::Error> {
-        // 6. Sanity-check your result with a tiny example.
-        //    Example input frequencies:
-        //    - a: 5
-        //    - b: 2
-        //    - c: 1
-        //    Expected process:
-        //    - merge c(1) + b(2) -> parent(3)
-        //    - merge parent(3) + a(5) -> root(8)
         let mut map = HashMap::new();
         map.insert(b'a', 5);
         map.insert(b'b', 2);
         map.insert(b'c', 1);
         let mut huffman = Huffman::new();
         huffman.insert(map);
-        let _ = huffman.build_tree();
-        assert_eq!(8, huffman.heap.pop().unwrap().0.freq());
+        huffman.build_tree()?;
+        let root = huffman.heap.pop().unwrap().0;
+        match root {
+            Node::Internal { freq, left, right } => {
+                assert_eq!(freq, 8);
+                assert_eq!(left.freq(), 3);
+                assert_eq!(right.freq(), 5);
+            }
+            _ => panic!("Test failed"),
+        }
         Ok(())
     }
 }
