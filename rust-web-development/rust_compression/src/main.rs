@@ -54,75 +54,6 @@ struct Huffman {
     heap: BinaryHeap<Reverse<Node>>,
 }
 
-// Step 2 TODOs, based on OpenDSA Huffman Coding Trees:
-// https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
-//
-// Read these sections while implementing:
-// - "Building Huffman Coding Trees"
-// - the sample node types (`HuffLeafNode`, `HuffInternalNode`)
-// - the sample `buildTree()` loop
-//
-// The important idea:
-// - the heap is only the priority queue / work area
-// - the Huffman tree is the value you are building inside that queue
-//
-// Suggested implementation steps:
-//
-// 1. Replace `(u8, usize)` with a real tree node type.
-//    Start with something like:
-//    - `Leaf { byte, freq }`
-//    - `Internal { freq, left, right }`
-//    OpenDSA uses separate leaf and internal node classes for this reason:
-//    leaves store a symbol, internal nodes store child pointers.
-//
-// 2. Make the heap hold "partial Huffman trees", not raw frequency tuples.
-//    At the beginning, each symbol/frequency pair becomes a one-node tree.
-//    This matches OpenDSA's "create n initial Huffman trees, each a single leaf".
-//
-// 3. Make it a min-heap by frequency.
-//    Huffman needs repeated access to the two *smallest* frequencies.
-//    Rust's `BinaryHeap` is a max-heap by default, so use `Reverse`
-//    or custom `Ord`/`PartialOrd` implementations.
-//
-// 4. Write a `build_tree` function.
-//    The OpenDSA loop is:
-//    - pop the smallest tree
-//    - pop the next smallest tree
-//    - create a new internal node with:
-//      - left = first tree
-//      - right = second tree
-//      - freq = left.freq + right.freq
-//    - push the merged tree back into the heap
-//
-// 5. Repeat until one tree remains.
-//    That final remaining item is the Huffman tree root.
-//    This is the actual output of step 2.
-//
-// 6. Sanity-check your result with a tiny example.
-//    Example input frequencies:
-//    - a: 5
-//    - b: 2
-//    - c: 1
-//    Expected process:
-//    - merge c(1) + b(2) -> parent(3)
-//    - merge parent(3) + a(5) -> root(8)
-//
-// 7. Keep step 3 in mind while designing step 2.
-//    In step 3 you will traverse the final tree:
-//    - left edge => 0
-//    - right edge => 1
-//    That only works if step 2 preserves the left/right child structure.
-//
-// 8. For a lossless compressor, do not lowercase bytes while counting.
-//    `A` and `a` must stay distinct if you want decode(encode(x)) == x.
-//
-// Practical checkpoint:
-// - if your heap contains only `(byte, freq)`, you have not built the tree yet
-// - if your heap contains nodes/trees and you merge two smallest until one
-//   root remains, you are implementing step 2 correctly
-//
-// OpenDSA references for the exact algorithm and example node design:
-// https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
 impl Huffman {
     pub fn new() -> Self {
         Self {
@@ -170,8 +101,7 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         }
         huffman.insert(map);
     }
-    huffman.build_tree();
-    dbg!(huffman.heap);
+    huffman.build_tree()?;
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
@@ -208,6 +138,38 @@ mod tests {
                 assert_eq!(freq, 8);
                 assert_eq!(left.freq(), 3);
                 assert_eq!(right.freq(), 5);
+            }
+            _ => panic!("Test failed"),
+        }
+        Ok(())
+    }
+    #[test]
+    fn validate_huffman_build_open_dsa() -> Result<(), anyhow::Error> {
+        let mut map = HashMap::new();
+        map.insert(b'c', 32);
+        map.insert(b'd', 42);
+        map.insert(b'e', 120);
+        map.insert(b'k', 7);
+        map.insert(b'l', 42);
+        map.insert(b'm', 24);
+        map.insert(b'u', 37);
+        map.insert(b'z', 2);
+        let mut huffman = Huffman::new();
+        huffman.insert(map);
+        huffman.build_tree()?;
+        let root = huffman.heap.pop().unwrap().0;
+        match root {
+            Node::Internal { freq, left, right } => {
+                assert_eq!(freq, 306);
+                assert_eq!(left.freq(), 120);
+                match *right {
+                    Node::Internal { freq, left, right } => {
+                        assert_eq!(freq, 186);
+                        assert_eq!(left.freq(), 79);
+                        assert_eq!(right.freq(), 107);
+                    }
+                    _ => panic!("Test failed"),
+                }
             }
             _ => panic!("Test failed"),
         }
