@@ -51,25 +51,94 @@ impl PartialOrd for Node {
 
 #[derive(Debug)]
 struct Huffman {
-    heap: BinaryHeap<Reverse<Node>>,
+    root: BinaryHeap<Reverse<Node>>,
 }
 
+// Design note for the next steps:
+//
+// Right now this `Huffman` struct is really acting as a tree builder. The
+// `BinaryHeap` is useful while we are constructing the Huffman tree: it lets us
+// repeatedly remove the two lowest-frequency nodes and merge them into a new
+// internal node.
+//
+// After `build_tree` finishes, though, the heap is no longer the main data
+// structure we care about. At that point the heap should contain exactly one
+// item: the root of the finished Huffman tree. For encoding, decoding, and
+// writing a file header, the useful object is the tree root, not the heap.
+//
+// A cleaner mental model is:
+//
+//     frequencies -> tree builder -> Huffman tree -> code table -> encoded bytes
+//
+// That suggests separating the construction phase from the usable tree phase:
+//
+//     struct HuffmanBuilder {
+//         heap: BinaryHeap<Reverse<Node>>,
+//     }
+//
+//     struct HuffmanTree {
+//         root: Node,
+//     }
+//
+// Then the builder would consume itself and return a finished tree:
+//
+//     impl HuffmanBuilder {
+//         fn build(self) -> Result<HuffmanTree, anyhow::Error> {
+//             ...
+//         }
+//     }
+//
+// This avoids an awkward state where a `Huffman` value may or may not be ready
+// to encode. With a separate `HuffmanTree`, methods like `encode`, `decode`,
+// `code_table`, and `encode_header` can live on a type that only exists after a
+// valid tree has been built.
+//
+// For step 4, the header must store enough information to recreate the tree
+// during decoding. Two common choices:
+//
+// 1. Store the frequency table.
+//    This fits the code we already have: read the header, rebuild the
+//    `HashMap<u8, usize>`, rebuild the same Huffman tree, then decode.
+//
+//    Important caveat: if two bytes have the same frequency, tree construction
+//    must be deterministic. Otherwise the encoder and decoder might build two
+//    different, but equally valid, trees. If that happens, the compressed bits
+//    will be interpreted incorrectly. A stable tie-breaker, such as ordering by
+//    byte value or assigning stable node IDs, fixes this.
+//
+// 2. Store the tree itself.
+//    This is often more robust because the decoder reconstructs the exact tree
+//    shape that the encoder used. The tradeoff is that it requires tree
+//    serialization: writing leaves/internal nodes in a format you can parse
+//    later.
+//
+// A practical learning path:
+//
+//     - First, make `build_tree` return a finished root/tree instead of leaving
+//       the root inside the heap.
+//     - Then generate the prefix-code table by walking the tree:
+//       left edge = 0, right edge = 1, leaf path = byte code.
+//     - For step 4, start with a frequency-table header because it builds on
+//       the work already done.
+//     - Before relying on that header format, make the tree-building order
+//       deterministic for equal frequencies.
+//
 impl Huffman {
     pub fn new() -> Self {
         Self {
-            heap: BinaryHeap::new(),
+            root: BinaryHeap::new(),
         }
     }
     pub fn insert(&mut self, map: HashMap<u8, usize>) {
         for (byte, freq) in map.into_iter() {
             let node = Node::Leaf { byte, freq };
-            self.heap.push(Reverse(node));
+            self.root.push(Reverse(node));
         }
     }
     pub fn build_tree(&mut self) -> Result<(), anyhow::Error> {
-        while self.heap.len() > 1 {
-            let left = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
-            let right = self.heap.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
+        while self.root.len() > 1 {
+            let left = self.root.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
+            let right = self.root.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
             let left_tree_freq = left.freq();
             let right_tree_freq = right.freq();
             let freq = left_tree_freq + right_tree_freq;
@@ -78,7 +147,7 @@ impl Huffman {
                 left: Box::new(left),
                 right: Box::new(right),
             };
-            self.heap.push(Reverse(new_node));
+            self.root.push(Reverse(new_node));
         }
         Ok(())
     }
@@ -132,7 +201,7 @@ mod tests {
         let mut huffman = Huffman::new();
         huffman.insert(map);
         huffman.build_tree()?;
-        let root = huffman.heap.pop().unwrap().0;
+        let root = huffman.root.pop().unwrap().0;
         match root {
             Node::Internal { freq, left, right } => {
                 assert_eq!(freq, 8);
@@ -157,7 +226,7 @@ mod tests {
         let mut huffman = Huffman::new();
         huffman.insert(map);
         huffman.build_tree()?;
-        let root = huffman.heap.pop().unwrap().0;
+        let root = huffman.root.pop().unwrap().0;
         match root {
             Node::Internal { freq, left, right } => {
                 assert_eq!(freq, 306);
