@@ -50,8 +50,13 @@ impl PartialOrd for Node {
 }
 
 #[derive(Debug)]
-struct Huffman {
+struct HuffmanBuilder {
     root: BinaryHeap<Reverse<Node>>,
+}
+
+#[derive(Debug)]
+struct HuffmanTree {
+    root: Node,
 }
 
 // Design note for the next steps:
@@ -123,7 +128,7 @@ struct Huffman {
 //     - Before relying on that header format, make the tree-building order
 //       deterministic for equal frequencies.
 //
-impl Huffman {
+impl HuffmanBuilder {
     pub fn new() -> Self {
         Self {
             root: BinaryHeap::new(),
@@ -154,7 +159,7 @@ impl Huffman {
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
-    let mut huffman = Huffman::new();
+    let mut huffman = HuffmanBuilder::new();
     for arg in items {
         let file = fs::canonicalize(arg)?;
         let mut file = File::open(file)?;
@@ -198,7 +203,7 @@ mod tests {
         map.insert(b'a', 5);
         map.insert(b'b', 2);
         map.insert(b'c', 1);
-        let mut huffman = Huffman::new();
+        let mut huffman = HuffmanBuilder::new();
         huffman.insert(map);
         huffman.build_tree()?;
         let root = huffman.root.pop().unwrap().0;
@@ -223,7 +228,7 @@ mod tests {
         map.insert(b'm', 24);
         map.insert(b'u', 37);
         map.insert(b'z', 2);
-        let mut huffman = Huffman::new();
+        let mut huffman = HuffmanBuilder::new();
         huffman.insert(map);
         huffman.build_tree()?;
         let root = huffman.root.pop().unwrap().0;
