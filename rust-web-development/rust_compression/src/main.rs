@@ -140,7 +140,7 @@ impl HuffmanBuilder {
             self.root.push(Reverse(node));
         }
     }
-    pub fn build_tree(&mut self) -> Result<(), anyhow::Error> {
+    pub fn build_tree(&mut self) -> Result<HuffmanTree, anyhow::Error> {
         while self.root.len() > 1 {
             let left = self.root.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
             let right = self.root.pop().ok_or(anyhow::anyhow!("Node not found"))?.0;
@@ -154,7 +154,10 @@ impl HuffmanBuilder {
             };
             self.root.push(Reverse(new_node));
         }
-        Ok(())
+        let tree = HuffmanTree {
+            root: self.root.pop().unwrap().0,
+        };
+        Ok(tree)
     }
 }
 
@@ -175,7 +178,8 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         }
         huffman.insert(map);
     }
-    huffman.build_tree()?;
+    let tree = huffman.build_tree()?;
+    dbg!(tree);
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
@@ -205,8 +209,8 @@ mod tests {
         map.insert(b'c', 1);
         let mut huffman = HuffmanBuilder::new();
         huffman.insert(map);
-        huffman.build_tree()?;
-        let root = huffman.root.pop().unwrap().0;
+        let tree = huffman.build_tree()?;
+        let root = tree.root;
         match root {
             Node::Internal { freq, left, right } => {
                 assert_eq!(freq, 8);
@@ -230,8 +234,8 @@ mod tests {
         map.insert(b'z', 2);
         let mut huffman = HuffmanBuilder::new();
         huffman.insert(map);
-        huffman.build_tree()?;
-        let root = huffman.root.pop().unwrap().0;
+        let tree = huffman.build_tree()?;
+        let root = tree.root;
         match root {
             Node::Internal { freq, left, right } => {
                 assert_eq!(freq, 306);
