@@ -59,6 +59,15 @@ struct HuffmanTree {
     root: Node,
 }
 
+impl HuffmanTree {
+    pub fn encode() -> Vec<u8> {
+        todo!()
+    }
+
+    pub fn decode() -> Self {
+        todo!()
+    }
+}
 // Design note for the next steps:
 //
 // Right now this `Huffman` struct is really acting as a tree builder. The
