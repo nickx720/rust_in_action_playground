@@ -35,6 +35,12 @@ impl Node {
             Node::Internal { freq, .. } => *freq,
         }
     }
+    pub fn is_leaf(&self) -> bool {
+        match self {
+            Node::Leaf { .. } => true,
+            Node::Internal { .. } => false,
+        }
+    }
 }
 
 impl Ord for Node {
