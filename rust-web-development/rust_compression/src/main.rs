@@ -67,6 +67,36 @@ struct HuffmanTree {
 
 impl HuffmanTree {
     pub fn encode() -> Vec<u8> {
+        // Depth-first search (DFS) explores one complete path before trying
+        // the next sibling path. On a tree, that usually means:
+        //
+        //     1. Visit the current node.
+        //     2. Choose one child and keep going until that branch ends.
+        //     3. Backtrack to the nearest unfinished node.
+        //     4. Repeat until every reachable node has been visited.
+        //
+        // Huffman encoding is a natural DFS problem. Each edge records one bit
+        // in the current path: conventionally left = 0 and right = 1. When the
+        // walk reaches a leaf, that path is the prefix code for the leaf's byte.
+        //
+        // Example shape:
+        //
+        //          root
+        //         /    \
+        //       'a'    internal
+        //              /      \
+        //            'b'      'c'
+        //
+        // DFS paths would produce codes like:
+        //
+        //     a -> 0
+        //     b -> 10
+        //     c -> 11
+        //
+        // In code, DFS can be recursive or stack-based. For recursive Huffman
+        // traversal, push a bit before descending into a child, record the path
+        // at a leaf, then pop that bit while backtracking.
+        let mut path: Vec<u8> = Vec::new();
         todo!()
     }
 
@@ -74,63 +104,6 @@ impl HuffmanTree {
         todo!()
     }
 }
-// Design note for the next steps:
-//
-// Right now this `Huffman` struct is really acting as a tree builder. The
-// `BinaryHeap` is useful while we are constructing the Huffman tree: it lets us
-// repeatedly remove the two lowest-frequency nodes and merge them into a new
-// internal node.
-//
-// After `build_tree` finishes, though, the heap is no longer the main data
-// structure we care about. At that point the heap should contain exactly one
-// item: the root of the finished Huffman tree. For encoding, decoding, and
-// writing a file header, the useful object is the tree root, not the heap.
-//
-// A cleaner mental model is:
-//
-//     frequencies -> tree builder -> Huffman tree -> code table -> encoded bytes
-//
-// That suggests separating the construction phase from the usable tree phase:
-//
-//     struct HuffmanBuilder {
-//         heap: BinaryHeap<Reverse<Node>>,
-//     }
-//
-//     struct HuffmanTree {
-//         root: Node,
-//     }
-//
-// Then the builder would consume itself and return a finished tree:
-//
-//     impl HuffmanBuilder {
-//         fn build(self) -> Result<HuffmanTree, anyhow::Error> {
-//             ...
-//         }
-//     }
-//
-// This avoids an awkward state where a `Huffman` value may or may not be ready
-// to encode. With a separate `HuffmanTree`, methods like `encode`, `decode`,
-// `code_table`, and `encode_header` can live on a type that only exists after a
-// valid tree has been built.
-//
-// For step 4, the header must store enough information to recreate the tree
-// during decoding. Two common choices:
-//
-// 1. Store the frequency table.
-//    This fits the code we already have: read the header, rebuild the
-//    `HashMap<u8, usize>`, rebuild the same Huffman tree, then decode.
-//
-//    Important caveat: if two bytes have the same frequency, tree construction
-//    must be deterministic. Otherwise the encoder and decoder might build two
-//    different, but equally valid, trees. If that happens, the compressed bits
-//    will be interpreted incorrectly. A stable tie-breaker, such as ordering by
-//    byte value or assigning stable node IDs, fixes this.
-//
-// 2. Store the tree itself.
-//    This is often more robust because the decoder reconstructs the exact tree
-//    shape that the encoder used. The tradeoff is that it requires tree
-//    serialization: writing leaves/internal nodes in a format you can parse
-//    later.
 //
 // A practical learning path:
 //
