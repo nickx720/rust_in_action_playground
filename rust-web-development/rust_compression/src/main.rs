@@ -96,6 +96,46 @@ impl HuffmanTree {
         // In code, DFS can be recursive or stack-based. For recursive Huffman
         // traversal, push a bit before descending into a child, record the path
         // at a leaf, then pop that bit while backtracking.
+        //
+        // Stack-based DFS pseudocode:
+        //
+        //     DFS(graph, start):
+        //         create empty stack
+        //         create empty visited set
+        //
+        //         push start onto stack
+        //
+        //         while stack is not empty:
+        //             node = pop from stack
+        //
+        //             if node is already in visited:
+        //                 continue
+        //
+        //             mark node as visited
+        //             process node
+        //
+        //             for each neighbor of node:
+        //                 if neighbor is not in visited:
+        //                     push neighbor onto stack
+        //
+        // To match recursive DFS traversal order, push neighbors in reverse:
+        //
+        //     DFS(graph, start):
+        //         stack = [start]
+        //         visited = empty set
+        //
+        //         while stack is not empty:
+        //             node = stack.pop()
+        //
+        //             if node in visited:
+        //                 continue
+        //
+        //             visited.add(node)
+        //             process(node)
+        //
+        //             for neighbor in reverse(graph[node]):
+        //                 if neighbor not in visited:
+        //                     stack.push(neighbor)
         let mut path: Vec<u8> = Vec::new();
         todo!()
     }
