@@ -66,77 +66,49 @@ struct HuffmanTree {
 }
 
 impl HuffmanTree {
-    pub fn encode() -> Vec<u8> {
-        // Depth-first search (DFS) explores one complete path before trying
-        // the next sibling path. On a tree, that usually means:
+    pub fn encode(&mut self) -> Vec<u8> {
+        // This traversal is for building the Huffman code table.
         //
-        //     1. Visit the current node.
-        //     2. Choose one child and keep going until that branch ends.
-        //     3. Backtrack to the nearest unfinished node.
-        //     4. Repeat until every reachable node has been visited.
+        // A code table answers the question:
         //
-        // Huffman encoding is a natural DFS problem. Each edge records one bit
-        // in the current path: conventionally left = 0 and right = 1. When the
-        // walk reaches a leaf, that path is the prefix code for the leaf's byte.
+        //     "For this byte, what bits should I write?"
         //
-        // Example shape:
+        // Its shape is:
         //
-        //          root
-        //         /    \
-        //       'a'    internal
-        //              /      \
-        //            'b'      'c'
+        //     byte -> path
         //
-        // DFS paths would produce codes like:
+        // For example:
         //
-        //     a -> 0
-        //     b -> 10
-        //     c -> 11
+        //     b'a' -> [0]
+        //     b'b' -> [1, 0]
+        //     b'c' -> [1, 1]
         //
-        // In code, DFS can be recursive or stack-based. For recursive Huffman
-        // traversal, push a bit before descending into a child, record the path
-        // at a leaf, then pop that bit while backtracking.
+        // Stack-based DFS works if each stack item stores both:
         //
-        // Stack-based DFS pseudocode:
+        //     1. the node to process
+        //     2. the path taken from the root to that node
         //
-        //     DFS(graph, start):
-        //         create empty stack
-        //         create empty visited set
+        //     stack = [(root, [])]
         //
-        //         push start onto stack
+        //     while stack is not empty:
+        //         node, path = stack.pop()
         //
-        //         while stack is not empty:
-        //             node = pop from stack
+        //         if node is a leaf:
+        //             record byte -> path in the code table
         //
-        //             if node is already in visited:
-        //                 continue
+        //         if node is internal:
+        //             push right child with path + [1]
+        //             push left child with path + [0]
         //
-        //             mark node as visited
-        //             process node
+        // "Record byte" means inserting into something like:
         //
-        //             for each neighbor of node:
-        //                 if neighbor is not in visited:
-        //                     push neighbor onto stack
+        //     HashMap<u8, Vec<u8>>
         //
-        // To match recursive DFS traversal order, push neighbors in reverse:
+        // A tree does not need a visited set because there are no cycles.
+        // The path is the important state: every left edge adds 0, and every
+        // right edge adds 1. When the traversal reaches a leaf, that path is
+        // the complete Huffman code for the leaf's byte.
         //
-        //     DFS(graph, start):
-        //         stack = [start]
-        //         visited = empty set
-        //
-        //         while stack is not empty:
-        //             node = stack.pop()
-        //
-        //             if node in visited:
-        //                 continue
-        //
-        //             visited.add(node)
-        //             process(node)
-        //
-        //             for neighbor in reverse(graph[node]):
-        //                 if neighbor not in visited:
-        //                     stack.push(neighbor)
-        let mut path: Vec<u8> = Vec::new();
         todo!()
     }
 
