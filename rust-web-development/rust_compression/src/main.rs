@@ -108,7 +108,12 @@ impl HuffmanTree {
         // The path is the important state: every left edge adds 0, and every
         // right edge adds 1. When the traversal reaches a leaf, that path is
         // the complete Huffman code for the leaf's byte.
-        //
+        let mut code_path = HashMap::new();
+        let mut stack = Vec::new();
+        stack.push((self.root, &mut code_path));
+        while let Some((node, table)) = stack.pop() {
+            if node.is_leaf() {}
+        }
         todo!()
     }
 
