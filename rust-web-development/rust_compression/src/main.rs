@@ -15,7 +15,7 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
     Ok(())
 }
 // An enum models the valid states directly: a Huffman node is either a leaf or an internal node, never both.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 enum Node {
     Leaf {
         byte: u8,
@@ -108,12 +108,23 @@ impl HuffmanTree {
         // The path is the important state: every left edge adds 0, and every
         // right edge adds 1. When the traversal reaches a leaf, that path is
         // the complete Huffman code for the leaf's byte.
-        let mut code_path = HashMap::new();
-        let mut stack = Vec::new();
-        stack.push((self.root, &mut code_path));
+        let mut code_path: HashMap<u8, Vec<u8>> = HashMap::new();
+        let mut stack: Vec<(Node, &mut Vec<u8>)> = Vec::new();
+        let mut path = Vec::new();
+        stack.push((self.root.clone(), &mut path));
         while let Some((node, table)) = stack.pop() {
-            if node.is_leaf() {}
+            match node {
+                Node::Leaf { byte, .. } => {
+                    code_path.insert(byte, table.to_vec());
+                }
+                Node::Internal { freq, left, right } => {
+                    // figure out path
+                    stack.push((*right, &mut vec![1u8]));
+                    stack.push((*left, &mut vec![0u8]));
+                }
+            }
         }
+
         todo!()
     }
 
