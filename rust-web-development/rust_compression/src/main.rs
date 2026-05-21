@@ -119,8 +119,12 @@ impl HuffmanTree {
                 }
                 Node::Internal { freq, left, right } => {
                     // figure out path
-                    stack.push((*right, &mut vec![1u8]));
-                    stack.push((*left, &mut vec![0u8]));
+                    {
+                        let mut path = path.clone();
+                        path.push(1);
+                        stack.push((*right, &mut path));
+                    }
+                    stack.push((*left, &mut path.clone()));
                 }
             }
         }
