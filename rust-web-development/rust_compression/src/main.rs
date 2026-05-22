@@ -109,9 +109,8 @@ impl HuffmanTree {
         // right edge adds 1. When the traversal reaches a leaf, that path is
         // the complete Huffman code for the leaf's byte.
         let mut code_path: HashMap<u8, Vec<u8>> = HashMap::new();
-        let mut stack: Vec<(Node, &mut Vec<u8>)> = Vec::new();
-        let mut path = Vec::new();
-        stack.push((self.root.clone(), &mut path));
+        let mut stack: Vec<(Node, Vec<u8>)> = Vec::new();
+        stack.push((self.root.clone(), Vec::new()));
         while let Some((node, table)) = stack.pop() {
             match node {
                 Node::Leaf { byte, .. } => {
@@ -120,15 +119,19 @@ impl HuffmanTree {
                 Node::Internal { freq, left, right } => {
                     // figure out path
                     {
-                        let mut path = path.clone();
-                        path.push(1);
-                        stack.push((*right, &mut path));
+                        let mut right_table = table.clone();
+                        right_table.push(1);
+                        stack.push((*right, right_table));
                     }
-                    stack.push((*left, &mut path.clone()));
+                    {
+                        let mut left_table = table.clone();
+                        left_table.push(0);
+                        stack.push((*left, left_table));
+                    }
                 }
             }
         }
-
+        dbg!(code_path);
         todo!()
     }
 
@@ -198,8 +201,8 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
         }
         huffman.insert(map);
     }
-    let tree = huffman.build_tree()?;
-    dbg!(tree);
+    let mut tree = huffman.build_tree()?;
+    tree.encode();
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
