@@ -178,7 +178,7 @@ impl HuffmanBuilder {
             self.root.push(Reverse(new_node));
         }
         let tree = HuffmanTree {
-            root: self.root.pop().unwrap().0,
+            root: self.root.pop().expect("No items in the tree").0,
         };
         Ok(tree)
     }
