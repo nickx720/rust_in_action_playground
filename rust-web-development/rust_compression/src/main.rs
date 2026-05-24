@@ -116,8 +116,11 @@ impl HuffmanTree {
                 Node::Leaf { byte, .. } => {
                     code_path.insert(byte, table.to_vec());
                 }
-                Node::Internal { freq, left, right } => {
-                    // figure out path
+                Node::Internal {
+                    freq: _,
+                    left,
+                    right,
+                } => {
                     {
                         let mut right_table = table.clone();
                         right_table.push(1);
