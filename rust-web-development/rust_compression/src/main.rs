@@ -66,7 +66,7 @@ struct HuffmanTree {
 }
 
 impl HuffmanTree {
-    pub fn encode(&mut self) -> Vec<u8> {
+    pub fn encode(&mut self) -> HashMap<u8, Vec<u8>> {
         // This traversal is for building the Huffman code table.
         //
         // A code table answers the question:
@@ -134,8 +134,7 @@ impl HuffmanTree {
                 }
             }
         }
-        dbg!(code_path);
-        todo!()
+        code_path
     }
 
     pub fn decode() -> Self {
