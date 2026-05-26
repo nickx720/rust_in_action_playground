@@ -188,20 +188,24 @@ impl HuffmanBuilder {
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     let mut huffman = HuffmanBuilder::new();
-    for arg in items {
-        let file = fs::canonicalize(arg)?;
-        let mut file = File::open(file)?;
-        let mut buf = [0u8; 1024];
-        let mut map = HashMap::new();
-        loop {
-            let n = file.read(&mut buf)?;
-            if n == 0 {
-                break;
+    match items.collect::<Vec<String>>().as_slice() {
+        [action, source, target] => {
+            dbg!(action, source, target);
+            let file = fs::canonicalize(source)?;
+            let mut file = File::open(file)?;
+            let mut buf = [0u8; 1024];
+            let mut map = HashMap::new();
+            loop {
+                let n = file.read(&mut buf)?;
+                if n == 0 {
+                    break;
+                }
+                let data = &buf[..n];
+                frequency_counter(data, &mut map)?;
             }
-            let data = &buf[..n];
-            frequency_counter(data, &mut map)?;
+            huffman.insert(map);
         }
-        huffman.insert(map);
+        _ => panic!("Unsupported action"),
     }
     let mut tree = huffman.build_tree()?;
     tree.encode();
@@ -209,6 +213,7 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
 }
 fn main() -> Result<(), anyhow::Error> {
     let args = env::args().skip(1);
+    dbg!(&args);
     valid_file_path(args)?;
     Ok(())
 }

@@ -47,7 +47,7 @@ As a debugging aid you might like to optionally log out the table. Here's some t
 
 An alternate to logging the frequency table is to write some unit tests that take in some prepared data and then check that the counting code returns the correct values.
 
-## Step 2
+## Step 2 Done
 
 In this step your goal is to use the frequencies that you calculated in step 1 to build the binary tree. There's a good explanation of how to do this complete with a visualisation here: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
 
