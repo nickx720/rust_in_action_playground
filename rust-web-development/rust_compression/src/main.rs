@@ -4,6 +4,7 @@ use std::{
     env,
     fs::{self, File},
     io::Read,
+    path::PathBuf,
 };
 
 fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), anyhow::Error> {
@@ -186,6 +187,10 @@ impl HuffmanBuilder {
     }
 }
 
+fn encode(prefix_table: HashMap<u8, Vec<u8>>, target: PathBuf) -> Result<(), anyhow::Error> {
+    todo!()
+}
+
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     let mut huffman = HuffmanBuilder::new();
     match items.collect::<Vec<String>>().as_slice() {
@@ -204,12 +209,14 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
                     frequency_counter(data, &mut map)?;
                 }
                 huffman.insert(map);
+                let mut tree = huffman.build_tree()?;
+                let prefix_table = tree.encode();
+                let target = fs::canonicalize(target)?;
+                encode(prefix_table, target)?;
             }
         }
         _ => panic!("Unsupported action"),
     }
-    let mut tree = huffman.build_tree()?;
-    tree.encode();
     Ok(())
 }
 fn main() -> Result<(), anyhow::Error> {
