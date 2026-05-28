@@ -53,7 +53,7 @@ In this step your goal is to use the frequencies that you calculated in step 1 t
 
 The examples used for the visualisation would be a good starting point for unit tests.
 
-## Step 3
+## Step 3 Done
 
 In this step your goal is to use the tree to generate the prefix-code table. Once again there's an explanation and visualisation at: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
 

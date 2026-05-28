@@ -67,7 +67,7 @@ struct HuffmanTree {
 }
 
 impl HuffmanTree {
-    pub fn encode(&mut self) -> HashMap<u8, Vec<u8>> {
+    pub fn encode(&mut self) -> HashMap<u8, (Vec<u8>, usize)> {
         // This traversal is for building the Huffman code table.
         //
         // A code table answers the question:
@@ -109,13 +109,13 @@ impl HuffmanTree {
         // The path is the important state: every left edge adds 0, and every
         // right edge adds 1. When the traversal reaches a leaf, that path is
         // the complete Huffman code for the leaf's byte.
-        let mut code_path: HashMap<u8, Vec<u8>> = HashMap::new();
+        let mut code_path: HashMap<u8, (Vec<u8>, usize)> = HashMap::new();
         let mut stack: Vec<(Node, Vec<u8>)> = Vec::new();
         stack.push((self.root.clone(), Vec::new()));
         while let Some((node, table)) = stack.pop() {
             match node {
-                Node::Leaf { byte, .. } => {
-                    code_path.insert(byte, table.to_vec());
+                Node::Leaf { byte, freq } => {
+                    code_path.insert(byte, (table.to_vec(), freq));
                 }
                 Node::Internal {
                     freq: _,
@@ -187,7 +187,20 @@ impl HuffmanBuilder {
     }
 }
 
-fn encode(prefix_table: HashMap<u8, Vec<u8>>, target: PathBuf) -> Result<(), anyhow::Error> {
+fn encode(
+    prefix_table: HashMap<u8, (Vec<u8>, usize)>,
+    target: &String,
+) -> Result<(), anyhow::Error> {
+    for (key, value) in prefix_table {
+        let output = format!(
+            "For the key {},the value is {},{}",
+            key,
+            value.0.len(),
+            value.1
+        );
+        dbg!(output);
+    }
+    //    let target = fs::canonicalize(target)?;
     todo!()
 }
 
@@ -211,7 +224,6 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
                 huffman.insert(map);
                 let mut tree = huffman.build_tree()?;
                 let prefix_table = tree.encode();
-                let target = fs::canonicalize(target)?;
                 encode(prefix_table, target)?;
             }
         }
