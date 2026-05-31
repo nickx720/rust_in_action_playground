@@ -5,6 +5,7 @@ A Rust implementation of Huffman coding for lossless text file compression and d
 Built as part of the [Coding Challenges - Huffman Compression](https://codingchallenges.fyi/challenges/challenge-huffman/) challenge.
 
 ---
+
 ## The Challenge - Building A Huffman Encoder/Decoder
 
 In the early 1950s David Huffman developed an algorithm to find the optimal prefix code that can be used for lossless data compression.
