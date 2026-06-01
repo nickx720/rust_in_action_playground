@@ -15,6 +15,7 @@ fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), an
     }
     Ok(())
 }
+
 // An enum models the valid states directly: a Huffman node is either a leaf or an internal node, never both.
 #[derive(Debug, PartialEq, Eq, Clone)]
 enum Node {
