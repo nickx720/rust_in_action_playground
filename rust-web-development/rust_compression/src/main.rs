@@ -3,8 +3,7 @@ use std::{
     collections::{BinaryHeap, HashMap},
     env,
     fs::{self, File},
-    io::Read,
-    path::PathBuf,
+    io::{Read, Write},
 };
 
 fn frequency_counter(data: &[u8], map: &mut HashMap<u8, usize>) -> Result<(), anyhow::Error> {
@@ -143,18 +142,7 @@ impl HuffmanTree {
         todo!()
     }
 }
-//
-// A practical learning path:
-//
-//     - First, make `build_tree` return a finished root/tree instead of leaving
-//       the root inside the heap.
-//     - Then generate the prefix-code table by walking the tree:
-//       left edge = 0, right edge = 1, leaf path = byte code.
-//     - For step 4, start with a frequency-table header because it builds on
-//       the work already done.
-//     - Before relying on that header format, make the tree-building order
-//       deterministic for equal frequencies.
-//
+
 impl HuffmanBuilder {
     pub fn new() -> Self {
         Self {
@@ -217,17 +205,20 @@ fn encode(
     // or null. Newline is fine as a separator inside the known-length header,
     // but do not rely on newline to separate the header from compressed data:
     // compressed data is arbitrary bytes and may contain newline by chance.
+    let mut header = String::new();
+    let mut out_bytes: Vec<usize> = Vec::new();
     for (key, value) in prefix_table {
-        let output = format!(
-            "For the key {},the value is {},{}",
-            key,
-            value.0.len(),
-            value.1
-        );
-        dbg!(output);
+        let output = format!("{}:{}\n", key, value.0.len());
+        header.push_str(&output);
+        out_bytes.push(value.1);
     }
-    //    let target = fs::canonicalize(target)?;
-    todo!()
+    let out_bytes: Vec<u8> = out_bytes.iter().flat_map(|i| i.to_be_bytes()).collect();
+    let header_length = header.len() as u32;
+    let mut file = File::create(target)?;
+    file.write_all(&header_length.to_le_bytes())?;
+    file.write_all(header.as_bytes())?;
+    file.write_all(&out_bytes)?;
+    Ok(())
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
