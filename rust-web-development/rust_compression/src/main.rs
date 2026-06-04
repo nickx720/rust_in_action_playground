@@ -206,11 +206,12 @@ fn encode(
     // but do not rely on newline to separate the header from compressed data:
     // compressed data is arbitrary bytes and may contain newline by chance.
     let mut header = String::new();
-    let mut out_bytes: Vec<usize> = Vec::new();
+    let mut out_bytes: Vec<u8> = Vec::new();
     for (key, value) in prefix_table {
-        let output = format!("{}:{}\n", key, value.0.len());
+        let output = format!("{}:{}\n", key, value.1);
+        dbg!(&output, &value);
         header.push_str(&output);
-        out_bytes.push(value.1);
+        out_bytes.extend(value.0.as_slice());
     }
     let out_bytes: Vec<u8> = out_bytes.iter().flat_map(|i| i.to_be_bytes()).collect();
     let header_length = header.len() as u32;
