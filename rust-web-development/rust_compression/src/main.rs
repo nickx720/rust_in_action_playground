@@ -178,6 +178,7 @@ impl HuffmanBuilder {
 
 fn encode(
     prefix_table: HashMap<u8, (Vec<u8>, usize)>,
+    source: &String,
     target: &String,
 ) -> Result<(), anyhow::Error> {
     // Step 4 file-format idea:
@@ -205,15 +206,28 @@ fn encode(
     // or null. Newline is fine as a separator inside the known-length header,
     // but do not rely on newline to separate the header from compressed data:
     // compressed data is arbitrary bytes and may contain newline by chance.
-    let mut header = String::new();
+
+    let file = fs::canonicalize(source)?;
+    let mut file = File::open(file)?;
+    let mut buf = [0u8; 1024];
     let mut out_bytes: Vec<u8> = Vec::new();
+    loop {
+        let n = file.read(&mut buf)?;
+        if n == 0 {
+            break;
+        }
+        let data = &buf[..n];
+        for key in data {
+            if let Some(value) = prefix_table.get(key) {
+                out_bytes.extend(value.0.as_slice());
+            }
+        }
+    }
+    let mut header = String::new();
     for (key, value) in prefix_table {
         let output = format!("{}:{}\n", key, value.1);
-        dbg!(&output, &value);
         header.push_str(&output);
-        out_bytes.extend(value.0.as_slice());
     }
-    let out_bytes: Vec<u8> = out_bytes.iter().flat_map(|i| i.to_be_bytes()).collect();
     let header_length = header.len() as u32;
     let mut file = File::create(target)?;
     file.write_all(&header_length.to_le_bytes())?;
@@ -242,7 +256,7 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
                 huffman.insert(map);
                 let mut tree = huffman.build_tree()?;
                 let prefix_table = tree.encode();
-                encode(prefix_table, target)?;
+                encode(prefix_table, source, target)?;
             }
         }
         _ => panic!("Unsupported action"),
