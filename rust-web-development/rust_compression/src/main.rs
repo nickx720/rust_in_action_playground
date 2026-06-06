@@ -236,6 +236,10 @@ fn encode(
     Ok(())
 }
 
+fn decode() -> Result<(), anyhow::Error> {
+    todo!()
+}
+
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
     let mut huffman = HuffmanBuilder::new();
     match items.collect::<Vec<String>>().as_slice() {
@@ -257,6 +261,21 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
                 let mut tree = huffman.build_tree()?;
                 let prefix_table = tree.encode();
                 encode(prefix_table, source, target)?;
+            }
+            if action.to_lowercase() == "decode" {
+                let file = fs::canonicalize(source)?;
+                let mut file = File::open(file)?;
+                let mut buf = [0u8; 1024];
+                loop {
+                    let n = file.read(&mut buf)?;
+                    if n == 0 {
+                        break;
+                    }
+                    let data = &buf[..n];
+                    let arr: [u8; 4] = data[0..4].try_into().unwrap();
+                    let length = u32::from_le_bytes(arr);
+                    dbg!(length);
+                }
             }
         }
         _ => panic!("Unsupported action"),
