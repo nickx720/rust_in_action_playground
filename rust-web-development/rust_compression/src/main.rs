@@ -67,7 +67,7 @@ struct HuffmanTree {
 }
 
 impl HuffmanTree {
-    pub fn encode(&mut self) -> HashMap<u8, (Vec<u8>, usize)> {
+    pub fn gen_prefix_table(&mut self) -> HashMap<u8, (Vec<u8>, usize)> {
         // This traversal is for building the Huffman code table.
         //
         // A code table answers the question:
@@ -136,10 +136,6 @@ impl HuffmanTree {
             }
         }
         code_path
-    }
-
-    pub fn decode() -> Self {
-        todo!()
     }
 }
 
@@ -236,7 +232,21 @@ fn encode(
     Ok(())
 }
 
-fn decode() -> Result<(), anyhow::Error> {
+fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
+    let file = fs::canonicalize(source)?;
+    let mut file = File::open(file)?;
+    let mut buf = [0u8; 1024];
+    loop {
+        let n = file.read(&mut buf)?;
+        if n == 0 {
+            break;
+        }
+        let data = &buf[..n];
+        let arr: [u8; 4] = data[0..4].try_into().unwrap();
+        let length = u32::from_le_bytes(arr);
+        let text = std::str::from_utf8(&data[4..length as usize])?;
+        dbg!(text);
+    }
     todo!()
 }
 
@@ -259,23 +269,11 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
                 }
                 huffman.insert(map);
                 let mut tree = huffman.build_tree()?;
-                let prefix_table = tree.encode();
+                let prefix_table = tree.gen_prefix_table();
                 encode(prefix_table, source, target)?;
             }
             if action.to_lowercase() == "decode" {
-                let file = fs::canonicalize(source)?;
-                let mut file = File::open(file)?;
-                let mut buf = [0u8; 1024];
-                loop {
-                    let n = file.read(&mut buf)?;
-                    if n == 0 {
-                        break;
-                    }
-                    let data = &buf[..n];
-                    let arr: [u8; 4] = data[0..4].try_into().unwrap();
-                    let length = u32::from_le_bytes(arr);
-                    dbg!(length);
-                }
+                decode(source, target)?;
             }
         }
         _ => panic!("Unsupported action"),
