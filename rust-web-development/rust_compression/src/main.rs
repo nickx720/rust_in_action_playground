@@ -224,6 +224,7 @@ fn encode(
         let output = format!("{}:{}\n", key, value.1);
         header.push_str(&output);
     }
+    header.push_str("\n");
     let header_length = header.len() as u32;
     let mut file = File::create(target)?;
     file.write_all(&header_length.to_le_bytes())?;
@@ -245,7 +246,19 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
         let arr: [u8; 4] = data[0..4].try_into().unwrap();
         let length = u32::from_le_bytes(arr);
         let text = std::str::from_utf8(&data[4..length as usize])?;
-        dbg!(text);
+        let mut encoded_output = HashMap::new();
+        text.split('\n').for_each(|item| {
+            let key_value: Vec<&str> = item.split(':').collect();
+            dbg!(&key_value);
+            let key = key_value[0].parse::<u8>().unwrap();
+            let value = key_value[1].parse::<usize>().unwrap();
+            encoded_output.insert(key, value);
+        });
+        dbg!(encoded_output);
+        let huffman_bytes = &data[length as usize..];
+        //        for b in huffman_bytes {
+        //            println!("{:02x}", b);
+        //        }
     }
     todo!()
 }
