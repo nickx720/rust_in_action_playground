@@ -252,11 +252,37 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
             let value = key_value[1].parse::<usize>().unwrap();
             encoded_output.insert(key, value);
         });
-        dbg!(encoded_output);
-        let huffman_bytes = &data[length as usize..];
-        //        for b in huffman_bytes {
-        //            println!("{:02x}", b);
-        //        }
+        // The compressed data does not need a delimiter after the header.
+        //
+        // The first 4 bytes of the file store `header_length`, so the decoder
+        // can calculate the exact start of the compressed payload:
+        //
+        //     4 bytes for the length prefix + header_length bytes for the header
+        //
+        // That is why this slice starts at `4 + length`.
+        //
+        // There is a second, more important question: how do we know where one
+        // encoded symbol ends and the next one begins? Huffman codes solve that
+        // by being prefix-free. Once the frequency table from the header is used
+        // to rebuild the same Huffman tree, decoding is just tree traversal:
+        //
+        //     0 -> move left
+        //     1 -> move right
+        //     leaf -> emit that byte, then reset to the root
+        //
+        // No delimiter is needed between encoded symbols because no valid code
+        // is the prefix of another valid code.
+        //
+        // Important: the current encoder stores each Huffman bit as a full byte
+        // containing either 0 or 1. That makes decoding simpler for now, but it
+        // is not true bit-level compression yet. Once bits are packed into real
+        // bytes, the file format also needs enough metadata to ignore padding at
+        // the end, such as the original uncompressed byte count or the number of
+        // valid bits in the final compressed byte.
+        let huffman_bytes = &data[4 + length as usize..];
+        for b in huffman_bytes {
+            println!("{:02x}", b);
+        }
     }
     todo!()
 }
