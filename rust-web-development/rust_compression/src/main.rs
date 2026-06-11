@@ -252,6 +252,9 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
             let value = key_value[1].parse::<usize>().unwrap();
             encoded_output.insert(key, value);
         });
+        let mut huffman = HuffmanBuilder::new();
+        huffman.insert(encoded_output);
+        let tree = huffman.build_tree()?;
         // The compressed data does not need a delimiter after the header.
         //
         // The first 4 bytes of the file store `header_length`, so the decoder
@@ -280,9 +283,9 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
         // the end, such as the original uncompressed byte count or the number of
         // valid bits in the final compressed byte.
         let huffman_bytes = &data[4 + length as usize..];
-        for b in huffman_bytes {
-            println!("{:02x}", b);
-        }
+        //        for b in huffman_bytes {
+        //            println!("{:02x}", b);
+        //        }
     }
     todo!()
 }
