@@ -137,6 +137,11 @@ impl HuffmanTree {
         }
         code_path
     }
+    pub fn decode(self) -> Result<(), anyhow::Error> {
+        // walk the tree, till it finds a left, emit that feafs byte
+        // reset current node back to root
+        Ok(())
+    }
 }
 
 impl HuffmanBuilder {
@@ -255,6 +260,7 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
         let mut huffman = HuffmanBuilder::new();
         huffman.insert(encoded_output);
         let tree = huffman.build_tree()?;
+        dbg!(tree);
         // The compressed data does not need a delimiter after the header.
         //
         // The first 4 bytes of the file store `header_length`, so the decoder
