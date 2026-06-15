@@ -140,17 +140,15 @@ impl HuffmanTree {
     pub fn decode(self, byte_stream: &[u8]) -> Result<(), anyhow::Error> {
         // walk the tree, till it finds a left, emit that feafs byte
         // reset current node back to root
-        let mut stack = Vec::new();
-        stack.push(self.root.clone());
-        while let Some(node) = stack.pop() {
-            match node {
-                Node::Leaf { byte, freq } => {
-                    todo!()
-                }
-                Node::Internal { freq, left, right } => {
-                    todo!()
-                }
+        let mut current = self.root.clone();
+        for bit in byte_stream {
+            if *bit == 0 {
+                // go left
             }
+            if *bit == 1 {
+                // go right
+            }
+            // if current is a leaf, return byte and reset current
         }
 
         Ok(())
