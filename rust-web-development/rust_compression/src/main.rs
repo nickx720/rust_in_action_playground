@@ -142,7 +142,16 @@ impl HuffmanTree {
         // reset current node back to root
         let mut stack = Vec::new();
         stack.push(self.root.clone());
-        while let Some(node) = stack.pop() {}
+        while let Some(node) = stack.pop() {
+            match node {
+                Node::Leaf { byte, freq } => {
+                    todo!()
+                }
+                Node::Internal { freq, left, right } => {
+                    todo!()
+                }
+            }
+        }
 
         Ok(())
     }
