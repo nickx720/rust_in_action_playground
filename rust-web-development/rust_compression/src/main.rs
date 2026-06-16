@@ -137,9 +137,10 @@ impl HuffmanTree {
         }
         code_path
     }
-    pub fn decode(self, byte_stream: &[u8]) -> Result<(), anyhow::Error> {
+    pub fn decode(self, byte_stream: &[u8]) -> Option<u8> {
         // walk the tree, till it finds a left, emit that feafs byte
         // reset current node back to root
+        let mut output: Option<u8> = None;
         let mut current = self.root.clone();
         for bit in byte_stream {
             if *bit == 0 {
@@ -148,10 +149,16 @@ impl HuffmanTree {
             if *bit == 1 {
                 // go right
             }
+            if current.is_leaf() {
+                match current {
+                    Node::Leaf { byte, freq } => output = Some(byte),
+                    _ => panic!("Illegal variant for current is leaf"),
+                }
+            }
             // if current is a leaf, return byte and reset current
         }
 
-        Ok(())
+        output
     }
 }
 
