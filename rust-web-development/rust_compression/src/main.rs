@@ -42,6 +42,18 @@ impl Node {
             Node::Internal { .. } => false,
         }
     }
+    pub fn left(&self) -> Node {
+        match self {
+            Node::Internal { freq, left, right } => *left.clone(),
+            _ => panic!("Is a leaf node"),
+        }
+    }
+    pub fn right(&self) -> Node {
+        match self {
+            Node::Internal { freq, left, right } => *right.clone(),
+            _ => panic!("Is a leaf node"),
+        }
+    }
 }
 
 impl Ord for Node {
@@ -145,9 +157,11 @@ impl HuffmanTree {
         for bit in byte_stream {
             if *bit == 0 {
                 // go left
+                current = current.left();
             }
             if *bit == 1 {
                 // go right
+                current = current.right();
             }
             if current.is_leaf() {
                 match current {
