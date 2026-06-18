@@ -165,7 +165,7 @@ impl HuffmanTree {
             }
             if current.is_leaf() {
                 match current {
-                    Node::Leaf { byte, freq } => output = Some(byte),
+                    Node::Leaf { byte, freq: _ } => output = Some(byte),
                     _ => panic!("Illegal variant for current is leaf"),
                 }
             }
