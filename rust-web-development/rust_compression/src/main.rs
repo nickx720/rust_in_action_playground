@@ -42,16 +42,16 @@ impl Node {
             Node::Internal { .. } => false,
         }
     }
-    pub fn left(&self) -> Node {
+    pub fn left(&self) -> Option<Box<Node>> {
         match self {
-            Node::Internal { freq, left, right } => *left.clone(),
-            _ => panic!("Is a leaf node"),
+            Node::Internal { freq, left, right } => Some(left.clone()),
+            _ => None,
         }
     }
-    pub fn right(&self) -> Node {
+    pub fn right(&self) -> Option<Box<Node>> {
         match self {
-            Node::Internal { freq, left, right } => *right.clone(),
-            _ => panic!("Is a leaf node"),
+            Node::Internal { freq, left, right } => Some(right.clone()),
+            _ => None,
         }
     }
 }
@@ -149,23 +149,27 @@ impl HuffmanTree {
         }
         code_path
     }
-    pub fn decode(self, byte_stream: &[u8]) -> Option<u8> {
+    pub fn decode(self, byte_stream: &[u8]) -> Vec<u8> {
         // walk the tree, till it finds a left, emit that feafs byte
         // reset current node back to root
-        let mut output: Option<u8> = None;
-        let mut current = self.root.clone();
+        let mut output: Vec<u8> = Vec::new();
+        let mut current = Box::new(self.root.clone());
         for bit in byte_stream {
             if *bit == 0 {
                 // go left
-                current = current.left();
+                if let Some(nodee) = current.left() {
+                    current = nodee;
+                }
             }
             if *bit == 1 {
                 // go right
-                current = current.right();
+                if let Some(nodee) = current.right() {
+                    current = nodee;
+                }
             }
             if current.is_leaf() {
-                match current {
-                    Node::Leaf { byte, freq: _ } => output = Some(byte),
+                match *current {
+                    Node::Leaf { byte, freq: _ } => output.push(byte),
                     _ => panic!("Illegal variant for current is leaf"),
                 }
             }
@@ -293,7 +297,8 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
         huffman.insert(encoded_output);
         let tree = huffman.build_tree()?;
         let huffman_bytes = &data[4 + length as usize..];
-        let _ = tree.decode(huffman_bytes);
+        let output = tree.decode(huffman_bytes);
+        dbg!(output);
         // The compressed data does not need a delimiter after the header.
         //
         // The first 4 bytes of the file store `header_length`, so the decoder
