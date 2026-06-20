@@ -169,7 +169,10 @@ impl HuffmanTree {
             }
             if current.is_leaf() {
                 match *current {
-                    Node::Leaf { byte, freq: _ } => output.push(byte),
+                    Node::Leaf { byte, freq: _ } => {
+                        output.push(byte);
+                        current = Box::new(self.root.clone());
+                    }
                     _ => panic!("Illegal variant for current is leaf"),
                 }
             }
