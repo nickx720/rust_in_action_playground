@@ -171,7 +171,8 @@ impl HuffmanTree {
                 match *current {
                     Node::Leaf { byte, freq: _ } => {
                         output.push(byte);
-                        current = Box::new(self.root.clone());
+                        // * keeps the same box, but updates the value inside
+                        *current = self.root.clone();
                     }
                     _ => panic!("Illegal variant for current is leaf"),
                 }
@@ -297,11 +298,13 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
             encoded_output.insert(key, value);
         });
         let mut huffman = HuffmanBuilder::new();
-        huffman.insert(encoded_output);
+        huffman.insert(encoded_output.clone());
         let tree = huffman.build_tree()?;
         let huffman_bytes = &data[4 + length as usize..];
         let output = tree.decode(huffman_bytes);
-        dbg!(output);
+        for decoded in output {
+            println!("{}", decoded as char);
+        }
         // The compressed data does not need a delimiter after the header.
         //
         // The first 4 bytes of the file store `header_length`, so the decoder
