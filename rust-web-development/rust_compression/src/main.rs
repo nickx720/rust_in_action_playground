@@ -222,32 +222,6 @@ fn encode(
     source: &String,
     target: &String,
 ) -> Result<(), anyhow::Error> {
-    // Step 4 file-format idea:
-    //
-    // The compressed bytes are not self-describing. The decoder needs enough
-    // metadata to rebuild the same Huffman tree/code table before it can make
-    // sense of the compressed bitstream.
-    //
-    // A simple format is:
-    //
-    //     [4-byte header length][UTF-8 text header][compressed bytes]
-    //
-    // The first 4 bytes can be a `u32` written with `to_le_bytes()`. That tells
-    // the decoder exactly how many bytes belong to the header. After reading
-    // that many bytes, everything left in the file is compressed data.
-    //
-    // The header can store byte frequencies as text, for example:
-    //
-    //     97:9
-    //     98:2
-    //     99:3
-    //
-    // Use byte numbers instead of characters like `a:9,b:2`, because any byte
-    // value may appear in the original file, including comma, colon, newline,
-    // or null. Newline is fine as a separator inside the known-length header,
-    // but do not rely on newline to separate the header from compressed data:
-    // compressed data is arbitrary bytes and may contain newline by chance.
-
     let file = fs::canonicalize(source)?;
     let mut file = File::open(file)?;
     let mut buf = [0u8; 1024];
@@ -302,13 +276,9 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
         let tree = huffman.build_tree()?;
         let huffman_bytes = &data[4 + length as usize..];
         let output = tree.decode(huffman_bytes);
-        let output_contents = output
-            .iter()
-            .map(|&item| item as char)
-            .collect::<Vec<char>>();
-        //        fs::write(target, output_contents.as_slice())?;
+        fs::write(target, output)?;
     }
-    todo!()
+    Ok(())
 }
 
 fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Error> {
