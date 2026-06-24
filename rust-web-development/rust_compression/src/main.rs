@@ -272,6 +272,26 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
             encoded_output.insert(key, value);
         });
         let mut huffman = HuffmanBuilder::new();
+        // README Step 6 starts here: rebuild the decoding structure from the header.
+        //
+        // Be careful: the header currently stores only byte frequencies. That is enough
+        // to build a valid Huffman tree, but not necessarily the exact same tree that
+        // encode used when multiple bytes have the same frequency.
+        //
+        // Before changing decode's tree walk, first make sure this reconstruction step
+        // is deterministic. Either store enough header data to recreate the exact codes,
+        // or make HuffmanBuilder break frequency ties in a stable way so encode and
+        // decode build the same left/right tree from the same frequency table.
+        //
+        // Huffman construction repeatedly combines the two lowest-frequency nodes.
+        // Highest-frequency bytes usually get shorter codes because they survive longer,
+        // closer to the root. When two nodes have the same frequency, however, Huffman
+        // does not define which one must be chosen first. That choice matters here:
+        // build_tree assigns the first popped node to `left` and the second to `right`,
+        // and gen_prefix_table turns left into 0 and right into 1.
+        //
+        // So the practical question is: when frequencies tie, can encode and decode
+        // guarantee the same node is popped first every time?
         huffman.insert(encoded_output.clone());
         let tree = huffman.build_tree()?;
         let huffman_bytes = &data[4 + length as usize..];
