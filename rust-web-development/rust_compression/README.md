@@ -58,27 +58,39 @@ The examples used for the visualisation would be a good starting point for unit 
 
 In this step your goal is to use the tree to generate the prefix-code table. Once again there's an explanation and visualisation at: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
 
-## Step 4
+## Step 4 Done
 
 In this step your goal is to write a header section to the output file (you'll want a command line option to specify the filename). The header section will include enough information for your program to be decode the compressed file.
 
 One way of doing this is to write out the tree, another option is to write out the character frequency table. Don't forget you'll need some way of knowing when the header ends and when the compressed data starts.
 
-## Step 5
+## Step 5 Done
 
 This is the moment you've been building up to! In this step your goal is to encode the text using the code table and write the compressed content of the source text to the output file, appending it after the header. Don't forget translate the prefixes into bit strings and pack them into bytes to achieve the compression.
 
-## Step 6
+## Step 6 Done
 
 In this step your goal is to read in the header of the encoded file and rebuild the prefix table ready to decode the text. In essence you're going to do the reverse of step 4.
 
-## Step 7
+## Step 7 Done
 
 In this step you will read in the remainder of the file and decode it using the prefix table before writing the decoded text back to the specified output file - the reverse of step 5.
 
 At this point you should be able to compress the file with your tool, compare the file size of the input and output see that the output is smaller and then decompress the output file to create an identical copy of the input.
 
 If so, congratulations you've written a working Huffman encode/decode tool!
+
+## Step 8
+
+In this step your goal is to make Huffman tree construction deterministic.
+
+The header currently stores byte frequencies. That can be enough to rebuild a Huffman tree, but only if encode and decode make the same choice every time two nodes have the same frequency.
+
+For example, if two bytes both occur 5 times, the Huffman algorithm says they have the same priority. It does not say which one must become the left child and which one must become the right child. Since left becomes `0` and right becomes `1`, different tie choices can produce different codes.
+
+To make this stable, add a tie-breaker to your priority queue ordering. Compare nodes by frequency first, then by a deterministic second value, such as the smallest byte contained in that node or an explicit insertion number that is recreated the same way during decode.
+
+After this step, encoding and decoding should rebuild the same tree from the same frequency table, even when multiple bytes have equal frequencies.
 
 ---
 
