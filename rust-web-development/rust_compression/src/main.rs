@@ -333,7 +333,6 @@ fn valid_file_path(items: impl Iterator<Item = String>) -> Result<(), anyhow::Er
 }
 fn main() -> Result<(), anyhow::Error> {
     let args = env::args().skip(1);
-    dbg!(&args);
     valid_file_path(args)?;
     Ok(())
 }
