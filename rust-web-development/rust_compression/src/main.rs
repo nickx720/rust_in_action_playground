@@ -1,5 +1,5 @@
 use std::{
-    cmp::Reverse,
+    cmp::{Ordering, Reverse},
     collections::{BinaryHeap, HashMap},
     env,
     fs::{self, File},
@@ -54,11 +54,34 @@ impl Node {
             _ => None,
         }
     }
+    pub fn tie_breaker(&self, other: &Node) -> Ordering {
+        // Resume here: frequency comparison already tied, so derive one stable sort
+        // key for each whole node and compare those keys. Leaves use their byte
+        // directly; internal nodes use the smallest byte contained anywhere in their
+        // left/right subtree. Think "compare this node's subtree-min byte against
+        // the other node's subtree-min byte", not "return the smaller byte".
+        //
+        // Leaf(A)          -> A
+        // Internal(A, C)   -> A
+        // Internal(B, D)   -> B
+        u8::min(self.smallest_byte(), other.smallest_byte())
+    }
+    pub fn smallest_byte(&self) -> u8 {
+        match self {
+            Node::Leaf { byte, freq } => *byte,
+            Node::Internal { freq, left, right } => todo!(),
+        }
+    }
 }
 
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.freq().cmp(&other.freq())
+        let freq_order = self.freq().cmp(&other.freq());
+        match freq_order {
+            Ordering::Equal => self.tie_breaker(other),
+
+            other => other,
+        }
     }
 }
 
