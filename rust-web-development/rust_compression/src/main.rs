@@ -69,7 +69,7 @@ impl Node {
     pub fn smallest_byte(&self) -> u8 {
         match self {
             Node::Leaf { byte, freq } => *byte,
-            Node::Internal { freq, left, right } => todo!(),
+            Node::Internal { freq, left, right } => left.smallest_byte(),
         }
     }
 }
