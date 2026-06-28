@@ -64,7 +64,7 @@ impl Node {
         // Leaf(A)          -> A
         // Internal(A, C)   -> A
         // Internal(B, D)   -> B
-        u8::min(self.smallest_byte(), other.smallest_byte())
+        self.smallest_byte().cmp(&other.smallest_byte())
     }
     pub fn smallest_byte(&self) -> u8 {
         match self {
@@ -295,17 +295,6 @@ fn decode(source: &String, target: &String) -> Result<(), anyhow::Error> {
             encoded_output.insert(key, value);
         });
         let mut huffman = HuffmanBuilder::new();
-        // README Step 6 starts here: rebuild the decoding structure from the header.
-        //
-        // Be careful: the header currently stores only byte frequencies. That is enough
-        // to build a valid Huffman tree, but not necessarily the exact same tree that
-        // encode used when multiple bytes have the same frequency.
-        //
-        // Before changing decode's tree walk, first make sure this reconstruction step
-        // is deterministic. Either store enough header data to recreate the exact codes,
-        // or make HuffmanBuilder break frequency ties in a stable way so encode and
-        // decode build the same left/right tree from the same frequency table.
-        //
         // Huffman construction repeatedly combines the two lowest-frequency nodes.
         // Highest-frequency bytes usually get shorter codes because they survive longer,
         // closer to the root. When two nodes have the same frequency, however, Huffman

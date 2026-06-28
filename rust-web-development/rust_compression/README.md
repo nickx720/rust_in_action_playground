@@ -80,7 +80,7 @@ At this point you should be able to compress the file with your tool, compare th
 
 If so, congratulations you've written a working Huffman encode/decode tool!
 
-## Step 8
+## Step 8 Done
 
 In this step your goal is to make Huffman tree construction deterministic.
 
