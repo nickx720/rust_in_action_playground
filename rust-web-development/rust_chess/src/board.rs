@@ -4,8 +4,8 @@ struct Board {
     board: [[Option<Piece>; 8]; 8],
 }
 impl Board {
-    fn empty() {
-        todo!()
+    fn empty(self) -> bool {
+        self.board.iter().all(|row| row.iter().all(Option::is_none))
     }
 
     fn starting_positing() {
