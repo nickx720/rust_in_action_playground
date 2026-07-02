@@ -8,7 +8,7 @@ impl Board {
         self.board.iter().all(|row| row.iter().all(Option::is_none))
     }
 
-    fn starting_positing() {
+    fn starting_positing() -> Option<Piece> {
         todo!()
     }
     fn piece_at(square: Square) {
