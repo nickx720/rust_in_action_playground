@@ -19,6 +19,7 @@ impl Board {
             .expect("nested array must contain an item")
     }
     fn piece_at(&self, square: Square) {
+        self.board
         todo!()
     }
 
