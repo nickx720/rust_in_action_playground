@@ -18,8 +18,8 @@ impl Board {
             .copied()
             .expect("nested array must contain an item")
     }
-    fn piece_at(&self, square: Square) {
-        self.board
+    fn piece_at(&self, pos: (usize, usize)) {
+        let piece = self.board.get(pos.0).and_then(|item| item.get(pos.1));
         todo!()
     }
 
