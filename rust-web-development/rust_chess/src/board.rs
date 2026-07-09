@@ -18,9 +18,12 @@ impl Board {
             .copied()
             .expect("nested array must contain an item")
     }
-    fn piece_at(&self, pos: (usize, usize)) {
-        let piece = self.board.get(pos.0).and_then(|item| item.get(pos.1));
-        piece
+    fn piece_at(&self, pos: (usize, usize)) -> Option<Piece> {
+        self.board
+            .get(pos.0)
+            .and_then(|item| item.get(pos.1))
+            .copied()
+            .expect("Unable to find piece")
     }
 
     fn place_piece(square: Square, piece: Piece) {
