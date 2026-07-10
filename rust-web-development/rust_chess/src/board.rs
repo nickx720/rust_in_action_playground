@@ -26,8 +26,8 @@ impl Board {
             .expect("Unable to find piece")
     }
 
-    fn place_piece(square: Square, piece: Piece) {
-        todo!()
+    fn place_piece(&mut self, square: Square, piece: Piece) {
+        self.board[square.rank as usize][square.file as usize] = Some(piece);
     }
 
     fn remove_piece(square: Square) {

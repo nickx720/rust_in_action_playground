@@ -23,8 +23,8 @@ pub struct Piece {
 // A square uses chess coordinates: `file` is the a–h column and `rank` is the
 // 1–8 row, stored internally as zero-based values from 0 to 7.
 pub struct Square {
-    file: u8,
-    rank: u8,
+    pub file: u8,
+    pub rank: u8,
 }
 
 struct ChessMove {
