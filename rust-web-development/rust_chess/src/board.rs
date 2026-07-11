@@ -30,8 +30,8 @@ impl Board {
         self.board[square.rank as usize][square.file as usize] = Some(piece);
     }
 
-    fn remove_piece(square: Square) {
-        todo!()
+    fn remove_piece(&mut self, square: Square) {
+        self.board[square.rank as usize][square.file as usize] = None;
     }
 }
 
