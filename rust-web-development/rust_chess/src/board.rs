@@ -1,10 +1,10 @@
 use crate::chess::{Piece, Square};
 
-struct Board {
+pub struct Board {
     board: [[Option<Piece>; 8]; 8],
 }
 impl Board {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             board: [[None; 8]; 8],
         }
@@ -13,12 +13,12 @@ impl Board {
         self.board.iter().all(|row| row.iter().all(Option::is_none))
     }
 
-    fn starting_positing(&self) -> Option<Piece> {
+    pub(crate) fn starting_positing(&self) -> Option<Piece> {
         (self.board.first().and_then(|inner| inner.first()))
             .copied()
             .expect("nested array must contain an item")
     }
-    fn piece_at(&self, pos: (usize, usize)) -> Option<Piece> {
+    pub(crate) fn piece_at(&self, pos: (usize, usize)) -> Option<Piece> {
         self.board
             .get(pos.0)
             .and_then(|item| item.get(pos.1))
@@ -26,11 +26,11 @@ impl Board {
             .expect("Unable to find piece")
     }
 
-    fn place_piece(&mut self, square: Square, piece: Piece) {
+    pub(crate) fn place_piece(&mut self, square: Square, piece: Piece) {
         self.board[square.rank as usize][square.file as usize] = Some(piece);
     }
 
-    fn remove_piece(&mut self, square: Square) {
+    pub(crate) fn remove_piece(&mut self, square: Square) {
         self.board[square.rank as usize][square.file as usize] = None;
     }
 }
