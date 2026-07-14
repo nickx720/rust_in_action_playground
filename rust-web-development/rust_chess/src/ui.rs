@@ -36,6 +36,12 @@ pub fn renderer(board: &Board) {
     //
     //  Keep those stages conceptually separate. The renderer should not know how pieces arrived at their squares,
     //  whether a position is legal, or whose turn it is.
+    for pieces in board.board.iter().rev() {
+        for piece in pieces {
+            let unicode = generate_view(&piece.unwrap());
+            print!("{}", unicode);
+        }
+    }
     todo!()
 }
 

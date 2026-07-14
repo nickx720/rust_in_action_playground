@@ -1,7 +1,7 @@
 use crate::chess::{Piece, Square};
 
 pub struct Board {
-    board: [[Option<Piece>; 8]; 8],
+    pub board: [[Option<Piece>; 8]; 8],
 }
 impl Board {
     pub(crate) fn new() -> Self {
