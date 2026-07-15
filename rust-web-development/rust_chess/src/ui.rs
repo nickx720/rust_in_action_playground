@@ -36,13 +36,21 @@ pub fn renderer(board: &Board) {
     //
     //  Keep those stages conceptually separate. The renderer should not know how pieces arrived at their squares,
     //  whether a position is legal, or whose turn it is.
-    for pieces in board.board.iter().rev() {
+    print!("   ");
+    if let Some(rank) = board.board.first() {
+        for index in 0..rank.len() {
+            let letter = (b'a' + index as u8) as char;
+            print!("{letter:<4}"); // < left aligns the value, 4 gives a minimum width of 4
+        }
+    }
+    for (file, pieces) in board.board.iter().enumerate().rev() {
+        print!("{file:<4}"); // < left aligns the value, 4 gives a minimum width of 4
         for piece in pieces {
             let unicode = generate_view(&piece.unwrap());
             print!("{}", unicode);
         }
+        println!(); //new line
     }
-    todo!()
 }
 
 #[cfg(test)]
