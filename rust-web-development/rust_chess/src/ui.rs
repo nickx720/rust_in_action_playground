@@ -46,8 +46,12 @@ pub fn renderer(board: &Board) {
     for (file, pieces) in board.board.iter().enumerate().rev() {
         print!("{file:<4}"); // < left aligns the value, 4 gives a minimum width of 4
         for piece in pieces {
-            let unicode = generate_view(&piece.unwrap());
-            print!("{}", unicode);
+            if let Some(piece_view) = piece {
+                let unicode = generate_view(piece_view);
+                print!("{unicode:<4}");
+            } else {
+                print!("{:4}", "")
+            }
         }
         println!(); //new line
     }
