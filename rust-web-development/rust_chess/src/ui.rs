@@ -25,7 +25,7 @@ pub fn generate_view(piece: &Piece) -> char {
 }
 pub fn renderer(board: &Board) {
     // Which rank and file is currently being displayed?
-    //  - Is that square empty or occupied?
+    //  - Is that square empty or occupied? DONE
     //  - If occupied, which visible symbol represents that piece’s kind and color?
     //  - In which direction should ranks be displayed so White appears at the bottom?
     //  - Where should rank and file labels appear?
