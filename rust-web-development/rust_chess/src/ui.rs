@@ -24,18 +24,6 @@ pub fn generate_view(piece: &Piece) -> char {
     }
 }
 pub fn renderer(board: &Board) {
-    // Which rank and file is currently being displayed?
-    //  - Is that square empty or occupied? DONE
-    //  - If occupied, which visible symbol represents that piece’s kind and color?
-    //  - In which direction should ranks be displayed so White appears at the bottom?
-    //  - Where should rank and file labels appear?
-    //
-    //  Think of it as a translation:
-    //
-    //  board state → visual representation → terminal output
-    //
-    //  Keep those stages conceptually separate. The renderer should not know how pieces arrived at their squares,
-    //  whether a position is legal, or whose turn it is.
     print!("   ");
     if let Some(rank) = board.board.first() {
         for index in 0..rank.len() {
@@ -43,8 +31,9 @@ pub fn renderer(board: &Board) {
             print!("{letter:<4}"); // < left aligns the value, 4 gives a minimum width of 4
         }
     }
-    for (file, pieces) in board.board.iter().enumerate().rev() {
-        print!("{file:<4}"); // < left aligns the value, 4 gives a minimum width of 4
+    println!(); //new line
+    for (rank, pieces) in board.board.iter().enumerate().rev() {
+        print!("{:<4}", rank + 1); // < left aligns the value, 4 gives a minimum width of 4
         for piece in pieces {
             if let Some(piece_view) = piece {
                 let unicode = generate_view(piece_view);
