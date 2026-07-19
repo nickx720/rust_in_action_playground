@@ -1,4 +1,4 @@
-use crate::chess::{Piece, Square};
+use crate::chess::{Color, Piece, PieceKind, Square};
 
 pub struct Board {
     pub board: [[Option<Piece>; 8]; 8],
@@ -6,7 +6,52 @@ pub struct Board {
 impl Board {
     pub(crate) fn new() -> Self {
         Self {
-            board: [[None; 8]; 8],
+            board: [
+                [
+                    Some(Piece::new(Color::White, PieceKind::Rook)),
+                    Some(Piece::new(Color::White, PieceKind::Knight)),
+                    Some(Piece::new(Color::White, PieceKind::Bishop)),
+                    Some(Piece::new(Color::White, PieceKind::Queen)),
+                    Some(Piece::new(Color::White, PieceKind::King)),
+                    Some(Piece::new(Color::White, PieceKind::Bishop)),
+                    Some(Piece::new(Color::White, PieceKind::Knight)),
+                    Some(Piece::new(Color::White, PieceKind::Rook)),
+                ],
+                [
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                    Some(Piece::new(Color::White, PieceKind::Pawn)),
+                ],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                    Some(Piece::new(Color::Black, PieceKind::Pawn)),
+                ],
+                [
+                    Some(Piece::new(Color::Black, PieceKind::Rook)),
+                    Some(Piece::new(Color::Black, PieceKind::Knight)),
+                    Some(Piece::new(Color::Black, PieceKind::Bishop)),
+                    Some(Piece::new(Color::Black, PieceKind::Queen)),
+                    Some(Piece::new(Color::Black, PieceKind::King)),
+                    Some(Piece::new(Color::Black, PieceKind::Bishop)),
+                    Some(Piece::new(Color::Black, PieceKind::Knight)),
+                    Some(Piece::new(Color::Black, PieceKind::Rook)),
+                ],
+            ],
         }
     }
     fn empty(&self) -> bool {
@@ -41,16 +86,19 @@ mod tests {
     use crate::chess::{Color, Piece, PieceKind, Square};
 
     #[test]
-    fn empty_board_is_empty() {
+    fn new_board_is_not_empty() {
         let board = Board::new();
 
-        assert!(board.empty());
+        assert!(!board.empty());
     }
 
     #[test]
-    fn starting_position_on_an_empty_board_is_none() {
+    fn starting_position_begins_with_a_white_rook() {
         let board = Board::new();
-        assert!(board.starting_positing().is_none());
+        assert_eq!(
+            board.starting_positing(),
+            Some(Piece::new(Color::White, PieceKind::Rook))
+        );
     }
 
     #[test]
@@ -85,7 +133,7 @@ mod tests {
         board.remove_piece(square);
 
         assert_eq!(board.piece_at((3, 7)), None);
-        assert!(board.empty());
+        assert!(!board.empty());
     }
 
     #[test]
@@ -94,7 +142,7 @@ mod tests {
 
         board.remove_piece(Square::new(3, 3));
 
-        assert!(board.empty());
+        assert!(!board.empty());
     }
 
     #[test]
