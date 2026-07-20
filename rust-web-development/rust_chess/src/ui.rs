@@ -1,6 +1,6 @@
 use crate::{
     board::Board,
-    chess::{Color, Piece, PieceKind},
+    chess::{ChessMove, Color, Piece, PieceKind},
 };
 
 pub fn generate_view(piece: &Piece) -> char {
@@ -45,7 +45,9 @@ pub fn renderer(board: &Board) {
         println!(); //new line
     }
 }
-
+pub fn parser(input: &str) -> ChessMove {
+    todo!()
+}
 #[cfg(test)]
 mod tests {
     use super::generate_view;
