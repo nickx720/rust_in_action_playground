@@ -46,12 +46,48 @@ pub fn renderer(board: &Board) {
     }
 }
 pub fn parser(input: &str) -> ChessMove {
+    let items = input
+        .split_whitespace()
+        .filter_map(|item| {
+            if item.len() == 2 {
+                if let [first, second] = *item
+                    .split("")
+                    .filter(|&item| item != "".to_string())
+                    .collect::<Vec<&str>>()
+                    .as_slice()
+                {
+                    match first.chars().next() {
+                        Some(file @ 'a'..='h') => match second.parse::<u8>() {
+                            Ok(rank @ 1..=8) => Some(item),
+                            _ => None,
+                        },
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<&str>>();
+    dbg!(items);
     todo!()
 }
 #[cfg(test)]
 mod tests {
-    use super::generate_view;
+    use super::{generate_view, parser};
     use crate::chess::{Color, Piece, PieceKind};
+
+    #[test]
+    fn parser_accepts_valid_squares() {
+        parser("e4 e8");
+    }
+
+    #[test]
+    fn parser_rejects_invalid_square() {
+        parser("e9");
+    }
 
     #[test]
     fn generate_view_renders_all_pieces() {
