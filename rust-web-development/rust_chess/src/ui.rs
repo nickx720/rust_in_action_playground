@@ -1,6 +1,6 @@
 use crate::{
     board::Board,
-    chess::{ChessMove, Color, Piece, PieceKind},
+    chess::{ChessMove, Color, Piece, PieceKind, Square},
 };
 
 pub fn generate_view(piece: &Piece) -> char {
@@ -45,7 +45,7 @@ pub fn renderer(board: &Board) {
         println!(); //new line
     }
 }
-pub fn parser(input: &str) -> ChessMove {
+pub fn parser(input: &str) -> Option<ChessMove> {
     let items = input
         .split_whitespace()
         .filter_map(|item| {
@@ -58,7 +58,7 @@ pub fn parser(input: &str) -> ChessMove {
                 {
                     match first.chars().next() {
                         Some(file @ 'a'..='h') => match second.parse::<u8>() {
-                            Ok(rank @ 1..=8) => Some(item),
+                            Ok(rank @ 1..=8) => Some(Square::new(file as u8, rank)),
                             _ => None,
                         },
                         _ => None,
@@ -70,9 +70,15 @@ pub fn parser(input: &str) -> ChessMove {
                 None
             }
         })
-        .collect::<Vec<&str>>();
-    dbg!(items);
-    todo!()
+        .collect::<Vec<Square>>();
+    if items.len() == 2 {
+        let (from, to) = (
+            items.get(0).expect("from is not present"),
+            items.get(1).expect("to is not present"),
+        );
+        return Some(ChessMove::new(*from, *to));
+    }
+    None
 }
 #[cfg(test)]
 mod tests {

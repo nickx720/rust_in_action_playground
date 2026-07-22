@@ -27,7 +27,7 @@ impl Piece {
 
 // A square uses chess coordinates: `file` is the a–h column and `rank` is the
 // 1–8 row, stored internally as zero-based values from 0 to 7.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Square {
     pub file: u8,
     pub rank: u8,
@@ -41,4 +41,9 @@ impl Square {
 pub struct ChessMove {
     from: Square,
     to: Square,
+}
+impl ChessMove {
+    pub fn new(from: Square, to: Square) -> Self {
+        Self { from, to }
+    }
 }
