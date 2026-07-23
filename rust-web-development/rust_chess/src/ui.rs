@@ -58,7 +58,10 @@ pub fn parser(input: &str) -> Option<ChessMove> {
                 {
                     match first.chars().next() {
                         Some(file @ 'a'..='h') => match second.parse::<u8>() {
-                            Ok(rank @ 1..=8) => Some(Square::new(file as u8, rank)),
+                            Ok(rank @ 1..=8) => {
+                                let file = file as u8 - 97;
+                                Some(Square::new(file, rank))
+                            }
                             _ => None,
                         },
                         _ => None,
@@ -93,6 +96,11 @@ mod tests {
     #[test]
     fn parser_rejects_invalid_square() {
         parser("e9");
+    }
+
+    #[test]
+    fn parser_rejects_invalid_input_between_valid_squares() {
+        assert!(parser("e2 invalid e4").is_none());
     }
 
     #[test]
