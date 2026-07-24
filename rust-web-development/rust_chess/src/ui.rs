@@ -48,7 +48,7 @@ pub fn renderer(board: &Board) {
 pub fn parser(input: &str) -> Option<ChessMove> {
     let items = input
         .split_whitespace()
-        .filter_map(|item| {
+        .map(|item| {
             if item.len() == 2 {
                 if let [first, second] = *item
                     .split("")
@@ -73,12 +73,11 @@ pub fn parser(input: &str) -> Option<ChessMove> {
                 None
             }
         })
-        .collect::<Vec<Square>>();
-    if items.len() == 2 {
-        let (from, to) = (
-            items.get(0).expect("from is not present"),
-            items.get(1).expect("to is not present"),
-        );
+        .collect::<Vec<Option<Square>>>();
+    if let (Some(from), Some(to)) = (
+        items.get(0).expect("from is not present"),
+        items.get(1).expect("to is not present"),
+    ) {
         return Some(ChessMove::new(*from, *to));
     }
     None

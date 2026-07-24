@@ -38,6 +38,7 @@ impl Square {
         Self { file, rank }
     }
 }
+#[derive(Clone, Copy, Debug)]
 pub struct ChessMove {
     from: Square,
     to: Square,
