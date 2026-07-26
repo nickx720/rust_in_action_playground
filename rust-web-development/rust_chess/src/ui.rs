@@ -89,12 +89,29 @@ mod tests {
 
     #[test]
     fn parser_accepts_valid_squares() {
-        parser("e4 e8");
+        assert!(parser("e2 e4").is_some());
     }
 
     #[test]
-    fn parser_rejects_invalid_square() {
-        parser("e9");
+    fn parser_rejects_missing_coordinates_without_panicking() {
+        for input in ["", "e2"] {
+            assert!(
+                parser(input).is_none(),
+                "accepted incomplete input: {input:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn parser_rejects_extra_coordinates() {
+        assert!(parser("e2 e4 e5").is_none());
+    }
+
+    #[test]
+    fn parser_rejects_invalid_squares() {
+        for input in ["e9 e4", "e2 e9", "i2 e4", "e2 i4"] {
+            assert!(parser(input).is_none(), "accepted invalid input: {input:?}");
+        }
     }
 
     #[test]
