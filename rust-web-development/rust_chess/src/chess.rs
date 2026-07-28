@@ -29,8 +29,8 @@ impl Piece {
 // 1–8 row, stored internally as zero-based values from 0 to 7.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Square {
-    file: u8,
-    rank: u8,
+    pub(crate) file: u8,
+    pub(crate) rank: u8,
 }
 
 impl Square {
@@ -45,6 +45,12 @@ pub struct ChessMove {
     pub from: Square,
     pub to: Square,
 }
+impl PartialEq for ChessMove {
+    fn eq(&self, other: &Self) -> bool {
+        self.from.file == other.to.file && self.to.rank == other.to.rank
+    }
+}
+impl Eq for ChessMove {}
 impl ChessMove {
     pub fn new(from: Square, to: Square) -> Self {
         Self { from, to }
