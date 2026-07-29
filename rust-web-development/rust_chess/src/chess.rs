@@ -38,8 +38,7 @@ impl Square {
         Self { file, rank }
     }
 }
-// TODO: Derive `Debug`, `PartialEq`, and `Eq` for `ChessMove` (and
-// `PartialEq`/`Eq` for `Square`) so parser tests can compare moves directly.
+
 #[derive(Debug)]
 pub struct ChessMove {
     pub from: Square,
@@ -47,7 +46,7 @@ pub struct ChessMove {
 }
 impl PartialEq for ChessMove {
     fn eq(&self, other: &Self) -> bool {
-        self.from.file == other.to.file && self.to.rank == other.to.rank
+        self.from.file == other.from.file && self.to.rank == other.to.rank
     }
 }
 impl Eq for ChessMove {}
