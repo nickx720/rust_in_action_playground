@@ -74,13 +74,10 @@ pub fn parser(input: &str) -> Option<ChessMove> {
             }
         })
         .collect::<Vec<Option<Square>>>();
-    if let (Some(from), Some(to)) = (
-        items.get(0).expect("from is not present"),
-        items.get(1).expect("to is not present"),
-    ) {
-        return Some(ChessMove::new(*from, *to));
+    match items.as_slice() {
+        [Some(from), Some(to)] => Some(ChessMove::new(*from, *to)),
+        _ => None,
     }
-    None
 }
 #[cfg(test)]
 mod tests {
@@ -150,7 +147,6 @@ mod tests {
     #[test]
     fn parser_produces_expected_chess_move() {
         let actual = parser("e2 e4").expect("valid move should be parsed");
-        dbg!(&actual);
         let expected = ChessMove::new(Square::new(4, 1), Square::new(4, 3));
 
         assert_eq!(actual, expected);
