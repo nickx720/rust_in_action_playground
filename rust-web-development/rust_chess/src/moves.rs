@@ -5,3 +5,6 @@ impl Board {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod test {}
