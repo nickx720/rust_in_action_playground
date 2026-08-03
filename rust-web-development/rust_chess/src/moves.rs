@@ -2,8 +2,8 @@ use crate::{
     board::Board,
     chess::{ChessMove, Piece, Square},
 };
-// codex resume 019fbc54-c741-78b2-a33e-90ab75d843f2
 impl Board {
+    // codex resume 019fbc54-c741-78b2-a33e-90ab75d843f2
     pub fn get(&self, square: Square) -> Option<Piece> {
         self.board[square.file as usize][square.rank as usize]
     }
