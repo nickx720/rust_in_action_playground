@@ -9,8 +9,10 @@ impl Board {
     }
     pub fn pseudo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
         if let Some(piece) = &self.get(square) {
-            dbg!(piece);
-            Some(vec![])
+            match piece.kind {
+                crate::chess::PieceKind::Knight => Some(vec![]),
+                _ => None,
+            }
         } else {
             None
         }
