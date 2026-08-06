@@ -23,6 +23,28 @@ impl Board {
                     // corners only two directions
                     // middle of the board can go in 4 direction
                     if square.is_corner() {
+                        let mut possible_moves = vec![];
+                        if square.file == 0 {
+                            let square_to = Square::new(square.file + 2, square.rank + 1);
+                            let square_to_another = Square::new(square.file + 1, square.rank + 2);
+                            possible_moves.push(
+                                vec![
+                                    ChessMove::new(square, square_to),
+                                    ChessMove::new(square, square_to_another),
+                                ]
+                                .as_slice(),
+                            );
+                        } else {
+                            let square_to = Square::new(square.file - 2, square.rank - 1);
+                            let square_to_another = Square::new(square.file - 1, square.rank - 2);
+                            possible_moves.push(
+                                vec![
+                                    ChessMove::new(square, square_to),
+                                    ChessMove::new(square, square_to_another),
+                                ]
+                                .as_slice(),
+                            );
+                        }
                         // corner
                     }
                     Some(vec![])
