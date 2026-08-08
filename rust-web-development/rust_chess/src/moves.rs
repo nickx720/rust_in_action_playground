@@ -21,9 +21,8 @@ impl Board {
             match piece.kind {
                 crate::chess::PieceKind::Knight => {
                     let mut possible_moves = vec![];
-                    // corners only two directions
-                    // middle of the board can go in 4 direction
                     if square.is_corner() {
+                        // corners only two directions
                         if square.file == 0 {
                             let square_to = Square::new(square.file + 2, square.rank + 1);
                             let square_to_another = Square::new(square.file + 1, square.rank + 2);
@@ -39,8 +38,8 @@ impl Board {
                                 ChessMove::new(square, square_to_another),
                             ]);
                         }
-                        // corner
                     } else {
+                        // middle of the board can go in 4 direction
                     }
                     Some(possible_moves)
                 }
