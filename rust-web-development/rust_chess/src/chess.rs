@@ -46,7 +46,10 @@ pub struct ChessMove {
 }
 impl PartialEq for ChessMove {
     fn eq(&self, other: &Self) -> bool {
-        self.from.file == other.from.file && self.to.rank == other.to.rank
+        self.from.file == other.from.file
+            && self.from.rank == other.from.rank
+            && self.to.file == other.to.file
+            && self.to.rank == other.to.rank
     }
 }
 impl Eq for ChessMove {}

@@ -49,7 +49,6 @@ impl Board {
                     let square_left_bottom = Square::new(square.file - 1, square.rank - 2);
                     let square_right_top = Square::new(square.file + 1, square.rank + 2);
                     let square_right_bottom = Square::new(square.file + 1, square.rank - 2);
-                    // TODO src/chess.rs:49 compares only two of the four move coordinates, so different moves may compare equal.
                     possible_moves.extend(vec![
                         ChessMove::new(square, square_top_left),
                         ChessMove::new(square, square_top_right),
