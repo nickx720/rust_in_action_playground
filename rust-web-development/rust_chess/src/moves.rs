@@ -71,17 +71,89 @@ impl Board {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+    use crate::chess::{Color, PieceKind};
+
+    fn empty_board() -> Board {
+        Board {
+            board: [[None; 8]; 8],
+        }
+    }
+
+    fn assert_moves_match(mut actual: Vec<ChessMove>, mut expected: Vec<ChessMove>) {
+        let coordinates = |chess_move: &ChessMove| {
+            (
+                chess_move.from.file,
+                chess_move.from.rank,
+                chess_move.to.file,
+                chess_move.to.rank,
+            )
+        };
+
+        actual.sort_by_key(&coordinates);
+        expected.sort_by_key(&coordinates);
+
+        assert_eq!(actual, expected);
+    }
 
     #[test]
     fn psuedo_legal_moves_accepts_middle_knight_moves() {
-        todo!()
+        let mut board = empty_board();
+        let from = Square::new(3, 3);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a knight should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(1, 2)),
+            ChessMove::new(from, Square::new(1, 4)),
+            ChessMove::new(from, Square::new(2, 1)),
+            ChessMove::new(from, Square::new(2, 5)),
+            ChessMove::new(from, Square::new(4, 1)),
+            ChessMove::new(from, Square::new(4, 5)),
+            ChessMove::new(from, Square::new(5, 2)),
+            ChessMove::new(from, Square::new(5, 4)),
+        ];
+
+        assert_moves_match(moves, expected);
     }
+
     #[test]
     fn psuedo_legal_moves_accepts_corner_knight_moves() {
-        todo!()
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a knight should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(1, 2)),
+            ChessMove::new(from, Square::new(2, 1)),
+        ];
+
+        assert_moves_match(moves, expected);
     }
+
     #[test]
     fn psuedo_legal_moves_accepts_corner_knight_moves_with_opponents() {
-        todo!()
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        let first_opponent = Square::new(1, 2);
+        let second_opponent = Square::new(2, 1);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
+        board.place_piece(first_opponent, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(second_opponent, Piece::new(Color::Black, PieceKind::Bishop));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a knight should be able to capture opposing pieces");
+        let expected = vec![
+            ChessMove::new(from, first_opponent),
+            ChessMove::new(from, second_opponent),
+        ];
+
+        assert_moves_match(moves, expected);
     }
 }
