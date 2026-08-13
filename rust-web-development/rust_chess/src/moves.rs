@@ -40,25 +40,25 @@ impl Board {
                         }
                     } else {
                         // middle of the board can go in 4 direction
+                        let square_top_left = Square::new(square.file + 2, square.rank + 1);
+                        let square_top_right = Square::new(square.file + 2, square.rank - 1);
+                        let square_bottom_left = Square::new(square.file - 2, square.rank - 1);
+                        let square_bottom_right = Square::new(square.file - 2, square.rank - 1);
+                        let square_left_top = Square::new(square.file - 1, square.rank + 2);
+                        let square_left_bottom = Square::new(square.file - 1, square.rank - 2);
+                        let square_right_top = Square::new(square.file + 1, square.rank + 2);
+                        let square_right_bottom = Square::new(square.file + 1, square.rank - 2);
+                        possible_moves.extend(vec![
+                            ChessMove::new(square, square_top_left),
+                            ChessMove::new(square, square_top_right),
+                            ChessMove::new(square, square_bottom_left),
+                            ChessMove::new(square, square_bottom_right),
+                            ChessMove::new(square, square_left_top),
+                            ChessMove::new(square, square_left_bottom),
+                            ChessMove::new(square, square_right_top),
+                            ChessMove::new(square, square_right_bottom),
+                        ]);
                     }
-                    let square_top_left = Square::new(square.file + 2, square.rank + 1);
-                    let square_top_right = Square::new(square.file + 2, square.rank - 1);
-                    let square_bottom_left = Square::new(square.file - 2, square.rank - 1);
-                    let square_bottom_right = Square::new(square.file - 2, square.rank - 1);
-                    let square_left_top = Square::new(square.file - 1, square.rank + 2);
-                    let square_left_bottom = Square::new(square.file - 1, square.rank - 2);
-                    let square_right_top = Square::new(square.file + 1, square.rank + 2);
-                    let square_right_bottom = Square::new(square.file + 1, square.rank - 2);
-                    possible_moves.extend(vec![
-                        ChessMove::new(square, square_top_left),
-                        ChessMove::new(square, square_top_right),
-                        ChessMove::new(square, square_bottom_left),
-                        ChessMove::new(square, square_bottom_right),
-                        ChessMove::new(square, square_left_top),
-                        ChessMove::new(square, square_left_bottom),
-                        ChessMove::new(square, square_right_top),
-                        ChessMove::new(square, square_right_bottom),
-                    ]);
                     Some(possible_moves)
                 }
                 _ => None,
