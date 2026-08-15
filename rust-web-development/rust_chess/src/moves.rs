@@ -133,4 +133,28 @@ mod test {
 
         assert_moves_match(moves, expected);
     }
+
+    #[test]
+    fn pseudo_legal_moves_rejects_friendly_occupied_destinations() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        let friendly_destination = Square::new(1, 2);
+        let opponent_destination = Square::new(2, 1);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
+        board.place_piece(
+            friendly_destination,
+            Piece::new(Color::White, PieceKind::Pawn),
+        );
+        board.place_piece(
+            opponent_destination,
+            Piece::new(Color::Black, PieceKind::Bishop),
+        );
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a knight should have pseudo-legal moves");
+        let expected = vec![ChessMove::new(from, opponent_destination)];
+
+        assert_moves_match(moves, expected);
+    }
 }
