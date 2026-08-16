@@ -33,7 +33,13 @@ impl Board {
                         };
 
                         if file < 8 && rank < 8 {
-                            possible_moves.push(ChessMove::new(square, Square::new(file, rank)));
+                            let pos_square = Square::new(file, rank);
+                            if let Some(piece_at_position) = self.get(pos_square)
+                                && piece_at_position.color == piece.color
+                            {
+                                continue;
+                            }
+                            possible_moves.push(ChessMove::new(square, pos_square));
                         }
                     }
                     Some(possible_moves)
