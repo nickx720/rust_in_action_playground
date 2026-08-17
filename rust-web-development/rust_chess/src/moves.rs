@@ -44,6 +44,9 @@ impl Board {
                     }
                     Some(possible_moves)
                 }
+                crate::chess::PieceKind::King => {
+                    todo!()
+                }
                 _ => None,
             }
         } else {
