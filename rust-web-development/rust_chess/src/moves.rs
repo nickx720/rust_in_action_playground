@@ -8,7 +8,7 @@ impl Board {
     pub fn get(&self, square: Square) -> Option<Piece> {
         self.board[square.rank as usize][square.file as usize]
     }
-    pub fn pseudo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
+    pub fn psuedo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
         if let Some(piece) = &self.get(square) {
             match piece.kind {
                 crate::chess::PieceKind::Knight => {
@@ -45,7 +45,37 @@ impl Board {
                     Some(possible_moves)
                 }
                 crate::chess::PieceKind::King => {
-                    todo!()
+                    let mut possible_moves = vec![];
+                    let offsets = [
+                        (1, 1), //diagonal
+                        (1, -1),
+                        (-1, 1),
+                        (-1, -1),
+                        (1, 0), // not diagonal
+                        (-1, 0),
+                        (0, 1),
+                        (0, -1),
+                    ];
+
+                    for (file_offset, rank_offset) in offsets {
+                        let Some(file) = square.file.checked_add_signed(file_offset) else {
+                            continue;
+                        };
+                        let Some(rank) = square.rank.checked_add_signed(rank_offset) else {
+                            continue;
+                        };
+
+                        if file < 8 && rank < 8 {
+                            let pos_square = Square::new(file, rank);
+                            if let Some(piece_at_position) = self.get(pos_square)
+                                && piece_at_position.color == piece.color
+                            {
+                                continue;
+                            }
+                            possible_moves.push(ChessMove::new(square, pos_square));
+                        }
+                    }
+                    Some(possible_moves)
                 }
                 _ => None,
             }
@@ -89,7 +119,7 @@ mod test {
         board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
 
         let moves = board
-            .pseudo_legal_moves(from)
+            .psuedo_legal_moves(from)
             .expect("a knight should have pseudo-legal moves");
         let expected = vec![
             ChessMove::new(from, Square::new(1, 2)),
@@ -112,7 +142,7 @@ mod test {
         board.place_piece(from, Piece::new(Color::White, PieceKind::Knight));
 
         let moves = board
-            .pseudo_legal_moves(from)
+            .psuedo_legal_moves(from)
             .expect("a knight should have pseudo-legal moves");
         let expected = vec![
             ChessMove::new(from, Square::new(1, 2)),
@@ -133,7 +163,7 @@ mod test {
         board.place_piece(second_opponent, Piece::new(Color::Black, PieceKind::Bishop));
 
         let moves = board
-            .pseudo_legal_moves(from)
+            .psuedo_legal_moves(from)
             .expect("a knight should be able to capture opposing pieces");
         let expected = vec![
             ChessMove::new(from, first_opponent),
@@ -160,9 +190,100 @@ mod test {
         );
 
         let moves = board
-            .pseudo_legal_moves(from)
+            .psuedo_legal_moves(from)
             .expect("a knight should have pseudo-legal moves");
         let expected = vec![ChessMove::new(from, opponent_destination)];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn psuedo_legal_moves_accepts_middle_king_moves() {
+        let mut board = empty_board();
+        let from = Square::new(3, 3);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::King));
+
+        let moves = board
+            .psuedo_legal_moves(from)
+            .expect("a king should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(2, 2)),
+            ChessMove::new(from, Square::new(2, 3)),
+            ChessMove::new(from, Square::new(2, 4)),
+            ChessMove::new(from, Square::new(3, 2)),
+            ChessMove::new(from, Square::new(3, 4)),
+            ChessMove::new(from, Square::new(4, 2)),
+            ChessMove::new(from, Square::new(4, 3)),
+            ChessMove::new(from, Square::new(4, 4)),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn psuedo_legal_moves_accepts_corner_king_moves() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::King));
+
+        let moves = board
+            .psuedo_legal_moves(from)
+            .expect("a king should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(0, 1)),
+            ChessMove::new(from, Square::new(1, 0)),
+            ChessMove::new(from, Square::new(1, 1)),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn psuedo_legal_moves_accepts_corner_king_moves_with_opponents() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        let first_opponent = Square::new(0, 1);
+        let second_opponent = Square::new(1, 0);
+        let third_opponent = Square::new(1, 1);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::King));
+        board.place_piece(first_opponent, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(second_opponent, Piece::new(Color::Black, PieceKind::Bishop));
+        board.place_piece(third_opponent, Piece::new(Color::Black, PieceKind::Knight));
+
+        let moves = board
+            .psuedo_legal_moves(from)
+            .expect("a king should be able to capture opposing pieces");
+        let expected = vec![
+            ChessMove::new(from, first_opponent),
+            ChessMove::new(from, second_opponent),
+            ChessMove::new(from, third_opponent),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_king_moves_reject_friendly_occupied_destinations() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        let friendly_destination = Square::new(0, 1);
+        let first_opponent = Square::new(1, 0);
+        let second_opponent = Square::new(1, 1);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::King));
+        board.place_piece(
+            friendly_destination,
+            Piece::new(Color::White, PieceKind::Pawn),
+        );
+        board.place_piece(first_opponent, Piece::new(Color::Black, PieceKind::Bishop));
+        board.place_piece(second_opponent, Piece::new(Color::Black, PieceKind::Knight));
+
+        let moves = board
+            .psuedo_legal_moves(from)
+            .expect("a king should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, first_opponent),
+            ChessMove::new(from, second_opponent),
+        ];
 
         assert_moves_match(moves, expected);
     }
