@@ -77,6 +77,9 @@ impl Board {
                     }
                     Some(possible_moves)
                 }
+                crate::chess::PieceKind::Bishop => {
+                    todo!()
+                }
                 _ => None,
             }
         } else {
