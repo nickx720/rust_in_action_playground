@@ -90,6 +90,12 @@ impl Board {
                     ];
                     for (file_offset, rank_offset) in offsets {
                         // loop through to edge conditions
+                        let (mut file, mut rank) = (square.file, square.rank);
+                        loop {
+                            if file < 8 && rank < 8 {
+                                todo!()
+                            }
+                        }
                     }
                     Some(possible_moves)
                 }
