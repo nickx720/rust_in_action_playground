@@ -92,8 +92,27 @@ impl Board {
                         // loop through to edge conditions
                         let (mut file, mut rank) = (square.file, square.rank);
                         loop {
+                            let Some(file_add) = file.checked_add_signed(file_offset) else {
+                                continue;
+                            };
+                            let Some(rank_add) = rank.checked_add_signed(rank_offset) else {
+                                continue;
+                            };
+                            file += file_add;
+                            rank += rank_add;
                             if file < 8 && rank < 8 {
-                                todo!()
+                                let pos_square = Square::new(file, rank);
+                                if let Some(piece_at_position) = self.get(pos_square) {
+                                    if piece_at_position.color == piece.color {
+                                        continue;
+                                    } else {
+                                        possible_moves.push(ChessMove::new(square, pos_square));
+                                        continue;
+                                    }
+                                }
+                                possible_moves.push(ChessMove::new(square, pos_square));
+                            } else {
+                                break;
                             }
                         }
                     }
@@ -305,6 +324,99 @@ mod test {
         let expected = vec![
             ChessMove::new(from, first_opponent),
             ChessMove::new(from, second_opponent),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_moves_accepts_middle_bishop_moves() {
+        let mut board = empty_board();
+        let from = Square::new(3, 3);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(0, 0)),
+            ChessMove::new(from, Square::new(1, 1)),
+            ChessMove::new(from, Square::new(2, 2)),
+            ChessMove::new(from, Square::new(4, 4)),
+            ChessMove::new(from, Square::new(5, 5)),
+            ChessMove::new(from, Square::new(6, 6)),
+            ChessMove::new(from, Square::new(7, 7)),
+            ChessMove::new(from, Square::new(0, 6)),
+            ChessMove::new(from, Square::new(1, 5)),
+            ChessMove::new(from, Square::new(2, 4)),
+            ChessMove::new(from, Square::new(4, 2)),
+            ChessMove::new(from, Square::new(5, 1)),
+            ChessMove::new(from, Square::new(6, 0)),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_moves_accepts_corner_bishop_moves() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should have pseudo-legal moves");
+        let expected = (1..8)
+            .map(|coordinate| ChessMove::new(from, Square::new(coordinate, coordinate)))
+            .collect();
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_bishop_moves_capture_opponents_without_moving_past_them() {
+        let mut board = empty_board();
+        let from = Square::new(2, 2);
+        let opponent = Square::new(4, 4);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+        board.place_piece(opponent, Piece::new(Color::Black, PieceKind::Pawn));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should be able to capture an opposing piece");
+        let expected = vec![
+            ChessMove::new(from, Square::new(0, 0)),
+            ChessMove::new(from, Square::new(1, 1)),
+            ChessMove::new(from, Square::new(1, 3)),
+            ChessMove::new(from, Square::new(0, 4)),
+            ChessMove::new(from, Square::new(3, 1)),
+            ChessMove::new(from, Square::new(4, 0)),
+            ChessMove::new(from, Square::new(3, 3)),
+            ChessMove::new(from, opponent),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_bishop_moves_stop_before_friendly_pieces() {
+        let mut board = empty_board();
+        let from = Square::new(2, 2);
+        let friendly_blocker = Square::new(4, 4);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+        board.place_piece(friendly_blocker, Piece::new(Color::White, PieceKind::Pawn));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(0, 0)),
+            ChessMove::new(from, Square::new(1, 1)),
+            ChessMove::new(from, Square::new(1, 3)),
+            ChessMove::new(from, Square::new(0, 4)),
+            ChessMove::new(from, Square::new(3, 1)),
+            ChessMove::new(from, Square::new(4, 0)),
+            ChessMove::new(from, Square::new(3, 3)),
         ];
 
         assert_moves_match(moves, expected);
