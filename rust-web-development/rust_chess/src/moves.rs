@@ -98,17 +98,23 @@ impl Board {
                             let Some(rank_add) = rank.checked_add_signed(rank_offset) else {
                                 continue;
                             };
-                            if file < 8 && rank < 8 {
+                            if file < 8 && rank < 8 && file < 8 && rank_add < 8 {
                                 let pos_square = Square::new(file_add, rank_add);
-                                if let Some(piece_at_position) = self.get(pos_square)
-                                    && piece_at_position.color == piece.color
-                                {
-                                    break;
+                                if let Some(piece_at_position) = self.get(pos_square) {
+                                    if piece_at_position.color == piece.color {
+                                        break;
+                                    }
+                                    if piece_at_position.color != piece.color {
+                                        possible_moves.push(ChessMove::new(square, pos_square));
+                                        break;
+                                    }
                                 }
                                 possible_moves.push(ChessMove::new(square, pos_square));
+                                file = file_add;
+                                rank = rank_add;
+                            } else {
+                                break;
                             }
-                            file += file_add;
-                            rank += rank_add;
                         }
                     }
                     Some(possible_moves)
