@@ -98,7 +98,8 @@ impl Board {
                             let Some(rank_add) = rank.checked_add_signed(rank_offset) else {
                                 continue;
                             };
-                            if file < 8 && rank < 8 && file < 8 && rank_add < 8 {
+                            dbg!(file, rank, file_add, rank_add);
+                            if file < 8 && rank < 8 && file_add > 0 && rank_add > 0 {
                                 let pos_square = Square::new(file_add, rank_add);
                                 if let Some(piece_at_position) = self.get(pos_square) {
                                     if piece_at_position.color == piece.color {
@@ -116,6 +117,7 @@ impl Board {
                                 break;
                             }
                         }
+                        dbg!(&possible_moves);
                     }
                     Some(possible_moves)
                 }
