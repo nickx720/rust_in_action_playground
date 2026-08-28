@@ -91,33 +91,27 @@ impl Board {
                     for (file_offset, rank_offset) in offsets {
                         // loop through to edge conditions
                         let (mut file, mut rank) = (square.file, square.rank);
-                        loop {
-                            let Some(file_add) = file.checked_add_signed(file_offset) else {
-                                continue;
-                            };
-                            let Some(rank_add) = rank.checked_add_signed(rank_offset) else {
-                                continue;
-                            };
-                            dbg!(file, rank, file_add, rank_add);
-                            if file < 8 && rank < 8 && file_add > 0 && rank_add > 0 {
-                                let pos_square = Square::new(file_add, rank_add);
-                                if let Some(piece_at_position) = self.get(pos_square) {
-                                    if piece_at_position.color == piece.color {
-                                        break;
-                                    }
-                                    if piece_at_position.color != piece.color {
-                                        possible_moves.push(ChessMove::new(square, pos_square));
-                                        break;
-                                    }
-                                }
-                                possible_moves.push(ChessMove::new(square, pos_square));
-                                file = file_add;
-                                rank = rank_add;
-                            } else {
+                        while let (Some(next_file), Some(next_rank)) = (
+                            file.checked_add_signed(file_offset),
+                            rank.checked_add_signed(rank_offset),
+                        ) {
+                            if file >= 8 || rank >= 8 {
                                 break;
                             }
+
+                            let pos_square = Square::new(next_file, next_rank);
+                            match self.get(pos_square) {
+                                Some(piece_at_position) => {
+                                    if piece_at_position.color != piece.color {
+                                        possible_moves.push(ChessMove::new(square, pos_square));
+                                    }
+                                    break;
+                                }
+                                None => possible_moves.push(ChessMove::new(square, pos_square)),
+                            }
+
+                            (file, rank) = (next_file, next_rank);
                         }
-                        dbg!(&possible_moves);
                     }
                     Some(possible_moves)
                 }

@@ -52,7 +52,7 @@ pub fn parser(input: &str) -> Option<ChessMove> {
             if item.len() == 2 {
                 if let [first, second] = *item
                     .split("")
-                    .filter(|&item| item != "".to_string())
+                    .filter(|item| !item.is_empty())
                     .collect::<Vec<&str>>()
                     .as_slice()
                 {
