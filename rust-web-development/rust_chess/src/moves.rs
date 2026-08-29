@@ -354,21 +354,22 @@ mod test {
         assert_moves_match(moves, expected);
     }
 
-    //    #[test]
-    //    fn pseudo_legal_moves_accepts_corner_bishop_moves() {
-    //        let mut board = empty_board();
-    //        let from = Square::new(0, 0);
-    //        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
-    //
-    //        let moves = board
-    //            .pseudo_legal_moves(from)
-    //            .expect("a bishop should have pseudo-legal moves");
-    //        let expected = (1..8)
-    //            .map(|coordinate| ChessMove::new(from, Square::new(coordinate, coordinate)))
-    //            .collect();
-    //
-    //        assert_moves_match(moves, expected);
-    //    }
+    // TODO fix
+    #[test]
+    fn pseudo_legal_moves_accepts_corner_bishop_moves() {
+        let mut board = empty_board();
+        let from = Square::new(0, 0);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should have pseudo-legal moves");
+        let expected = (1..8)
+            .map(|coordinate| ChessMove::new(from, Square::new(coordinate, coordinate)))
+            .collect();
+
+        assert_moves_match(moves, expected);
+    }
 
     #[test]
     fn pseudo_legal_bishop_moves_capture_opponents_without_moving_past_them() {
