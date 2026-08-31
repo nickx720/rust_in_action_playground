@@ -1,7 +1,9 @@
 use crate::chess::{Color, Piece, PieceKind, Square};
 
+pub const BOARD_SIZE: usize = 8;
+
 pub struct Board {
-    pub board: [[Option<Piece>; 8]; 8],
+    pub board: [[Option<Piece>; BOARD_SIZE]; BOARD_SIZE],
 }
 impl Board {
     pub(crate) fn new() -> Self {

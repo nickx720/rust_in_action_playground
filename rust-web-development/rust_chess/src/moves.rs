@@ -1,12 +1,12 @@
 use crate::{
-    board::Board,
+    board::{BOARD_SIZE, Board},
     chess::{ChessMove, Piece, Square},
 };
 
 impl Board {
     // codex resume 019fbc54-c741-78b2-a33e-90ab75d843f2
     pub fn get(&self, square: Square) -> Option<Piece> {
-        if square.rank == 8 || square.file == 8 {
+        if square.rank as usize == BOARD_SIZE || square.file as usize == BOARD_SIZE {
             return None;
         }
         self.board[square.rank as usize][square.file as usize]
