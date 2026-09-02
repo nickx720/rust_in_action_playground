@@ -98,7 +98,7 @@ impl Board {
                             file.checked_add_signed(file_offset),
                             rank.checked_add_signed(rank_offset),
                         ) {
-                            if file >= 8 || rank >= 8 {
+                            if file >= 7 || rank >= 7 {
                                 break;
                             }
 
@@ -357,7 +357,6 @@ mod test {
         assert_moves_match(moves, expected);
     }
 
-    // TODO fix
     #[test]
     fn pseudo_legal_moves_accepts_corner_bishop_moves() {
         let mut board = empty_board();
@@ -370,6 +369,28 @@ mod test {
         let expected = (1..8)
             .map(|coordinate| ChessMove::new(from, Square::new(coordinate, coordinate)))
             .collect();
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_moves_accepts_upper_right_edge_bishop_moves() {
+        let mut board = empty_board();
+        let from = Square::new(7, 7);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Bishop));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a bishop should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(6, 6)),
+            ChessMove::new(from, Square::new(5, 5)),
+            ChessMove::new(from, Square::new(4, 4)),
+            ChessMove::new(from, Square::new(3, 3)),
+            ChessMove::new(from, Square::new(2, 2)),
+            ChessMove::new(from, Square::new(1, 1)),
+            ChessMove::new(from, Square::new(0, 0)),
+        ];
 
         assert_moves_match(moves, expected);
     }
