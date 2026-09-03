@@ -98,11 +98,13 @@ impl Board {
                             file.checked_add_signed(file_offset),
                             rank.checked_add_signed(rank_offset),
                         ) {
+                            dbg!(file, rank, next_file, next_rank);
                             if file >= 7 || rank >= 7 {
                                 break;
                             }
 
                             let pos_square = Square::new(next_file, next_rank);
+                            dbg!(pos_square);
                             match self.get(pos_square) {
                                 Some(piece_at_position) => {
                                     if piece_at_position.color != piece.color {
