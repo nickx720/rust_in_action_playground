@@ -118,7 +118,9 @@ impl Board {
                     }
                     Some(possible_moves)
                 }
-                crate::chess::PieceKind::Queen => {
+                crate::chess::PieceKind::Rook => {
+                    // goes either horizontol directions
+                    // vertical directions
                     todo!()
                 }
                 _ => None,
