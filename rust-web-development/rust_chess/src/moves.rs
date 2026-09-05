@@ -118,6 +118,9 @@ impl Board {
                     }
                     Some(possible_moves)
                 }
+                crate::chess::PieceKind::Queen => {
+                    todo!()
+                }
                 _ => None,
             }
         } else {
