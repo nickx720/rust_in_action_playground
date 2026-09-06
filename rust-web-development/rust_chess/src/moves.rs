@@ -121,6 +121,8 @@ impl Board {
                 crate::chess::PieceKind::Rook => {
                     // goes either horizontol directions
                     // vertical directions
+                    let mut possible_moves: Vec<ChessMove> = vec![];
+                    let offsets = [(1, 0), (0, 1)];
                     todo!()
                 }
                 _ => None,
