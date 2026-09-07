@@ -123,6 +123,7 @@ impl Board {
                     // vertical directions
                     let mut possible_moves: Vec<ChessMove> = vec![];
                     let offsets = [(1, 0), (0, 1)];
+                    for (file_offset, rank_offset) in offsets {}
                     todo!()
                 }
                 _ => None,
