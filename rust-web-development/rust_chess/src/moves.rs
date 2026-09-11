@@ -133,7 +133,9 @@ impl Board {
                                 break;
                             }
                             let pos_square = Square::new(next_file, next_rank);
-                            match self.get(pos_square) {todo!()}
+                            match self.get(pos_square) {
+                                _ => todo!(),
+                            }
                         }
                     }
                     todo!()
