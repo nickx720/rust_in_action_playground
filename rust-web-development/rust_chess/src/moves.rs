@@ -137,8 +137,9 @@ impl Board {
                                 Some(piece_at_position) => {
                                     todo!()
                                 }
-                                None => todo!(),
+                                None => possible_moves.push(ChessMove::new(square, pos_square)),
                             }
+                            (file, rank) = (next_file, next_rank)
                         }
                     }
                     todo!()
