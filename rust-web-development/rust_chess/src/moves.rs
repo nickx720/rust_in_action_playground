@@ -145,7 +145,7 @@ impl Board {
                             (file, rank) = (next_file, next_rank)
                         }
                     }
-                    todo!()
+                    Some(possible_moves)
                 }
                 _ => None,
             }
