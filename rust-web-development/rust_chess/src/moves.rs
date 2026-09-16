@@ -122,7 +122,7 @@ impl Board {
                     // goes either horizontol directions
                     // vertical directions
                     let mut possible_moves: Vec<ChessMove> = vec![];
-                    let offsets = [(1, 0), (0, 1)];
+                    let offsets = [(1, 0), (0, 1), (-1, 0), (0, -1)];
                     for (file_offset, rank_offset) in offsets {
                         let (mut file, mut rank) = (square.file, square.rank);
                         while let (Some(next_file), Some(next_rank)) = (
