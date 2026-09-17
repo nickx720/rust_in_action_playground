@@ -147,6 +147,9 @@ impl Board {
                     }
                     Some(possible_moves)
                 }
+                crate::chess::PieceKind::Pawn => {
+                    todo!()
+                }
                 _ => None,
             }
         } else {
