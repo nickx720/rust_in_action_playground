@@ -148,6 +148,17 @@ impl Board {
                     Some(possible_moves)
                 }
                 crate::chess::PieceKind::Pawn => {
+                    let mut possible_moves = vec![];
+                    let offsets = [
+                        (1, 1), //diagonal
+                        (1, -1),
+                        (-1, 1),
+                        (-1, -1),
+                        (1, 0), // not diagonal
+                        (-1, 0),
+                        (0, 1),
+                        (0, -1),
+                    ];
                     todo!()
                 }
                 _ => None,
