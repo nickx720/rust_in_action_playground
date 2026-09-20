@@ -159,7 +159,9 @@ impl Board {
                         (0, 1),
                         (0, -1),
                     ];
-                    for (file_offset, rank_offset) in offsets {}
+                    for (file_offset, rank_offset) in offsets {
+                        let (mut file, mut rank) = (square.file, square.rank);
+                    }
                     todo!()
                 }
                 _ => None,
