@@ -150,13 +150,11 @@ impl Board {
                 crate::chess::PieceKind::Pawn => {
                     let mut possible_moves = vec![];
                     let offsets = [
-                        (1, 1), //diagonal
-                        (1, -1),
-                        (-1, 1),
-                        (-1, -1),
-                        (1, 0), // not diagonal
-                        (-1, 0),
-                        (0, 1),
+                        (0, 1), // not diagonal
+                        // Both directions are currently tried for every pawn; White should move
+                        // toward increasing ranks, while Black should move toward decreasing ranks.
+                        // Pawns do not slide: check one step and a conditional initial two-step.
+                        // This loop also never updates file/rank, so an in-bounds target repeats forever.
                         (0, -1),
                     ];
                     for (file_offset, rank_offset) in offsets {
