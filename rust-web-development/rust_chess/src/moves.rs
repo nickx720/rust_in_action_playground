@@ -1,6 +1,6 @@
 use crate::{
     board::{BOARD_SIZE, Board},
-    chess::{ChessMove, Piece, Square},
+    chess::{ChessMove, Color, Piece, Square},
 };
 
 impl Board {
@@ -157,17 +157,19 @@ impl Board {
                         // This loop also never updates file/rank, so an in-bounds target repeats forever.
                         (0, -1),
                     ];
-                    for (file_offset, rank_offset) in offsets {
-                        let (mut file, mut rank) = (square.file, square.rank);
-
-                        while let (Some(next_file), Some(next_rank)) = (
-                            file.checked_add_signed(file_offset),
-                            rank.checked_add_signed(rank_offset),
-                        ) {
-                            if next_file > 7 || next_rank > 7 {
-                                break;
+                    let piece_at_position = self.get(square);
+                    if let Some(piece) = piece_at_position {
+                        match piece.color {
+                            Color::White => {
+                                println!("Hello");
+                            }
+                            Color::Black => {
+                                println!("World")
                             }
                         }
+                    }
+                    for (file_offset, rank_offset) in offsets {
+                        let (mut file, mut rank) = (square.file, square.rank);
                     }
                     todo!()
                 }
