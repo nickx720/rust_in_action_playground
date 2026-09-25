@@ -1,3 +1,5 @@
+use std::intrinsics::offset;
+
 use crate::{
     board::{BOARD_SIZE, Board},
     chess::{ChessMove, Color, Piece, Square},
@@ -161,6 +163,16 @@ impl Board {
                     if let Some(piece) = piece_at_position {
                         match piece.color {
                             Color::White => {
+                                let mut start_pos = offsets[0];
+                                while start_pos.1 < 7 {
+                                    let pos_next = Square::new(
+                                        square.file + start_pos.0,
+                                        square.rank + start_pos.1,
+                                    );
+                                    match self.get(pos_next) {
+                                        _ => todo!(),
+                                    }
+                                }
                                 println!("Hello");
                             }
                             Color::Black => {
