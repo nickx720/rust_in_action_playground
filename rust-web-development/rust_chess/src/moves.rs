@@ -165,12 +165,14 @@ impl Board {
                             Color::White => {
                                 let mut start_pos = offsets[0];
                                 while start_pos.1 < 7 {
-                                    let pos_next = Square::new(
-                                        square.file + start_pos.0,
-                                        square.rank + start_pos.1,
-                                    );
-                                    match self.get(pos_next) {
-                                        _ => todo!(),
+                                    if let (Some(next_file), Some(next_rank)) = (
+                                        square.file.checked_add_signed(start_pos.0),
+                                        square.rank.checked_add_signed(start_pos.1),
+                                    ) {
+                                        let pos_next = Square::new(next_file, next_rank);
+                                        match self.get(pos_next) {
+                                            _ => todo!(),
+                                        }
                                     }
                                 }
                                 println!("Hello");
