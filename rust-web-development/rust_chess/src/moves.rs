@@ -150,40 +150,39 @@ impl Board {
                     Some(possible_moves)
                 }
                 crate::chess::PieceKind::Pawn => {
+                    // starting position 1 and 6
                     let mut possible_moves = vec![];
-                    let offsets = [
-                        (0, 1), // not diagonal
-                        // Both directions are currently tried for every pawn; White should move
-                        // toward increasing ranks, while Black should move toward decreasing ranks.
-                        // Pawns do not slide: check one step and a conditional initial two-step.
-                        // This loop also never updates file/rank, so an in-bounds target repeats forever.
-                        (0, -1),
-                    ];
                     let piece_at_position = self.get(square);
                     if let Some(piece) = piece_at_position {
+                        // White pawns move toward increasing ranks.
+                        // A white pawn may move one square forward if that square is empty.
+                        // From its starting rank (rank 1 in these zero-based coordinates), it may
+                        // also move two squares forward if both squares ahead are empty.
+                        // A white pawn may capture one square diagonally forward to either side,
+                        // but only when that square contains a black piece.
+                        // Diagonal captures are checked independently of forward movement.
+                        // Any destination must be within the board.
+
                         match piece.color {
                             Color::White => {
-                                let mut start_pos = offsets[0];
-                                while start_pos.1 < 7 {
+                                let mut offsets = vec![(0, 1), (-1, 1), (1, 1)];
+                                for (file_offset, rank_offset) in offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
-                                        square.file.checked_add_signed(start_pos.0),
-                                        square.rank.checked_add_signed(start_pos.1),
+                                        square.file.checked_add(file_offset),
+                                        square.rank.checked_add(rank_offset),
                                     ) {
-                                        let pos_next = Square::new(next_file, next_rank);
-                                        match self.get(pos_next) {
-                                            _ => todo!(),
+                                        if square.rank == 1 && file_offset == 0 && rank_offset == 1
+                                        {
+                                            // check two ranks
                                         }
+                                        let pos_square = Square::new(file_offset, rank_offset);
                                     }
                                 }
-                                println!("Hello");
                             }
                             Color::Black => {
                                 println!("World")
                             }
                         }
-                    }
-                    for (file_offset, rank_offset) in offsets {
-                        let (mut file, mut rank) = (square.file, square.rank);
                     }
                     todo!()
                 }
