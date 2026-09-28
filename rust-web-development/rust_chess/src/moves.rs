@@ -165,17 +165,33 @@ impl Board {
 
                         match piece.color {
                             Color::White => {
-                                let mut offsets = vec![(0, 1), (-1, 1), (1, 1)];
+                                let mut offsets = vec![(-1, 1), (1, 1)];
                                 for (file_offset, rank_offset) in offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
                                         square.file.checked_add(file_offset),
                                         square.rank.checked_add(rank_offset),
                                     ) {
-                                        if square.rank == 1 && file_offset == 0 && rank_offset == 1
-                                        {
-                                            // check two ranks
-                                        }
                                         let pos_square = Square::new(file_offset, rank_offset);
+                                        match self.get(pos_square) {
+                                            Some(piece_at_position) => {
+                                                if piece_at_position.color != piece.color {
+                                                    possible_moves
+                                                        .push(ChessMove::new(square, pos_square));
+                                                    continue;
+                                                }
+                                            }
+                                            None => continue,
+                                        }
+                                        if square.rank == 1 {
+                                            // check two ranks
+                                            let pos_square =
+                                                Square::new(file_offset, square.rank + 2);
+                                            match self.get(pos_square) {
+                                                Some(piece) => continue,
+                                                None => possible_moves
+                                                    .push(ChessMove::new(square, pos_square)),
+                                            }
+                                        }
                                     }
                                 }
                             }
