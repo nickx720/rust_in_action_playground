@@ -168,10 +168,10 @@ impl Board {
                                 let mut offsets = vec![(-1, 1), (1, 1)];
                                 for (file_offset, rank_offset) in offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
-                                        square.file.checked_add(file_offset),
-                                        square.rank.checked_add(rank_offset),
+                                        square.file.checked_add_signed(file_offset),
+                                        square.rank.checked_add_signed(rank_offset),
                                     ) {
-                                        let pos_square = Square::new(file_offset, rank_offset);
+                                        let pos_square = Square::new(next_file, next_rank);
                                         match self.get(pos_square) {
                                             Some(piece_at_position) => {
                                                 if piece_at_position.color != piece.color {
@@ -185,7 +185,7 @@ impl Board {
                                         if square.rank == 1 {
                                             // check two ranks
                                             let pos_square =
-                                                Square::new(file_offset, square.rank + 2);
+                                                Square::new(next_file, square.rank + 2);
                                             match self.get(pos_square) {
                                                 Some(piece) => continue,
                                                 None => possible_moves
