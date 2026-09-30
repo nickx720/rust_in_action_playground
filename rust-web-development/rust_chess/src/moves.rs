@@ -165,12 +165,20 @@ impl Board {
 
                         match piece.color {
                             Color::White => {
-                                let mut offsets = vec![(-1, 1), (1, 1)];
+                                // TODO: White pawn moves currently include empty diagonals and
+                                // occupied forward squares. The starting two-square move is
+                                // skipped when the square ahead is empty, and a blocked diagonal
+                                // can produce an invalid two-rank move. The pawn branch still
+                                // reaches todo!() and panics.
+                                let mut offsets = vec![(-1, 1), (1, 1), (0, 1)];
                                 for (file_offset, rank_offset) in offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
                                         square.file.checked_add_signed(file_offset),
                                         square.rank.checked_add_signed(rank_offset),
                                     ) {
+                                        if next_file > 7 || next_rank > 7 {
+                                            continue;
+                                        }
                                         let pos_square = Square::new(next_file, next_rank);
                                         match self.get(pos_square) {
                                             Some(piece_at_position) => {
@@ -180,7 +188,11 @@ impl Board {
                                                     continue;
                                                 }
                                             }
-                                            None => continue,
+                                            None => {
+                                                possible_moves
+                                                    .push(ChessMove::new(square, pos_square));
+                                                continue;
+                                            }
                                         }
                                         if square.rank == 1 {
                                             // check two ranks
