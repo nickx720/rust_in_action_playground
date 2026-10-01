@@ -185,13 +185,11 @@ impl Board {
                                                 if piece_at_position.color != piece.color {
                                                     possible_moves
                                                         .push(ChessMove::new(square, pos_square));
-                                                    continue;
                                                 }
                                             }
                                             None => {
                                                 possible_moves
                                                     .push(ChessMove::new(square, pos_square));
-                                                continue;
                                             }
                                         }
                                         if square.rank == 1 {
@@ -212,7 +210,7 @@ impl Board {
                             }
                         }
                     }
-                    todo!()
+                    Some(possible_moves)
                 }
                 _ => None,
             }
