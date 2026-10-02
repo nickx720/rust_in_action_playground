@@ -165,11 +165,8 @@ impl Board {
 
                         match piece.color {
                             Color::White => {
-                                // TODO: White pawn moves currently include empty diagonals and
-                                // occupied forward squares. The starting two-square move is
-                                // skipped when the square ahead is empty, and a blocked diagonal
-                                // can produce an invalid two-rank move. The pawn branch still
-                                // reaches todo!() and panics.
+                                // TODO: White pawn moves currently include empty diagonal
+                                // squares and forward squares occupied by black pieces.
                                 let mut offsets = vec![(-1, 1), (1, 1), (0, 1)];
                                 for (file_offset, rank_offset) in offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
@@ -188,18 +185,19 @@ impl Board {
                                                 }
                                             }
                                             None => {
+                                                if square.rank == 1 && file_offset == 0 {
+                                                    // check two ranks
+                                                    let pos_square =
+                                                        Square::new(next_file, square.rank + 2);
+                                                    match self.get(pos_square) {
+                                                        Some(piece) => continue,
+                                                        None => possible_moves.push(
+                                                            ChessMove::new(square, pos_square),
+                                                        ),
+                                                    }
+                                                }
                                                 possible_moves
                                                     .push(ChessMove::new(square, pos_square));
-                                            }
-                                        }
-                                        if square.rank == 1 {
-                                            // check two ranks
-                                            let pos_square =
-                                                Square::new(next_file, square.rank + 2);
-                                            match self.get(pos_square) {
-                                                Some(piece) => continue,
-                                                None => possible_moves
-                                                    .push(ChessMove::new(square, pos_square)),
                                             }
                                         }
                                     }
