@@ -185,7 +185,8 @@ impl Board {
                                                         .push(ChessMove::new(square, pos_square));
                                                 }
                                             }
-                                            None => continue,
+                                            None => possible_moves
+                                                .push(ChessMove::new(square, pos_square)),
                                         }
                                     }
                                 }
