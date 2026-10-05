@@ -185,6 +185,21 @@ impl Board {
                                                         .push(ChessMove::new(square, pos_square));
                                                 }
                                             }
+                                            None => continue,
+                                        }
+                                    }
+                                }
+                                for (file_offset, rank_offset) in forward_offsets {
+                                    if let (Some(next_file), Some(next_rank)) = (
+                                        square.file.checked_add_signed(file_offset),
+                                        square.rank.checked_add_signed(rank_offset),
+                                    ) {
+                                        if next_file > 7 || next_rank > 7 {
+                                            continue;
+                                        }
+                                        let pos_square = Square::new(next_file, next_rank);
+                                        match self.get(pos_square) {
+                                            Some(piece_at_position) => continue,
                                             None => possible_moves
                                                 .push(ChessMove::new(square, pos_square)),
                                         }
