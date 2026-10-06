@@ -189,19 +189,29 @@ impl Board {
                                         }
                                     }
                                 }
-                                for (file_offset, rank_offset) in forward_offsets {
-                                    if let (Some(next_file), Some(next_rank)) = (
-                                        square.file.checked_add_signed(file_offset),
-                                        square.rank.checked_add_signed(rank_offset),
-                                    ) {
-                                        if next_file > 7 || next_rank > 7 {
-                                            continue;
-                                        }
-                                        let pos_square = Square::new(next_file, next_rank);
-                                        match self.get(pos_square) {
-                                            Some(piece_at_position) => continue,
-                                            None => possible_moves
-                                                .push(ChessMove::new(square, pos_square)),
+                                if let (Some(next_file), Some(next_rank)) = (
+                                    square.file.checked_add_signed(0),
+                                    square.rank.checked_add_signed(1),
+                                ) {
+                                    if next_file > 7 || next_rank > 7 {
+                                        return Some(possible_moves);
+                                    }
+                                    let pos_square = Square::new(next_file, next_rank);
+                                    match self.get(pos_square) {
+                                        Some(_) => return Some(possible_moves),
+                                        None => {
+                                            if square.rank == 1 {
+                                                if let (Some(next_file), Some(next_rank)) = (
+                                                    square.file.checked_add_signed(0),
+                                                    square.rank.checked_add_signed(2),
+                                                ) {
+                                                    let pos_square =
+                                                        Square::new(next_file, next_rank);
+                                                    possible_moves
+                                                        .push(ChessMove::new(square, pos_square))
+                                                }
+                                            }
+                                            possible_moves.push(ChessMove::new(square, pos_square))
                                         }
                                     }
                                 }
