@@ -168,7 +168,6 @@ impl Board {
                             Color::White => {
                                 // TODO: White pawn moves currently include empty diagonal
                                 // squares and forward squares occupied by black pieces.
-                                let forward_offsets = vec![(0, 1)];
                                 for (file_offset, rank_offset) in diagonal_offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
                                         square.file.checked_add_signed(file_offset),
@@ -207,8 +206,11 @@ impl Board {
                                                 ) {
                                                     let pos_square =
                                                         Square::new(next_file, next_rank);
-                                                    possible_moves
-                                                        .push(ChessMove::new(square, pos_square))
+                                                    if self.get(pos_square).is_none() {
+                                                        possible_moves.push(ChessMove::new(
+                                                            square, pos_square,
+                                                        ))
+                                                    };
                                                 }
                                             }
                                             possible_moves.push(ChessMove::new(square, pos_square))
