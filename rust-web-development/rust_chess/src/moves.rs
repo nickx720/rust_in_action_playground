@@ -154,15 +154,6 @@ impl Board {
                     let mut possible_moves = vec![];
                     let piece_at_position = self.get(square);
                     if let Some(piece) = piece_at_position {
-                        // White pawns move toward increasing ranks.
-                        // A white pawn may move one square forward if that square is empty.
-                        // From its starting rank (rank 1 in these zero-based coordinates), it may
-                        // also move two squares forward if both squares ahead are empty.
-                        // A white pawn may capture one square diagonally forward to either side,
-                        // but only when that square contains a black piece.
-                        // Diagonal captures are checked independently of forward movement.
-                        // Any destination must be within the board.
-
                         let mut diagonal_offsets = vec![(-1, 1), (1, 1)];
                         match piece.color {
                             Color::White => {
