@@ -1,5 +1,3 @@
-use std::intrinsics::offset;
-
 use crate::{
     board::{BOARD_SIZE, Board},
     chess::{ChessMove, Color, Piece, Square},
@@ -154,11 +152,9 @@ impl Board {
                     let mut possible_moves = vec![];
                     let piece_at_position = self.get(square);
                     if let Some(piece) = piece_at_position {
-                        let mut diagonal_offsets = vec![(-1, 1), (1, 1)];
                         match piece.color {
                             Color::White => {
-                                // TODO: White pawn moves currently include empty diagonal
-                                // squares and forward squares occupied by black pieces.
+                                let diagonal_offsets = vec![(-1, 1), (1, 1)];
                                 for (file_offset, rank_offset) in diagonal_offsets {
                                     if let (Some(next_file), Some(next_rank)) = (
                                         square.file.checked_add_signed(file_offset),
@@ -210,7 +206,39 @@ impl Board {
                                 }
                             }
                             Color::Black => {
-                                println!("World")
+                                for file_offset in [-1, 1] {
+                                    let (Some(next_file), Some(next_rank)) = (
+                                        square.file.checked_add_signed(file_offset),
+                                        square.rank.checked_add_signed(-1),
+                                    ) else {
+                                        continue;
+                                    };
+                                    if next_file > 7 {
+                                        continue;
+                                    }
+
+                                    let destination = Square::new(next_file, next_rank);
+                                    if let Some(target) = self.get(destination)
+                                        && target.color == Color::White
+                                    {
+                                        possible_moves.push(ChessMove::new(square, destination));
+                                    }
+                                }
+
+                                if let Some(next_rank) = square.rank.checked_add_signed(-1) {
+                                    let one_ahead = Square::new(square.file, next_rank);
+                                    if self.get(one_ahead).is_none() {
+                                        possible_moves.push(ChessMove::new(square, one_ahead));
+
+                                        if square.rank == 6 {
+                                            let two_ahead = Square::new(square.file, 4);
+                                            if self.get(two_ahead).is_none() {
+                                                possible_moves
+                                                    .push(ChessMove::new(square, two_ahead));
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -645,5 +673,104 @@ mod test {
         ];
 
         assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn black_pawn_can_advance_one_or_two_from_start() {
+        let mut board = empty_board();
+        let from = Square::new(4, 6);
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(4, 5)),
+                ChessMove::new(from, Square::new(4, 4)),
+            ],
+        );
+
+        board.remove_piece(from);
+        let moved_from = Square::new(4, 5);
+        board.place_piece(moved_from, Piece::new(Color::Black, PieceKind::Pawn));
+        assert_moves_match(
+            board.pseudo_legal_moves(moved_from).unwrap(),
+            vec![ChessMove::new(moved_from, Square::new(4, 4))],
+        );
+    }
+
+    #[test]
+    fn black_pawn_two_step_requires_both_forward_squares_empty() {
+        let mut board = empty_board();
+        let from = Square::new(4, 6);
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(Square::new(4, 4), Piece::new(Color::White, PieceKind::Rook));
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![ChessMove::new(from, Square::new(4, 5))],
+        );
+
+        board.place_piece(Square::new(4, 5), Piece::new(Color::White, PieceKind::Rook));
+        assert_moves_match(board.pseudo_legal_moves(from).unwrap(), vec![]);
+    }
+
+    #[test]
+    fn black_pawn_captures_white_on_either_diagonal_even_when_blocked_ahead() {
+        let mut board = empty_board();
+        let from = Square::new(4, 6);
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(Square::new(4, 5), Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(3, 5),
+            Piece::new(Color::White, PieceKind::Bishop),
+        );
+        board.place_piece(
+            Square::new(5, 5),
+            Piece::new(Color::White, PieceKind::Knight),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(3, 5)),
+                ChessMove::new(from, Square::new(5, 5)),
+            ],
+        );
+    }
+
+    #[test]
+    fn black_pawn_cannot_capture_friendly_piece_or_empty_diagonal() {
+        let mut board = empty_board();
+        let from = Square::new(4, 5);
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(Square::new(3, 4), Piece::new(Color::Black, PieceKind::Rook));
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![ChessMove::new(from, Square::new(4, 4))],
+        );
+    }
+
+    #[test]
+    fn black_pawn_handles_board_edges() {
+        let mut board = empty_board();
+        let from = Square::new(0, 1);
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(1, 0),
+            Piece::new(Color::White, PieceKind::Queen),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(0, 0)),
+                ChessMove::new(from, Square::new(1, 0)),
+            ],
+        );
+
+        board.remove_piece(from);
+        let last_rank = Square::new(7, 0);
+        board.place_piece(last_rank, Piece::new(Color::Black, PieceKind::Pawn));
+        assert_moves_match(board.pseudo_legal_moves(last_rank).unwrap(), vec![]);
     }
 }
