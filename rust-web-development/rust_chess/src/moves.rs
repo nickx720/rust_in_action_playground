@@ -186,19 +186,17 @@ impl Board {
                                     match self.get(pos_square) {
                                         Some(_) => return Some(possible_moves),
                                         None => {
-                                            if square.rank == 1 {
-                                                if let (Some(next_file), Some(next_rank)) = (
+                                            if square.rank == 1
+                                                && let (Some(next_file), Some(next_rank)) = (
                                                     square.file.checked_add_signed(0),
                                                     square.rank.checked_add_signed(2),
-                                                ) {
-                                                    let pos_square =
-                                                        Square::new(next_file, next_rank);
-                                                    if self.get(pos_square).is_none() {
-                                                        possible_moves.push(ChessMove::new(
-                                                            square, pos_square,
-                                                        ))
-                                                    };
-                                                }
+                                                )
+                                            {
+                                                let pos_square = Square::new(next_file, next_rank);
+                                                if self.get(pos_square).is_none() {
+                                                    possible_moves
+                                                        .push(ChessMove::new(square, pos_square))
+                                                };
                                             }
                                             possible_moves.push(ChessMove::new(square, pos_square))
                                         }
