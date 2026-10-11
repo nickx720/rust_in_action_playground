@@ -154,51 +154,38 @@ impl Board {
                     if let Some(piece) = piece_at_position {
                         match piece.color {
                             Color::White => {
-                                let diagonal_offsets = vec![(-1, 1), (1, 1)];
-                                for (file_offset, rank_offset) in diagonal_offsets {
-                                    if let (Some(next_file), Some(next_rank)) = (
+                                for file_offset in [-1, 1] {
+                                    let (Some(next_file), Some(next_rank)) = (
                                         square.file.checked_add_signed(file_offset),
-                                        square.rank.checked_add_signed(rank_offset),
-                                    ) {
-                                        if next_file > 7 || next_rank > 7 {
-                                            continue;
-                                        }
-                                        let pos_square = Square::new(next_file, next_rank);
-                                        match self.get(pos_square) {
-                                            Some(piece_at_position) => {
-                                                if piece_at_position.color != piece.color {
-                                                    possible_moves
-                                                        .push(ChessMove::new(square, pos_square));
-                                                }
-                                            }
-                                            None => continue,
-                                        }
+                                        square.rank.checked_add_signed(1),
+                                    ) else {
+                                        continue;
+                                    };
+                                    if next_file > 7 || next_rank > 7 {
+                                        continue;
+                                    }
+
+                                    let destination = Square::new(next_file, next_rank);
+                                    if let Some(target) = self.get(destination)
+                                        && target.color == Color::Black
+                                    {
+                                        possible_moves.push(ChessMove::new(square, destination));
                                     }
                                 }
-                                if let (Some(next_file), Some(next_rank)) = (
-                                    square.file.checked_add_signed(0),
-                                    square.rank.checked_add_signed(1),
-                                ) {
-                                    if next_file > 7 || next_rank > 7 {
-                                        return Some(possible_moves);
-                                    }
-                                    let pos_square = Square::new(next_file, next_rank);
-                                    match self.get(pos_square) {
-                                        Some(_) => return Some(possible_moves),
-                                        None => {
-                                            if square.rank == 1
-                                                && let (Some(next_file), Some(next_rank)) = (
-                                                    square.file.checked_add_signed(0),
-                                                    square.rank.checked_add_signed(2),
-                                                )
-                                            {
-                                                let pos_square = Square::new(next_file, next_rank);
-                                                if self.get(pos_square).is_none() {
-                                                    possible_moves
-                                                        .push(ChessMove::new(square, pos_square))
-                                                };
+
+                                if let Some(next_rank) = square.rank.checked_add_signed(1)
+                                    && next_rank < 8
+                                {
+                                    let one_ahead = Square::new(square.file, next_rank);
+                                    if self.get(one_ahead).is_none() {
+                                        possible_moves.push(ChessMove::new(square, one_ahead));
+
+                                        if square.rank == 1 {
+                                            let two_ahead = Square::new(square.file, 3);
+                                            if self.get(two_ahead).is_none() {
+                                                possible_moves
+                                                    .push(ChessMove::new(square, two_ahead));
                                             }
-                                            possible_moves.push(ChessMove::new(square, pos_square))
                                         }
                                     }
                                 }
