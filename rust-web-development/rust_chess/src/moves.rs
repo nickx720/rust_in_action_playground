@@ -758,4 +758,170 @@ mod test {
         board.place_piece(last_rank, Piece::new(Color::Black, PieceKind::Pawn));
         assert_moves_match(board.pseudo_legal_moves(last_rank).unwrap(), vec![]);
     }
+
+    #[test]
+    fn white_pawn_has_one_and_two_step_options_only_from_its_start_rank() {
+        let mut board = empty_board();
+        let from = Square::new(3, 1); // d2
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(3, 2)), // d3
+                ChessMove::new(from, Square::new(3, 3)), // d4
+            ],
+        );
+
+        board.remove_piece(from);
+        let from = Square::new(3, 3); // d4
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![ChessMove::new(from, Square::new(3, 4))], // d5, never d6
+        );
+    }
+
+    #[test]
+    fn white_pawn_two_step_needs_an_empty_destination_and_clear_first_square() {
+        let mut board = empty_board();
+        let from = Square::new(3, 1); // d2
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+        board.place_piece(Square::new(3, 3), Piece::new(Color::Black, PieceKind::Rook));
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![ChessMove::new(from, Square::new(3, 2))], // d3 only
+        );
+
+        board.remove_piece(Square::new(3, 3));
+        board.place_piece(Square::new(3, 2), Piece::new(Color::Black, PieceKind::Rook));
+
+        assert_moves_match(board.pseudo_legal_moves(from).unwrap(), vec![]);
+    }
+
+    #[test]
+    fn white_pawn_captures_both_diagonals_even_when_forward_is_blocked() {
+        let mut board = empty_board();
+        let from = Square::new(4, 1); // e2
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+        board.place_piece(Square::new(4, 2), Piece::new(Color::Black, PieceKind::Rook));
+        board.place_piece(
+            Square::new(3, 2),
+            Piece::new(Color::Black, PieceKind::Bishop),
+        );
+        board.place_piece(
+            Square::new(5, 2),
+            Piece::new(Color::Black, PieceKind::Knight),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(3, 2)), // d3
+                ChessMove::new(from, Square::new(5, 2)), // f3
+            ],
+        );
+    }
+
+    #[test]
+    fn white_pawn_rejects_friendly_diagonal_and_keeps_independent_forward_move() {
+        let mut board = empty_board();
+        let from = Square::new(4, 3); // e4
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(3, 4),
+            Piece::new(Color::White, PieceKind::Bishop),
+        );
+        board.place_piece(
+            Square::new(5, 4),
+            Piece::new(Color::Black, PieceKind::Knight),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(4, 4)), // e5
+                ChessMove::new(from, Square::new(5, 4)), // f5
+            ],
+        );
+    }
+
+    #[test]
+    fn white_pawn_at_each_file_edge_checks_only_the_on_board_diagonal() {
+        let mut board = empty_board();
+        let from = Square::new(0, 3); // a4
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(1, 4),
+            Piece::new(Color::Black, PieceKind::Queen),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(0, 4)), // a5
+                ChessMove::new(from, Square::new(1, 4)), // b5
+            ],
+        );
+
+        board.remove_piece(from);
+        let from = Square::new(7, 3); // h4
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(6, 4),
+            Piece::new(Color::Black, PieceKind::Queen),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(7, 4)), // h5
+                ChessMove::new(from, Square::new(6, 4)), // g5
+            ],
+        );
+    }
+
+    #[test]
+    fn black_pawn_capture_is_independent_of_empty_forward_square() {
+        let mut board = empty_board();
+        let from = Square::new(4, 4); // e5
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(3, 3),
+            Piece::new(Color::White, PieceKind::Bishop),
+        );
+        board.place_piece(
+            Square::new(5, 3),
+            Piece::new(Color::Black, PieceKind::Knight),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(4, 3)), // e4
+                ChessMove::new(from, Square::new(3, 3)), // d4
+            ],
+        );
+    }
+
+    #[test]
+    fn black_pawn_at_right_file_edge_checks_only_the_on_board_diagonal() {
+        let mut board = empty_board();
+        let from = Square::new(7, 4); // h5
+        board.place_piece(from, Piece::new(Color::Black, PieceKind::Pawn));
+        board.place_piece(
+            Square::new(6, 3),
+            Piece::new(Color::White, PieceKind::Queen),
+        );
+
+        assert_moves_match(
+            board.pseudo_legal_moves(from).unwrap(),
+            vec![
+                ChessMove::new(from, Square::new(7, 3)), // h4
+                ChessMove::new(from, Square::new(6, 3)), // g4
+            ],
+        );
+    }
 }
