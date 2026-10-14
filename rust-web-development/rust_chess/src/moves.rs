@@ -230,6 +230,17 @@ impl Board {
                     Some(possible_moves)
                 }
                 crate::chess::PieceKind::Queen => {
+                    let mut possible_moves: Vec<ChessMove> = vec![];
+                    let offsets = [
+                        (1, 1), //diagonal
+                        (1, -1),
+                        (-1, 1),
+                        (-1, -1),
+                        (1, 0),
+                        (0, 1),
+                        (-1, 0),
+                        (0, -1),
+                    ];
                     todo!()
                 }
                 _ => None,
