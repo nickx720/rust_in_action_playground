@@ -241,7 +241,8 @@ impl Board {
                         (-1, 0),
                         (0, -1),
                     ];
-                    todo!()
+                    for (file_offset, rank_offset) in offsets {}
+                    Some(possible_moves)
                 }
                 _ => None,
             }
