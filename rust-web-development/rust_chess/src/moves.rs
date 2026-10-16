@@ -241,7 +241,13 @@ impl Board {
                         (-1, 0),
                         (0, -1),
                     ];
-                    for (file_offset, rank_offset) in offsets {}
+                    for (file_offset, rank_offset) in offsets {
+                        let (mut file, mut rank) = (square.file, square.rank);
+                        while let (Some(next_file), Some(next_rank)) = (
+                            file.checked_add_signed(file_offset),
+                            rank.checked_add_signed(rank_offset),
+                        ) {}
+                    }
                     Some(possible_moves)
                 }
                 _ => None,
