@@ -246,7 +246,11 @@ impl Board {
                         while let (Some(next_file), Some(next_rank)) = (
                             file.checked_add_signed(file_offset),
                             rank.checked_add_signed(rank_offset),
-                        ) {}
+                        ) {
+                            if next_file > 7 || next_rank > 7 {
+                                continue;
+                            }
+                        }
                     }
                     Some(possible_moves)
                 }
