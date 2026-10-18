@@ -250,6 +250,7 @@ impl Board {
                             if next_file > 7 || next_rank > 7 {
                                 continue;
                             }
+                            let destination = Square::new(next_file, next_rank);
                         }
                     }
                     Some(possible_moves)
