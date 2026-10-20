@@ -697,6 +697,189 @@ mod test {
     }
 
     #[test]
+    fn pseudo_legal_moves_accepts_middle_queen_moves() {
+        let mut board = empty_board();
+        let from = Square::new(3, 3);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Queen));
+
+        let moves = board
+            .pseudo_legal_moves(from)
+            .expect("a queen should have pseudo-legal moves");
+        let expected = vec![
+            ChessMove::new(from, Square::new(0, 3)),
+            ChessMove::new(from, Square::new(1, 3)),
+            ChessMove::new(from, Square::new(2, 3)),
+            ChessMove::new(from, Square::new(4, 3)),
+            ChessMove::new(from, Square::new(5, 3)),
+            ChessMove::new(from, Square::new(6, 3)),
+            ChessMove::new(from, Square::new(7, 3)),
+            ChessMove::new(from, Square::new(3, 0)),
+            ChessMove::new(from, Square::new(3, 1)),
+            ChessMove::new(from, Square::new(3, 2)),
+            ChessMove::new(from, Square::new(3, 4)),
+            ChessMove::new(from, Square::new(3, 5)),
+            ChessMove::new(from, Square::new(3, 6)),
+            ChessMove::new(from, Square::new(3, 7)),
+            ChessMove::new(from, Square::new(0, 0)),
+            ChessMove::new(from, Square::new(1, 1)),
+            ChessMove::new(from, Square::new(2, 2)),
+            ChessMove::new(from, Square::new(4, 4)),
+            ChessMove::new(from, Square::new(5, 5)),
+            ChessMove::new(from, Square::new(6, 6)),
+            ChessMove::new(from, Square::new(7, 7)),
+            ChessMove::new(from, Square::new(0, 6)),
+            ChessMove::new(from, Square::new(1, 5)),
+            ChessMove::new(from, Square::new(2, 4)),
+            ChessMove::new(from, Square::new(4, 2)),
+            ChessMove::new(from, Square::new(5, 1)),
+            ChessMove::new(from, Square::new(6, 0)),
+        ];
+
+        assert_moves_match(moves, expected);
+    }
+
+    #[test]
+    fn pseudo_legal_moves_accepts_queen_moves_from_each_corner() {
+        for (file, rank) in [(0, 0), (0, 7), (7, 0), (7, 7)] {
+            let mut board = empty_board();
+            let from = Square::new(file, rank);
+            board.place_piece(from, Piece::new(Color::White, PieceKind::Queen));
+
+            let moves = board
+                .pseudo_legal_moves(from)
+                .expect("a queen should have pseudo-legal moves at a board corner");
+            let expected = (1..8)
+                .flat_map(|distance| {
+                    let to_file = if file == 0 { distance } else { 7 - distance };
+                    let to_rank = if rank == 0 { distance } else { 7 - distance };
+                    [
+                        ChessMove::new(from, Square::new(to_file, rank)),
+                        ChessMove::new(from, Square::new(file, to_rank)),
+                        ChessMove::new(from, Square::new(to_file, to_rank)),
+                    ]
+                })
+                .collect();
+
+            assert_moves_match(moves, expected);
+        }
+    }
+
+    #[test]
+    fn pseudo_legal_queen_moves_stop_before_friendly_pieces_in_every_direction() {
+        for color in [Color::White, Color::Black] {
+            let mut board = empty_board();
+            let from = Square::new(3, 3);
+            board.place_piece(from, Piece::new(color, PieceKind::Queen));
+            for (file, rank) in [
+                (1, 3),
+                (5, 3),
+                (3, 1),
+                (3, 5),
+                (1, 1),
+                (1, 5),
+                (5, 1),
+                (5, 5),
+            ] {
+                board.place_piece(Square::new(file, rank), Piece::new(color, PieceKind::Pawn));
+            }
+
+            let moves = board
+                .pseudo_legal_moves(from)
+                .expect("a queen should move up to friendly blockers");
+            let expected = vec![
+                ChessMove::new(from, Square::new(2, 3)),
+                ChessMove::new(from, Square::new(4, 3)),
+                ChessMove::new(from, Square::new(3, 2)),
+                ChessMove::new(from, Square::new(3, 4)),
+                ChessMove::new(from, Square::new(2, 2)),
+                ChessMove::new(from, Square::new(2, 4)),
+                ChessMove::new(from, Square::new(4, 2)),
+                ChessMove::new(from, Square::new(4, 4)),
+            ];
+
+            assert_moves_match(moves, expected);
+        }
+    }
+
+    #[test]
+    fn pseudo_legal_queen_moves_capture_opponents_without_moving_past_them() {
+        for (color, opponent_color) in [(Color::White, Color::Black), (Color::Black, Color::White)]
+        {
+            let mut board = empty_board();
+            let from = Square::new(3, 3);
+            board.place_piece(from, Piece::new(color, PieceKind::Queen));
+            for (file, rank) in [
+                (1, 3),
+                (5, 3),
+                (3, 1),
+                (3, 5),
+                (1, 1),
+                (1, 5),
+                (5, 1),
+                (5, 5),
+            ] {
+                board.place_piece(
+                    Square::new(file, rank),
+                    Piece::new(opponent_color, PieceKind::Pawn),
+                );
+            }
+
+            let moves = board
+                .pseudo_legal_moves(from)
+                .expect("a queen should be able to capture opposing pieces");
+            let expected = vec![
+                ChessMove::new(from, Square::new(2, 3)),
+                ChessMove::new(from, Square::new(1, 3)),
+                ChessMove::new(from, Square::new(4, 3)),
+                ChessMove::new(from, Square::new(5, 3)),
+                ChessMove::new(from, Square::new(3, 2)),
+                ChessMove::new(from, Square::new(3, 1)),
+                ChessMove::new(from, Square::new(3, 4)),
+                ChessMove::new(from, Square::new(3, 5)),
+                ChessMove::new(from, Square::new(2, 2)),
+                ChessMove::new(from, Square::new(1, 1)),
+                ChessMove::new(from, Square::new(2, 4)),
+                ChessMove::new(from, Square::new(1, 5)),
+                ChessMove::new(from, Square::new(4, 2)),
+                ChessMove::new(from, Square::new(5, 1)),
+                ChessMove::new(from, Square::new(4, 4)),
+                ChessMove::new(from, Square::new(5, 5)),
+            ];
+
+            assert_moves_match(moves, expected);
+        }
+    }
+
+    #[test]
+    fn pseudo_legal_queen_moves_are_empty_when_surrounded_by_friendly_pieces() {
+        let mut board = empty_board();
+        let from = Square::new(3, 3);
+        board.place_piece(from, Piece::new(Color::White, PieceKind::Queen));
+        for (file, rank) in [
+            (2, 3),
+            (4, 3),
+            (3, 2),
+            (3, 4),
+            (2, 2),
+            (2, 4),
+            (4, 2),
+            (4, 4),
+        ] {
+            board.place_piece(
+                Square::new(file, rank),
+                Piece::new(Color::White, PieceKind::Pawn),
+            );
+        }
+
+        assert_moves_match(
+            board
+                .pseudo_legal_moves(from)
+                .expect("a blocked queen should have no pseudo-legal moves"),
+            vec![],
+        );
+    }
+
+    #[test]
     fn black_pawn_can_advance_one_or_two_from_start() {
         let mut board = empty_board();
         let from = Square::new(4, 6);
