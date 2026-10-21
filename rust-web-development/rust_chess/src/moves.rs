@@ -248,7 +248,7 @@ impl Board {
                             rank.checked_add_signed(rank_offset),
                         ) {
                             if next_file > 7 || next_rank > 7 {
-                                continue;
+                                break;
                             }
                             let pos_square = Square::new(next_file, next_rank);
                             match self.get(pos_square) {
