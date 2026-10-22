@@ -272,18 +272,3 @@ important than any material score.
 Done when the computer chooses legal moves within a predictable time limit and
 can find simple tactical wins.
 
-## Where to start now
-
-Work only on steps 1 and 2 first:
-
-1. Move the default `main.rs` code aside.
-2. Create `chess.rs` with `Color`, `PieceKind`, `Piece`, `Square`, and
-   `ChessMove`.
-3. Test algebraic coordinate parsing.
-4. Create `board.rs` with `Board::empty()` and `Board::starting_position()`.
-5. Test the initial piece count and key starting squares.
-6. Commit that working foundation before adding rendering or move rules.
-
-Run `cargo test` after every small behavior is added. This keeps failures close
-to the code that introduced them and prevents chess-rule bugs from becoming
-entangled with input/output or search.
