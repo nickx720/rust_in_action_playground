@@ -6,7 +6,7 @@ use crate::{
 impl Board {
     pub fn get(&self, square: Square) -> Option<Piece> {
         // TODO: Use >= BOARD_SIZE to also reject coordinates beyond the board size.
-        if square.rank as usize == BOARD_SIZE || square.file as usize == BOARD_SIZE {
+        if square.rank as usize >= BOARD_SIZE || square.file as usize >= BOARD_SIZE {
             return None;
         }
         self.board[square.rank as usize][square.file as usize]
