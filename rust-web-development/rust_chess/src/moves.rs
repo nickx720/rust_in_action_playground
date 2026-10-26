@@ -5,7 +5,6 @@ use crate::{
 
 impl Board {
     pub fn get(&self, square: Square) -> Option<Piece> {
-        // TODO: Use >= BOARD_SIZE to also reject coordinates beyond the board size.
         if square.rank as usize >= BOARD_SIZE || square.file as usize >= BOARD_SIZE {
             return None;
         }
@@ -14,7 +13,9 @@ impl Board {
     pub fn apply_move(&self, source: Square, destination: Square) -> Board {
         let mut board = self.board.clone();
         match self.get(destination) {
-            Some(piece) => todo!(),
+            Some(piece) => {
+                board[destination.rank as usize][destination.file as usize] = Some(piece)
+            }
             None => todo!(),
         }
         Board { board }
