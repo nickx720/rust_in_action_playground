@@ -12,9 +12,10 @@ impl Board {
     }
     pub fn apply_move(&self, source: Square, destination: Square) -> Board {
         let mut board = self.board.clone();
-        match self.get(destination) {
+        match self.get(source) {
             Some(piece) => {
-                board[destination.rank as usize][destination.file as usize] = Some(piece)
+                board[destination.rank as usize][destination.file as usize] = Some(piece);
+                board[source.rank as usize][destination.file as usize] = None;
             }
             None => todo!(),
         }
