@@ -12,13 +12,10 @@ impl Board {
     }
     pub fn apply_move(&self, source: Square, destination: Square) -> Board {
         let mut board = self.board.clone();
-        match self.get(source) {
-            Some(piece) => {
-                board[destination.rank as usize][destination.file as usize] = Some(piece);
-                board[source.rank as usize][destination.file as usize] = None;
-            }
-            None => todo!(),
+        if let Some(piece) = self.get(source) {
+            board[destination.rank as usize][destination.file as usize] = Some(piece);
         }
+        board[source.rank as usize][destination.file as usize] = None;
         Board { board }
     }
     pub fn pseudo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
