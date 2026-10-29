@@ -15,7 +15,7 @@ impl Board {
         if let Some(piece) = self.get(source) {
             board[destination.rank as usize][destination.file as usize] = Some(piece);
         }
-        board[source.rank as usize][destination.file as usize] = None;
+        board[source.rank as usize][source.file as usize] = None;
         Board { board }
     }
     pub fn pseudo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
