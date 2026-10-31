@@ -1,3 +1,23 @@
+use core::fmt;
+use std::error::Error;
+
+#[derive(Debug)]
+pub enum MoveError {
+    EmptyBoard(String),
+}
+
+impl fmt::Display for MoveError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::EmptyBoard(board) => {
+                write!(f, "invalid board: {board}")
+            }
+        }
+    }
+}
+
+impl Error for MoveError {}
+
 use crate::{
     board::{BOARD_SIZE, Board},
     chess::{ChessMove, Color, Piece, Square},
@@ -10,13 +30,16 @@ impl Board {
         }
         self.board[square.rank as usize][square.file as usize]
     }
-    pub fn apply_move(&self, source: Square, destination: Square) -> Board {
+    pub fn apply_move(&self, source: Square, destination: Square) -> Result<Board, MoveError> {
+        if self.empty() {
+            return Err(MoveError::EmptyBoard("Board is empty".to_owned()));
+        }
         let mut board = self.board.clone();
         if let Some(piece) = self.get(source) {
             board[destination.rank as usize][destination.file as usize] = Some(piece);
         }
         board[source.rank as usize][source.file as usize] = None;
-        Board { board }
+        Ok(Board { board })
     }
     pub fn pseudo_legal_moves(&self, square: Square) -> Option<Vec<ChessMove>> {
         if let Some(piece) = &self.get(square) {

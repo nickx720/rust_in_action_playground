@@ -70,7 +70,9 @@ fn step_6_normal_moves_clear_source_and_fill_destination_for_every_piece_and_col
             };
             let mut original = empty_board();
             original.place_piece(Square::new(from.0, from.1), Piece::new(color, kind));
-            let moved = original.apply_move(Square::new(from.0, from.1), Square::new(to.0, to.1));
+            let moved = original
+                .apply_move(Square::new(from.0, from.1), Square::new(to.0, to.1))
+                .expect("a valid move should succeed");
             assert_position(&moved, &[(to.0, to.1, color, kind)]);
             assert_position(&original, &[(from.0, from.1, color, kind)]);
         }
@@ -86,7 +88,9 @@ fn step_6_capture_replaces_opponent_and_preserves_original_and_bystanders() {
         original.place_piece(Square::new(7, 2), Piece::new(moving, PieceKind::Knight));
         original.place_piece(Square::new(6, 5), Piece::new(opponent, PieceKind::Pawn));
 
-        let moved = original.apply_move(Square::new(0, 0), Square::new(0, 7));
+        let moved = original
+            .apply_move(Square::new(0, 0), Square::new(0, 7))
+            .expect("a valid move should succeed");
         assert_position(
             &moved,
             &[
@@ -119,7 +123,9 @@ fn step_6_pawn_diagonal_capture_moves_the_pawn_for_both_colors() {
             Square::new(4, destination_rank),
             Piece::new(opponent, PieceKind::Queen),
         );
-        let moved = original.apply_move(Square::new(3, 3), Square::new(4, destination_rank));
+        let moved = original
+            .apply_move(Square::new(3, 3), Square::new(4, destination_rank))
+            .expect("a valid move should succeed");
         assert_position(&moved, &[(4, destination_rank, moving, PieceKind::Pawn)]);
     }
 }
@@ -137,7 +143,9 @@ fn step_6_moves_between_board_corners_work_in_both_directions() {
             Square::new(from.0, from.1),
             Piece::new(Color::White, PieceKind::Rook),
         );
-        let moved = original.apply_move(Square::new(from.0, from.1), Square::new(to.0, to.1));
+        let moved = original
+            .apply_move(Square::new(from.0, from.1), Square::new(to.0, to.1))
+            .expect("a valid move should succeed");
         assert_position(&moved, &[(to.0, to.1, Color::White, PieceKind::Rook)]);
     }
 }
@@ -147,8 +155,12 @@ fn step_6_successive_moves_preserve_each_previous_position() {
     let mut original = empty_board();
     original.place_piece(Square::new(0, 0), Piece::new(Color::White, PieceKind::Rook));
     original.place_piece(Square::new(7, 7), Piece::new(Color::Black, PieceKind::Rook));
-    let first = original.apply_move(Square::new(0, 0), Square::new(0, 7));
-    let second = first.apply_move(Square::new(7, 7), Square::new(0, 7));
+    let first = original
+        .apply_move(Square::new(0, 0), Square::new(0, 7))
+        .expect("a valid move should succeed");
+    let second = first
+        .apply_move(Square::new(7, 7), Square::new(0, 7))
+        .expect("a valid move should succeed");
 
     assert_position(
         &original,
@@ -167,46 +179,36 @@ fn step_6_successive_moves_preserve_each_previous_position() {
     assert_position(&second, &[(0, 7, Color::Black, PieceKind::Rook)]);
 }
 
-// The current signature returns Board. This adapter keeps the behavioral tests
-// runnable while making the README's missing error contract a test failure.
-// If the API later returns Result, the same assertion checks for an actual Err.
-trait ErrorOutcome {
-    fn assert_error(self);
-}
-
-impl ErrorOutcome for Board {
-    fn assert_error(self) {
-        panic!("README step 6 requires an error; apply_move returned Board instead of Result");
-    }
-}
-
-impl<T, E> ErrorOutcome for Result<T, E> {
-    fn assert_error(self) {
-        assert!(self.is_err(), "an inapplicable move must return an error");
-    }
-}
-
 #[test]
 fn step_6_empty_source_to_empty_destination_returns_error() {
-    empty_board()
-        .apply_move(Square::new(2, 2), Square::new(2, 3))
-        .assert_error();
+    assert!(
+        empty_board()
+            .apply_move(Square::new(2, 2), Square::new(2, 3))
+            .is_err(),
+        "an empty source must return an error"
+    );
 }
 
 #[test]
 fn step_6_empty_source_to_occupied_destination_returns_error() {
     let mut board = empty_board();
     board.place_piece(Square::new(2, 3), Piece::new(Color::Black, PieceKind::Pawn));
-    board
-        .apply_move(Square::new(2, 2), Square::new(2, 3))
-        .assert_error();
+    assert!(
+        board
+            .apply_move(Square::new(2, 2), Square::new(2, 3))
+            .is_err(),
+        "an empty source must return an error"
+    );
 }
 
 #[test]
 fn step_6_same_source_and_destination_returns_error() {
     let mut board = empty_board();
     board.place_piece(Square::new(3, 3), Piece::new(Color::White, PieceKind::Rook));
-    board
-        .apply_move(Square::new(3, 3), Square::new(3, 3))
-        .assert_error();
+    assert!(
+        board
+            .apply_move(Square::new(3, 3), Square::new(3, 3))
+            .is_err(),
+        "identical source and destination must return an error"
+    );
 }

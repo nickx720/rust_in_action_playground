@@ -56,7 +56,7 @@ impl Board {
             ],
         }
     }
-    fn empty(&self) -> bool {
+    pub(crate) fn empty(&self) -> bool {
         self.board.iter().all(|row| row.iter().all(Option::is_none))
     }
 
