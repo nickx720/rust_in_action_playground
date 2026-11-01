@@ -4,6 +4,7 @@ use std::error::Error;
 #[derive(Debug)]
 pub enum MoveError {
     EmptyBoard(String),
+    SourceEmpty,
 }
 
 impl fmt::Display for MoveError {
@@ -11,6 +12,9 @@ impl fmt::Display for MoveError {
         match self {
             Self::EmptyBoard(board) => {
                 write!(f, "invalid board: {board}")
+            }
+            Self::SourceEmpty => {
+                write!(f, "Source is empty")
             }
         }
     }
@@ -33,6 +37,9 @@ impl Board {
     pub fn apply_move(&self, source: Square, destination: Square) -> Result<Board, MoveError> {
         if self.empty() {
             return Err(MoveError::EmptyBoard("Board is empty".to_owned()));
+        }
+        if self.get(source).is_none() {
+            return Err(MoveError::SourceEmpty);
         }
         let mut board = self.board.clone();
         if let Some(piece) = self.get(source) {
