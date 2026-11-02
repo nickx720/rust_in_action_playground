@@ -5,6 +5,7 @@ use std::error::Error;
 pub enum MoveError {
     EmptyBoard(String),
     SourceEmpty,
+    SameEntry,
 }
 
 impl fmt::Display for MoveError {
@@ -15,6 +16,9 @@ impl fmt::Display for MoveError {
             }
             Self::SourceEmpty => {
                 write!(f, "Source is empty")
+            }
+            Self::SameEntry => {
+                write!(f, "Source and Destination are the same")
             }
         }
     }
@@ -40,6 +44,9 @@ impl Board {
         }
         if self.get(source).is_none() {
             return Err(MoveError::SourceEmpty);
+        }
+        if source == destination {
+            return Err(MoveError::SameEntry);
         }
         let mut board = self.board.clone();
         if let Some(piece) = self.get(source) {

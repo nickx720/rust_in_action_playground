@@ -27,7 +27,7 @@ impl Piece {
 
 // A square uses chess coordinates: `file` is the a–h column and `rank` is the
 // 1–8 row, stored internally as zero-based values from 0 to 7.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Square {
     pub(crate) file: u8,
     pub(crate) rank: u8,
