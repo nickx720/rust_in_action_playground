@@ -1,6 +1,13 @@
+use crate::{
+    board::{BOARD_SIZE, Board},
+    chess::{ChessMove, Color, Piece, Square},
+};
 use core::fmt;
 use std::error::Error;
 
+pub fn is_in_check(color: Color, board: Board) -> bool {
+    todo!()
+}
 #[derive(Debug)]
 pub enum MoveError {
     EmptyBoard(String),
@@ -25,12 +32,6 @@ impl fmt::Display for MoveError {
 }
 
 impl Error for MoveError {}
-
-use crate::{
-    board::{BOARD_SIZE, Board},
-    chess::{ChessMove, Color, Piece, Square},
-};
-
 impl Board {
     pub fn get(&self, square: Square) -> Option<Piece> {
         if square.rank as usize >= BOARD_SIZE || square.file as usize >= BOARD_SIZE {
