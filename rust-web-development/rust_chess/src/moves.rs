@@ -46,6 +46,9 @@ impl fmt::Display for MoveError {
 
 impl Error for MoveError {}
 impl Board {
+    pub fn get_king(&self) {
+        todo!()
+    }
     pub fn get(&self, square: Square) -> Option<Piece> {
         if square.rank as usize >= BOARD_SIZE || square.file as usize >= BOARD_SIZE {
             return None;
