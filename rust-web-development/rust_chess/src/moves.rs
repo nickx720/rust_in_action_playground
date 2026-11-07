@@ -46,9 +46,14 @@ impl fmt::Display for MoveError {
 
 impl Error for MoveError {}
 impl Board {
-    pub fn get_king(&self,color:Color) {
-        let found = &self.board.iter().enumerate().find_map(|(row_index,row)|{
-            row.iter().position(|Some(item)|  item.color== color).map(|col_index) (row_index,col_index))
+    pub fn get_king(&self, color: Color) {
+        let found = &self.board.iter().enumerate().find_map(|(row_index, row)| {
+            row.iter()
+                .position(|square| match square {
+                    Some(piece) => piece.color == color,
+                    None => false,
+                })
+                .map(|col_index| (row_index, col_index))
         });
         todo!()
     }
