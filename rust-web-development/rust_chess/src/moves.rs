@@ -19,6 +19,7 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // a general list of attacked squares because it also includes forward moves.
     // TODO: Use attack patterns without filtering for the attacker's king safety.
     // Return true as soon as an enemy attacks the king, or false if none do.
+    if board.get_king(color).is_some() {}
     todo!()
 }
 #[derive(Debug)]
@@ -46,16 +47,15 @@ impl fmt::Display for MoveError {
 
 impl Error for MoveError {}
 impl Board {
-    pub fn get_king(&self, color: Color) {
-        let found = &self.board.iter().enumerate().find_map(|(row_index, row)| {
+    pub fn get_king(&self, color: Color) -> Option<(usize, usize)> {
+        self.board.iter().enumerate().find_map(|(row_index, row)| {
             row.iter()
                 .position(|square| match square {
                     Some(piece) => piece.color == color,
                     None => false,
                 })
                 .map(|col_index| (row_index, col_index))
-        });
-        todo!()
+        })
     }
     pub fn get(&self, square: Square) -> Option<Piece> {
         if square.rank as usize >= BOARD_SIZE || square.file as usize >= BOARD_SIZE {
