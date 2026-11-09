@@ -1,6 +1,6 @@
 use crate::{
     board::{BOARD_SIZE, Board},
-    chess::{ChessMove, Color, Piece, Square},
+    chess::{ChessMove, Color, Piece, PieceKind, Square},
 };
 use core::fmt;
 use std::error::Error;
@@ -19,8 +19,11 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // a general list of attacked squares because it also includes forward moves.
     // TODO: Use attack patterns without filtering for the attacker's king safety.
     // Return true as soon as an enemy attacks the king, or false if none do.
-    if board.get_king(color).is_some() {}
-    todo!()
+    if let Some((row, col)) = board.get_king(color) {
+        todo!()
+    } else {
+        false
+    }
 }
 #[derive(Debug)]
 pub enum MoveError {
@@ -51,7 +54,7 @@ impl Board {
         self.board.iter().enumerate().find_map(|(row_index, row)| {
             row.iter()
                 .position(|square| match square {
-                    Some(piece) => piece.color == color,
+                    Some(piece) => piece.color == color && piece.kind == PieceKind::King,
                     None => false,
                 })
                 .map(|col_index| (row_index, col_index))
