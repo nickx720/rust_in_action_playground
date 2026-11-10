@@ -6,19 +6,20 @@ use core::fmt;
 use std::error::Error;
 
 pub fn is_in_check(color: Color, board: Board) -> bool {
-    // TODO: Find the square containing this color's king.
-    // TODO: Decide how to handle a board that has no king of this color.
-    // TODO: Examine pieces of the opposing color and check whether any attacks
-    // the king's square using its capture pattern.
-    // TODO: For rooks, bishops, and queens, check that no piece blocks the path.
-    // Knights jump over pieces; kings attack all adjacent squares.
-    // TODO: Handle pawn attacks separately from pawn movement: White attacks
-    // one rank higher diagonally; Black attacks one rank lower diagonally.
-    // For example, a black pawn on d5 attacks c4 and e4, never d4.
-    // Pawn diagonals are attacked even when empty; pseudo_legal_moves is not
-    // a general list of attacked squares because it also includes forward moves.
-    // TODO: Use attack patterns without filtering for the attacker's king safety.
-    // Return true as soon as an enemy attacks the king, or false if none do.
+    // TODO: Use this color's king position as the target square. get_king returns
+    // (rank, file), while Square::new expects (file, rank).
+    // TODO: Loop over the board and examine only pieces of the opposing color.
+    // TODO: Generate each opponent piece's pseudo_legal_moves and compare each
+    // move's destination with the king's square; blocking rules are already handled.
+    // Pawns work here because the king occupies the target: a diagonal capture
+    // includes the king, while a forward move requires an empty destination.
+    // For example, a black pawn on d5 threatens a king on e4, never one on d4.
+    // A general attack query for empty squares needs separate pawn handling:
+    // pawns attack empty diagonals too, and never attack their forward squares.
+    // Keep using pseudo-legal moves: even pinned pieces attack squares, and using
+    // fully legal moves would create a dependency cycle with check detection.
+    // TODO: Return true as soon as any destination matches the king's square;
+    // return false if no opposing piece attacks it.
     if let Some((row, col)) = board.get_king(color) {
         todo!()
     } else {
