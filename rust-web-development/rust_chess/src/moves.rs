@@ -52,13 +52,13 @@ impl fmt::Display for MoveError {
 impl Error for MoveError {}
 impl Board {
     pub fn get_king(&self, color: Color) -> Option<(usize, usize)> {
-        self.board.iter().enumerate().find_map(|(row_index, row)| {
+        self.board.iter().enumerate().find_map(|(rank, row)| {
             row.iter()
                 .position(|square| match square {
                     Some(piece) => piece.color == color && piece.kind == PieceKind::King,
                     None => false,
                 })
-                .map(|col_index| (row_index, col_index))
+                .map(|file| (file, rank))
         })
     }
     pub fn get(&self, square: Square) -> Option<Piece> {
