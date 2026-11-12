@@ -20,7 +20,7 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // fully legal moves would create a dependency cycle with check detection.
     // TODO: Return true as soon as any destination matches the king's square;
     // return false if no opposing piece attacks it.
-    if let Some((row, col)) = board.get_king(color) {
+    if let Some((file, rank)) = board.get_king(color) {
         todo!()
     } else {
         false
