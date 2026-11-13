@@ -21,7 +21,19 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // TODO: Return true as soon as any destination matches the king's square;
     // return false if no opposing piece attacks it.
     if let Some((file, rank)) = board.get_king(color) {
-        todo!()
+        for row in board.board.iter() {
+            for piece in row {
+                match piece {
+                    Some(piece) => {
+                        if piece.color != color {
+                            todo!()
+                        }
+                    }
+                    None => continue,
+                }
+            }
+        }
+        true
     } else {
         false
     }
