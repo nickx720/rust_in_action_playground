@@ -6,7 +6,7 @@ use core::fmt;
 use std::error::Error;
 
 pub fn is_in_check(color: Color, board: Board) -> bool {
-    // TODO: Use this color's king position as the target square. get_king returns
+    // : Use this color's king position as the target square. get_king returns
     // (rank, file), while Square::new expects (file, rank).
     // TODO: Loop over the board and examine only pieces of the opposing color.
     // TODO: Generate each opponent piece's pseudo_legal_moves and compare each
