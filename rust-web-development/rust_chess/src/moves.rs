@@ -21,11 +21,18 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // TODO: Return true as soon as any destination matches the king's square;
     // return false if no opposing piece attacks it.
     if let Some((file, rank)) = board.get_king(color) {
-        for row in board.board.iter() {
-            for piece in row {
+        for (file_dest, row) in board.board.iter().enumerate() {
+            for (rank_dest, piece) in row.iter().enumerate() {
                 match piece {
                     Some(piece) => {
                         if piece.color != color {
+                            let move_dest = board.apply_move(
+                                Square::new(file as u8, rank as u8),
+                                Square::new(file_dest as u8, rank_dest as u8),
+                            );
+                            if move_dest.is_err() {
+                                continue;
+                            }
                             todo!()
                         }
                     }
