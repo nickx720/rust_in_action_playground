@@ -26,14 +26,17 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
                 match piece {
                     Some(piece) => {
                         if piece.color != color {
-                            let move_dest = board.apply_move(
-                                Square::new(file as u8, rank as u8),
-                                Square::new(file_dest as u8, rank_dest as u8),
-                            );
-                            if move_dest.is_err() {
-                                continue;
+                            let king_pos = Square::new(file as u8, rank as u8);
+                            if board
+                                .pseudo_legal_moves(Square::new(file_dest as u8, rank_dest as u8))
+                                .as_ref()
+                                .and_then(|items| {
+                                    items.iter().find(|chess_move| chess_move.to == king_pos)
+                                })
+                                .is_some()
+                            {
+                                true
                             }
-                            todo!()
                         }
                     }
                     None => continue,
