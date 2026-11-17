@@ -35,7 +35,9 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
                                 })
                                 .is_some()
                             {
-                                true
+                                return true;
+                            } else {
+                                continue;
                             }
                         }
                     }
@@ -43,7 +45,7 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
                 }
             }
         }
-        true
+        false
     } else {
         false
     }
