@@ -11,8 +11,8 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
     // (columns), but Square::new expects (file, rank). The current arguments are
     // reversed, so move generation can examine a different square.
     if let Some((file, rank)) = board.get_king(color) {
-        for (file_dest, row) in board.board.iter().enumerate() {
-            for (rank_dest, piece) in row.iter().enumerate() {
+        for (rank_dest, row) in board.board.iter().enumerate() {
+            for (file_dest, piece) in row.iter().enumerate() {
                 match piece {
                     Some(piece) => {
                         if piece.color != color {
