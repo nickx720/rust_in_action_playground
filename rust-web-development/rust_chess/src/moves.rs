@@ -6,10 +6,13 @@ use core::fmt;
 use std::error::Error;
 
 pub fn is_in_check(color: Color, board: Board) -> bool {
-    // TODO: Correct the opponent piece's coordinates passed to pseudo_legal_moves.
-    // The outer board iterator yields ranks (rows), and the inner yields files
-    // (columns), but Square::new expects (file, rank). The current arguments are
-    // reversed, so move generation can examine a different square.
+    // Find this color's king and check whether an opponent's pseudo-legal move
+    // reaches it. Board iteration yields (rank, file); Square::new takes (file, rank).
+    // Pawn captures work here because the king occupies the target square;
+    // forward pawn moves require an empty target and cannot give check.
+    // TODO (README step 7, "Detect attacks and check"): add a general square-attack
+    // query that also handles pawn attacks on empty squares, plus focused tests
+    // for checks from all six piece types, blocked sliders, and both pawn colors.
     if let Some((file, rank)) = board.get_king(color) {
         for (rank_dest, row) in board.board.iter().enumerate() {
             for (file_dest, piece) in row.iter().enumerate() {
@@ -37,6 +40,7 @@ pub fn is_in_check(color: Color, board: Board) -> bool {
         }
         false
     } else {
+        // A board without this color's king is treated as not in check.
         false
     }
 }
