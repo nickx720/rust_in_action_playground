@@ -6,7 +6,6 @@ use core::fmt;
 use std::error::Error;
 
 pub fn is_in_check(color: Color, board: Board) -> bool {
-    // TODO
     // Find this color's king and check whether an opponent's pseudo-legal move
     // reaches it. Board iteration yields (rank, file); Square::new takes (file, rank).
     // Pawn captures work here because the king occupies the target square;
