@@ -6,10 +6,9 @@ use core::fmt;
 use std::error::Error;
 
 pub fn is_in_check(color: Color, board: Board) -> bool {
-    // TODO Find this color's king and check whether an opponent's pseudo-legal move
-    // reaches it. Board iteration yields (rank, file); Square::new takes (file, rank).
-    // Pawn captures work here because the king occupies the target square;
-    // forward pawn moves require an empty target and cannot give check.
+    // Check whether an opponent's pseudo-legal move reaches this color's king.
+    // Board indices are (rank, file); Square::new takes (file, rank).
+    // Pawns can capture the king, but cannot move forward onto its occupied square.
     // TODO (README step 7, "Detect attacks and check"): add a general square-attack
     // query that also handles pawn attacks on empty squares, plus focused tests
     // for checks from all six piece types, blocked sliders, and both pawn colors.
